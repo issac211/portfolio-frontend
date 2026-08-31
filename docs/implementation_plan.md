@@ -292,13 +292,13 @@ sequenceDiagram
 
 ## Step-by-Step Roadmap
 
-### 🔲 Phase 0: Foundation
+### ✅ Phase 0: Foundation — COMPLETE
 
-- [ ] **0.1** — Install `react-router-dom`
-- [ ] **0.2** — Create `types/` folder — define all TypeScript interfaces from API contract
-- [ ] **0.3** — Create `config/constants.ts` — `API_BASE_URL`, `IMAGE_BASE_URL`
-- [ ] **0.4** — Create `services/apiClient.ts` — base fetch wrapper
-- [ ] **0.5** — Create `services/authService.ts`, `profileService.ts`, `projectService.ts`
+- [x] **0.1** — Install `react-router-dom`
+- [x] **0.2** — Create `types/` folder — define all TypeScript interfaces from API contract
+- [x] **0.3** — Create `config/constants.ts` — `API_BASE_URL`, `IMAGE_BASE_URL`
+- [x] **0.4** — Create `services/apiClient.ts` — base fetch wrapper
+- [x] **0.5** — Create `services/authService.ts`, `profileService.ts`, `projectService.ts`
 
 **🎓 React Concepts to teach:** None yet — this is pure TypeScript.
 
