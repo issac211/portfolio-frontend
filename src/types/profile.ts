@@ -1,11 +1,4 @@
-/**
- * Personal Info / Profile Types
- * Derived from: api-contract.json → PersonalInfoResponse, PersonalInfoCreate, PersonalInfoUpdate
- *
- * Note: image_url is a relative path from the API (e.g., "/uploads/profile/img.jpg").
- * The component layer must prepend IMAGE_BASE_URL to render it.
- */
-
+/** Profile data returned by `GET /profile/`. `image_url` is a relative path — prepend `IMAGE_BASE_URL` to render. */
 export interface PersonalInfoResponse {
   id: number;
   first_name: string;
@@ -15,6 +8,7 @@ export interface PersonalInfoResponse {
   image_url: string | null;
 }
 
+/** Payload for creating a profile (`PUT /profile/`). */
 export interface PersonalInfoCreate {
   first_name: string;
   last_name: string;
@@ -22,6 +16,7 @@ export interface PersonalInfoCreate {
   bio?: string | null;
 }
 
+/** Partial update payload for the profile (`PUT /profile/`). All fields optional. */
 export interface PersonalInfoUpdate {
   first_name?: string | null;
   last_name?: string | null;

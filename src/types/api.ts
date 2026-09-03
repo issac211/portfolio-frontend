@@ -1,25 +1,16 @@
-/**
- * Shared API Error Types
- * Derived from: api-contract.json → ValidationError, HTTPValidationError
- *
- * These represent the error response shape when the API returns 422 (Validation Error).
- * We use them to parse and display user-friendly error messages.
- */
-
+/** Single field-level validation error returned by the API (422). */
 export interface ValidationError {
   loc: (string | number)[];
   msg: string;
   type: string;
 }
 
+/** Wrapper for 422 Validation Error responses. */
 export interface HTTPValidationError {
   detail: ValidationError[];
 }
 
-/**
- * A generic wrapper for API errors that our apiClient will throw.
- * This gives us a consistent error shape across the entire app.
- */
+/** Normalized error shape thrown by `apiClient` for consistent error handling across the app. */
 export interface ApiError {
   status: number;
   message: string;

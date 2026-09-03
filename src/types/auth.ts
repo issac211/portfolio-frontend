@@ -1,16 +1,10 @@
-/**
- * Authentication Types
- * Derived from: api-contract.json → Token, Body_login_for_access_token
- *
- * The login endpoint uses OAuth2 password flow (application/x-www-form-urlencoded),
- * so LoginRequest represents the form fields we send — not a JSON body.
- */
-
+/** Credentials sent to the login endpoint as `application/x-www-form-urlencoded` (OAuth2 password flow). */
 export interface LoginRequest {
   username: string;
   password: string;
 }
 
+/** JWT token pair returned by `POST /auth/login`. */
 export interface Token {
   access_token: string;
   token_type: string;

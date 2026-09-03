@@ -1,11 +1,4 @@
-/**
- * Project Types
- * Derived from: api-contract.json → ProjectResponse, ProjectCreate, ProjectUpdate
- *
- * Note: image_url is a relative path from the API (e.g., "/uploads/projects/img.jpg").
- * The component layer must prepend IMAGE_BASE_URL to render it.
- */
-
+/** Project data returned by the API. `image_url` is a relative path — prepend `IMAGE_BASE_URL` to render. */
 export interface ProjectResponse {
   id: number;
   title: string;
@@ -17,6 +10,7 @@ export interface ProjectResponse {
   image_url: string | null;
 }
 
+/** Payload for `POST /projects/`. */
 export interface ProjectCreate {
   title: string;
   description: string;
@@ -26,6 +20,7 @@ export interface ProjectCreate {
   display_order?: number | null;
 }
 
+/** Partial update payload for `PATCH /projects/:id`. All fields optional. */
 export interface ProjectUpdate {
   title?: string | null;
   description?: string | null;

@@ -1,10 +1,3 @@
-/**
- * Project Service
- *
- * Wraps all /projects endpoints. Uses apiRequest for consistent
- * auth headers and error handling.
- */
-
 import { apiRequest } from "./apiClient";
 import type { ProjectResponse, ProjectCreate, ProjectUpdate } from "../types/project";
 
@@ -28,7 +21,7 @@ export async function createProject(
   });
 }
 
-/** Updates an existing project (partial update). Auth required. */
+/** Partially updates an existing project. Auth required. */
 export async function updateProject(
   id: number,
   data: ProjectUpdate
@@ -39,17 +32,14 @@ export async function updateProject(
   });
 }
 
-/** Deletes a project. Auth required. Returns void (204 No Content). */
+/** Deletes a project. Auth required. */
 export async function deleteProject(id: number): Promise<void> {
   return apiRequest<void>(`/projects/${id}`, {
     method: "DELETE",
   });
 }
 
-/**
- * Uploads an image for a specific project. Auth required.
- * Uses FormData — apiClient will NOT set Content-Type (browser handles it).
- */
+/** Uploads an image for a specific project via FormData. Auth required. */
 export async function uploadProjectImage(
   id: number,
   file: File

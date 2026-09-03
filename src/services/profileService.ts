@@ -1,10 +1,3 @@
-/**
- * Profile Service
- *
- * Wraps all /profile endpoints. Uses apiRequest for consistent
- * auth headers and error handling.
- */
-
 import { apiRequest } from "./apiClient";
 import type { PersonalInfoResponse, PersonalInfoCreate, PersonalInfoUpdate } from "../types/profile";
 
@@ -13,10 +6,7 @@ export async function getProfile(): Promise<PersonalInfoResponse> {
   return apiRequest<PersonalInfoResponse>("/profile/");
 }
 
-/**
- * Creates or updates the profile (upsert).
- * Auth required — apiClient attaches the Bearer token automatically.
- */
+/** Creates or updates the profile (upsert). Auth required. */
 export async function upsertProfile(
   data: PersonalInfoCreate | PersonalInfoUpdate
 ): Promise<PersonalInfoResponse> {
@@ -26,10 +16,7 @@ export async function upsertProfile(
   });
 }
 
-/**
- * Uploads a profile image. Auth required.
- * Uses FormData — apiClient will NOT set Content-Type (browser handles it).
- */
+/** Uploads a profile image via FormData. Auth required. */
 export async function uploadProfileImage(
   file: File
 ): Promise<PersonalInfoResponse> {
