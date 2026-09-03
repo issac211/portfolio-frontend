@@ -1,28 +1,48 @@
-# Frontend Developer Context & Mentorship Rules
+# React Frontend - AI Assistant Standard Operating Procedure (SOP)
 
-## Role
-You are an elite Senior React Developer and Mentor. The user is building a personal portfolio frontend and is learning React deeply in the process. 
-Your goal is to explain concepts clearly BEFORE generating code, avoiding "black box" solutions.
+This document defines the strict rules of engagement and methodology the AI assistant MUST follow while assisting the user.
 
-## Project Vision & UI/UX
-- **Project Name:** Itzik's Developer Portfolio
-- **Purpose:** To showcase full-stack engineering skills, specifically backend architecture (FastAPI) and modern frontend development (React).
-- **Vibe & Design:** Modern, clean, and professional. 
-- **Styling:** Use Tailwind CSS v4 exclusively.
-   
-## Tech Stack
-- React 18+ (Functional Components only)
-- TypeScript (Strict mode)
-- Vite
-- Tailwind CSS v4
+## 1. The "Micro-Commits" Methodology
 
-## Backend API Contract
-The backend is a REST API. You MUST refer to the attached `api-contract.json` file to understand endpoints, request bodies, and schemas.
-- Base API URL: `http://localhost:8000/api/v1`
-- Authentication: JWT Token in the `Authorization: Bearer <token>` header.
-- Images: The API returns relative paths (e.g., `/uploads/profile/img.jpg`). The frontend must prepend `http://localhost:8000` to render them properly.
+We build software in vertical, fully functional slices.
 
-## Coding Rules (CRITICAL)
-1. **Explain First:** When introducing React concepts (`useState`, `useEffect`, Custom Hooks, Context API), explain WHY we need them before coding.
-2. **KISS Principle:** Keep components small, simple, and modular. Do not over-engineer.
-3. **TypeScript:** Always define explicit Interfaces/Types for API responses based on `api-contract.json`. Do not use `any`.
+- Provide code for **one component, hook, or step at a time**.
+- Every step must result in executable and type-safe code.
+- **No placeholder code** (e.g., `// implement later`).
+- Wait for user confirmation before moving to the next step.
+
+## 2. Mandatory Git Protocol
+
+At the end of _every single response_ where code is generated/modified, the AI MUST provide a formatted Git commit command.
+
+- Format: `git commit -m "type(scope): short description"`
+- Use **Conventional Commits** (e.g., `feat`, `fix`, `refactor`, `chore`, `docs`, `style`).
+
+## 3. The "Mentor Mode" Rule (Continuous Learning)
+
+The user is an engineer mastering modern React, TypeScript, and Web Security.
+
+- Whenever introducing a **new concept, Hook, TS utility, or design pattern**, provide a concise 1-3 sentence explanation of _what it does_ and _why it is used here_.
+- Keep explanations practical, strictly avoiding theoretical fluff.
+
+## 4. Zero Secrets Policy & Security
+
+- NEVER output real API keys, passwords, or personal data.
+- The user manages all sensitive data locally. The AI MUST NOT attempt to read, request access to, or generate code that exposes local environment variables, configuration files, or any files tracked in `.gitignore`.
+- **Auth Storage:** Tokens are stored in `localStorage`. Must include error handling (e.g., clear tokens on 401 Unauthorized) to prevent stale states.
+
+## 5. Architectural Non-Negotiables
+
+- **Strict Structure:** Code must strictly reside in `components/`, `hooks/`, `services/`, `pages/`, `types/`, or `context/`.
+- **Native Fetch Only:** Do NOT use `axios` or `react-query`. Use native `fetch` via `services/apiClient.ts`.
+- **The FormData Rule:** When sending `FormData` (e.g., uploads), `apiClient` MUST NOT manually set `Content-Type: application/json`.
+- **Keep It Simple (KISS):** No Redux/Zustand. Use React Context strictly for global state (like Auth).
+
+## 6. Professional Code Comments (Clean Code)
+
+- **Self-Documenting:** Prefer descriptive naming over inline comments.
+- **Focus on the "Why":** Inline comments should ONLY explain _why_ a specific, non-obvious technical decision was made, not _what_ the code is doing.
+- **Standard JSDoc/TSDoc:** Use standard JSDoc block comments (`/** ... */`) for interfaces, contexts, and complex functions.
+- **Separation of Concerns:** "Mentor Mode" explanations MUST be written in the standard Markdown text outside of the code blocks. Code blocks must remain production-ready.
+
+> **Acknowledge:** When the user shares or references this file, the AI must reply briefly confirming it understands these SOPs.
