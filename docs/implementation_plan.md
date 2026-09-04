@@ -32,11 +32,14 @@ src/
 ├── config/                     # ✅ Phase 0 — Complete
 │   └── constants.ts            #    API_BASE_URL, IMAGE_BASE_URL, TOKEN_KEY
 │
-└── services/                   # ✅ Phase 0 — Complete
-    ├── apiClient.ts            #    Base fetch wrapper (FormData-aware + token helpers)
-    ├── authService.ts          #    login() — uses URLSearchParams (OAuth2 flow)
-    ├── profileService.ts       #    getProfile(), upsertProfile(), uploadProfileImage()
-    └── projectService.ts       #    CRUD + uploadProjectImage()
+├── services/                   # ✅ Phase 0 — Complete
+│   ├── apiClient.ts            #    Base fetch wrapper (FormData-aware + token helpers)
+│   ├── authService.ts          #    login() — uses URLSearchParams (OAuth2 flow)
+│   ├── profileService.ts       #    getProfile(), upsertProfile(), uploadProfileImage()
+│   └── projectService.ts       #    CRUD + uploadProjectImage()
+│
+└── context/                    # ✅ Phase 1.1 — Complete
+    └── AuthContext.tsx          #    AuthProvider + useAuthContext
 ```
 
 ### Key Implementation Details (Phase 0)
@@ -80,7 +83,7 @@ src/
 │   ├── useProfile.ts            #    Fetch & cache profile data
 │   └── useProjects.ts           #    Fetch & cache projects data
 │
-├── context/                     # 🔲 Phase 1
+├── context/                     # ✅ Done (Phase 1.1)
 │   └── AuthContext.tsx           #    AuthProvider + useAuthContext
 │
 ├── components/                  # 🔲 Phase 2 + 3 + 4
@@ -308,7 +311,7 @@ sequenceDiagram
 
 > **Goal:** Full login flow with protected routes.
 
-- [ ] **1.1** — Create `context/AuthContext.tsx` — AuthProvider with token state + localStorage
+- [x] **1.1** — Create `context/AuthContext.tsx` — AuthProvider with token state + localStorage
 - [ ] **1.2** — Create `hooks/useAuth.ts` — login/logout functions consuming authService
 - [ ] **1.3** — Create `router/ProtectedRoute.tsx` — redirects to `/login` if not authenticated
 - [ ] **1.4** — Create `router/AppRouter.tsx` — full route config (public + admin)
