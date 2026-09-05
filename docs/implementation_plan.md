@@ -38,8 +38,11 @@ src/
 │   ├── profileService.ts       #    getProfile(), upsertProfile(), uploadProfileImage()
 │   └── projectService.ts       #    CRUD + uploadProjectImage()
 │
-└── context/                    # ✅ Phase 1.1 — Complete
-    └── AuthContext.tsx          #    AuthProvider + useAuthContext
+├── context/                    # ✅ Phase 1.1 — Complete
+│   └── AuthContext.tsx          #    AuthProvider + useAuthContext
+│
+└── hooks/                      # ✅ Phase 1.2 — Complete
+    └── useAuth.ts               #    handleLogin/handleLogout + loading/error state
 ```
 
 ### Key Implementation Details (Phase 0)
@@ -78,8 +81,8 @@ src/
 │   ├── profileService.ts
 │   └── projectService.ts
 │
-├── hooks/                       # 🔲 Phase 1 + 3
-│   ├── useAuth.ts               #    Login/logout logic consuming authService
+├── hooks/                       # 🔲 Phase 1 + 3 (useAuth ✅)
+│   ├── useAuth.ts               #    ✅ handleLogin/handleLogout + loading/error state
 │   ├── useProfile.ts            #    Fetch & cache profile data
 │   └── useProjects.ts           #    Fetch & cache projects data
 │
@@ -312,7 +315,7 @@ sequenceDiagram
 > **Goal:** Full login flow with protected routes.
 
 - [x] **1.1** — Create `context/AuthContext.tsx` — AuthProvider with token state + localStorage
-- [ ] **1.2** — Create `hooks/useAuth.ts` — login/logout functions consuming authService
+- [x] **1.2** — Create `hooks/useAuth.ts` — login/logout functions consuming authService
 - [ ] **1.3** — Create `router/ProtectedRoute.tsx` — redirects to `/login` if not authenticated
 - [ ] **1.4** — Create `router/AppRouter.tsx` — full route config (public + admin)
 - [ ] **1.5** — Update `App.tsx` — wrap with AuthProvider + AppRouter
