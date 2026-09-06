@@ -30,7 +30,7 @@ src/
 │   └── api.ts                  #    ValidationError, HTTPValidationError, ApiError
 │
 ├── config/                     # ✅ Phase 0 — Complete
-│   └── constants.ts            #    API_BASE_URL, IMAGE_BASE_URL, TOKEN_KEY
+│   └── constants.ts            #    API_BASE_URL, IMAGE_BASE_URL, TOKEN_KEY (env vars)
 │
 ├── services/                   # ✅ Phase 0 — Complete
 │   ├── apiClient.ts            #    Base fetch wrapper (FormData-aware + token helpers)
@@ -41,11 +41,14 @@ src/
 ├── context/                    # ✅ Phase 1.1 — Complete
 │   └── AuthContext.tsx          #    AuthProvider + useAuthContext
 │
-└── hooks/                      # ✅ Phase 1.2 — Complete
-    └── useAuth.ts               #    handleLogin/handleLogout + loading/error state
+├── hooks/                      # ✅ Phase 1.2 — Complete
+│   └── useAuth.ts               #    handleLogin/handleLogout + loading/error state
+│
+└── router/                     # ✅ Phase 1.3 — Complete
+    └── ProtectedRoute.tsx       #    Auth guard — redirects to /login if unauthenticated
 ```
 
-### Key Implementation Details (Phase 0)
+### Key Implementation Details
 
 > [!IMPORTANT]
 > **FormData Content-Type Fix:** [`apiClient.ts`](../src/services/apiClient.ts) does NOT hardcode `Content-Type: application/json`. When the body is `FormData`, it skips the header entirely — the browser sets `multipart/form-data` with the correct boundary automatically. This is critical for image uploads in Phases 4+.
@@ -54,7 +57,10 @@ src/
 > **Auth Service Exception:** [`authService.ts`](../src/services/authService.ts) uses direct `fetch()` instead of `apiRequest`, because the login endpoint requires `application/x-www-form-urlencoded` (OAuth2 password flow), not JSON.
 
 > [!NOTE]
-> **TOKEN_KEY Centralized:** The localStorage key `"portfolio_auth_token"` is defined once in [`constants.ts`](../src/config/constants.ts) and imported by [`apiClient.ts`](../src/services/apiClient.ts). The AuthContext (Phase 1) will import from the same source.
+> **TOKEN_KEY Centralized:** The localStorage key `"portfolio_auth_token"` is defined once in [`constants.ts`](../src/config/constants.ts) and imported by [`apiClient.ts`](../src/services/apiClient.ts). [`AuthContext.tsx`](../src/context/AuthContext.tsx) accesses it indirectly via the token helper functions in `apiClient`.
+
+> [!NOTE]
+> **Environment Variables:** `API_BASE_URL` and `IMAGE_BASE_URL` in [`constants.ts`](../src/config/constants.ts) are loaded from `VITE_API_BASE_URL` and `VITE_IMAGE_BASE_URL` env vars via a fail-fast `getRequiredEnvVar()` helper. A `.env` file must exist locally (tracked in `.gitignore`).
 
 ---
 
@@ -119,9 +125,9 @@ src/
 │       ├── ProfileFormPage.tsx  #    Edit profile + upload image
 │       └── ProjectFormPage.tsx  #    Create/Edit project + upload image
 │
-└── router/                      # 🔲 Phase 1
+└── router/                      # 🔲 Phase 1 (ProtectedRoute ✅)
     ├── AppRouter.tsx            #    Route definitions
-    └── ProtectedRoute.tsx       #    Auth guard wrapper
+    └── ProtectedRoute.tsx       #    ✅ Auth guard wrapper
 ```
 
 ---
@@ -316,7 +322,7 @@ sequenceDiagram
 
 - [x] **1.1** — Create `context/AuthContext.tsx` — AuthProvider with token state + localStorage
 - [x] **1.2** — Create `hooks/useAuth.ts` — login/logout functions consuming authService
-- [ ] **1.3** — Create `router/ProtectedRoute.tsx` — redirects to `/login` if not authenticated
+- [x] **1.3** — Create `router/ProtectedRoute.tsx` — redirects to `/login` if not authenticated
 - [ ] **1.4** — Create `router/AppRouter.tsx` — full route config (public + admin)
 - [ ] **1.5** — Update `App.tsx` — wrap with AuthProvider + AppRouter
 - [ ] **1.6** — Create `pages/LoginPage.tsx` — login form with error handling
