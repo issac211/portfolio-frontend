@@ -45,4 +45,17 @@ The user is an engineer mastering modern React, TypeScript, and Web Security.
 - **Standard JSDoc/TSDoc:** Use standard JSDoc block comments (`/** ... */`) for interfaces, contexts, and complex functions.
 - **Separation of Concerns:** "Mentor Mode" explanations MUST be written in the standard Markdown text outside of the code blocks. Code blocks must remain production-ready.
 
+## 7. Implementation Plan Sync (Mandatory)
+
+After completing **each step** in the project roadmap, the AI MUST update `docs/implementation_plan.md` in **ALL** of the following sections:
+
+1. **"Current Project State" tree** — Add the new file/folder with its status.
+2. **"Target Folder Structure" tree** — Mark the file/folder as ✅ Done.
+3. **"Phase X checklist"** — Mark the step as `[x]`.
+4. **"Key Implementation Details"** — Add or update notes if a non-obvious architectural decision was made.
+5. **Stale references** — Scan for any text, descriptions, or future-tense language (`"will..."`) that is now outdated and fix it.
+
+> **Rule:** Do NOT consider a step complete until all 5 update points above have been addressed.
+
 > **Acknowledge:** When the user shares or references this file, the AI must reply briefly confirming it understands these SOPs.
+
