@@ -20,7 +20,7 @@
 ```
 src/
 ├── main.tsx                    # Entry point — renders <App />
-├── App.tsx                     # Placeholder (will be updated in Phase 1)
+├── App.tsx                     # Root — AuthProvider + AppRouter
 ├── index.css                   # @import "tailwindcss"
 │
 ├── types/                      # ✅ Phase 0 — Complete
@@ -325,7 +325,7 @@ sequenceDiagram
 - [x] **1.2** — Create `hooks/useAuth.ts` — login/logout functions consuming authService
 - [x] **1.3** — Create `router/ProtectedRoute.tsx` — redirects to `/login` if not authenticated
 - [x] **1.4** — Create `router/AppRouter.tsx` — full route config (public + admin)
-- [ ] **1.5** — Update `App.tsx` — wrap with AuthProvider + AppRouter
+- [x] **1.5** — Update `App.tsx` — wrap with AuthProvider + AppRouter
 - [ ] **1.6** — Create `pages/LoginPage.tsx` — login form with error handling
 
 **🎓 Concepts:** `createContext`, `useContext`, `useState`, `useEffect`, localStorage, conditional rendering.
