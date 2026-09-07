@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { LoginPage } from "../pages/LoginPage";
 
 // ─── Temporary Page Stubs ────────────────────────────────────────
 // Replaced with real components as each Phase is completed.
@@ -12,9 +13,6 @@ function ProjectDetailPage() {
   return <h1>Project Detail</h1>;
 }
 
-function LoginPage() {
-  return <h1>Login</h1>;
-}
 
 function DashboardPage() {
   return <h1>Admin Dashboard</h1>;
