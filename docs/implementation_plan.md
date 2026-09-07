@@ -44,8 +44,9 @@ src/
 ├── hooks/                      # ✅ Phase 1.2 — Complete
 │   └── useAuth.ts               #    handleLogin/handleLogout + loading/error state
 │
-└── router/                     # ✅ Phase 1.3 — Complete
-    └── ProtectedRoute.tsx       #    Auth guard — redirects to /login if unauthenticated
+└── router/                     # ✅ Phase 1.3-1.4 — Complete
+    ├── ProtectedRoute.tsx       #    Auth guard — redirects to /login if unauthenticated
+    └── AppRouter.tsx            #    Full route tree (public + admin) with temp stubs
 ```
 
 ### Key Implementation Details
@@ -125,8 +126,8 @@ src/
 │       ├── ProfileFormPage.tsx  #    Edit profile + upload image
 │       └── ProjectFormPage.tsx  #    Create/Edit project + upload image
 │
-└── router/                      # 🔲 Phase 1 (ProtectedRoute ✅)
-    ├── AppRouter.tsx            #    Route definitions
+└── router/                      # ✅ Done
+    ├── AppRouter.tsx            #    ✅ Route definitions
     └── ProtectedRoute.tsx       #    ✅ Auth guard wrapper
 ```
 
@@ -323,7 +324,7 @@ sequenceDiagram
 - [x] **1.1** — Create `context/AuthContext.tsx` — AuthProvider with token state + localStorage
 - [x] **1.2** — Create `hooks/useAuth.ts` — login/logout functions consuming authService
 - [x] **1.3** — Create `router/ProtectedRoute.tsx` — redirects to `/login` if not authenticated
-- [ ] **1.4** — Create `router/AppRouter.tsx` — full route config (public + admin)
+- [x] **1.4** — Create `router/AppRouter.tsx` — full route config (public + admin)
 - [ ] **1.5** — Update `App.tsx` — wrap with AuthProvider + AppRouter
 - [ ] **1.6** — Create `pages/LoginPage.tsx` — login form with error handling
 
