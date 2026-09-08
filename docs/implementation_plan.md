@@ -48,8 +48,12 @@ src/
 │   ├── ProtectedRoute.tsx       #    Auth guard — redirects to /login if unauthenticated
 │   └── AppRouter.tsx            #    Full route tree (public + admin) with temp stubs
 │
-└── pages/                      # ✅ Phase 1.6 — In Progress
-    └── LoginPage.tsx            #    Login form with error handling + redirect
+├── pages/                      # ✅ Phase 1.6 — In Progress
+│   └── LoginPage.tsx            #    Login form with error handling + redirect
+│
+└── components/                 # ✅ Phase 2.1 — In Progress
+    └── ui/
+        └── Button.tsx           #    Reusable button (primary/secondary/danger + sizes)
 ```
 
 ### Key Implementation Details
@@ -110,7 +114,7 @@ src/
 │   │   └── AdminLayout.tsx      #    Sidebar + <Outlet /> (no Navbar/Footer)
 │   │
 │   ├── ui/                      #    Generic UI primitives
-│   │   ├── Button.tsx
+│   │   ├── Button.tsx           #    ✅ Reusable button (variants + sizes + loading)
 │   │   ├── Card.tsx
 │   │   ├── Input.tsx
 │   │   ├── Loader.tsx           #    Spinner / skeleton
@@ -339,7 +343,7 @@ sequenceDiagram
 
 > **Goal:** Build the visual frame for both public site and admin panel.
 
-- [ ] **2.1** — Create `components/ui/Button.tsx` — reusable button with variants
+- [x] **2.1** — Create `components/ui/Button.tsx` — reusable button with variants
 - [ ] **2.2** — Create `components/ui/Loader.tsx` — spinner/loading indicator
 - [ ] **2.3** — Create `components/layout/Navbar.tsx` — anchor links for single-page scroll
 - [ ] **2.4** — Create `components/layout/Footer.tsx` — social links (GitHub, LinkedIn, Email)
