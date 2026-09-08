@@ -51,9 +51,10 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-└── components/                 # ✅ Phase 2.1 — In Progress
+└── components/                 # ✅ Phase 2.1-2.2 — In Progress
     └── ui/
-        └── Button.tsx           #    Reusable button (primary/secondary/danger + sizes)
+        ├── Button.tsx           #    Reusable button (primary/secondary/danger + sizes)
+        └── Loader.tsx           #    CSS-only spinner (sm/md/lg)
 ```
 
 ### Key Implementation Details
@@ -117,7 +118,7 @@ src/
 │   │   ├── Button.tsx           #    ✅ Reusable button (variants + sizes + loading)
 │   │   ├── Card.tsx
 │   │   ├── Input.tsx
-│   │   ├── Loader.tsx           #    Spinner / skeleton
+│   │   ├── Loader.tsx           #    ✅ Spinner / skeleton
 │   │   └── SectionTitle.tsx     #    Reusable section header
 │   │
 │   └── shared/                  #    Domain-aware shared components
@@ -344,7 +345,7 @@ sequenceDiagram
 > **Goal:** Build the visual frame for both public site and admin panel.
 
 - [x] **2.1** — Create `components/ui/Button.tsx` — reusable button with variants
-- [ ] **2.2** — Create `components/ui/Loader.tsx` — spinner/loading indicator
+- [x] **2.2** — Create `components/ui/Loader.tsx` — spinner/loading indicator
 - [ ] **2.3** — Create `components/layout/Navbar.tsx` — anchor links for single-page scroll
 - [ ] **2.4** — Create `components/layout/Footer.tsx` — social links (GitHub, LinkedIn, Email)
 - [ ] **2.5** — Create `components/layout/PublicLayout.tsx` — Navbar + `<Outlet />` + Footer
