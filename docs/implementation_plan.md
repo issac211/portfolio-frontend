@@ -51,10 +51,12 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-└── components/                 # ✅ Phase 2.1-2.2 — In Progress
-    └── ui/
-        ├── Button.tsx           #    Reusable button (primary/secondary/danger + sizes)
-        └── Loader.tsx           #    CSS-only spinner (sm/md/lg)
+├── components/                 # ✅ Phase 2.1-2.3 — In Progress
+│   ├── layout/                 #    Public layout shell
+│   │   └── Navbar.tsx          #    Top nav with anchor links + auth controls + mobile menu
+│   └── ui/
+│       ├── Button.tsx          #    Reusable button (primary/secondary/danger + sizes)
+│       └── Loader.tsx          #    CSS-only spinner (sm/md/lg)
 ```
 
 ### Key Implementation Details
@@ -70,6 +72,9 @@ src/
 
 > [!NOTE]
 > **Environment Variables:** `API_BASE_URL` and `IMAGE_BASE_URL` in [`constants.ts`](../src/config/constants.ts) are loaded from `VITE_API_BASE_URL` and `VITE_IMAGE_BASE_URL` env vars via a fail-fast `getRequiredEnvVar()` helper. A `.env` file must exist locally (tracked in `.gitignore`).
+
+> [!NOTE]
+> **Navbar Anchor Links & Auth:** [`Navbar.tsx`](../src/components/layout/Navbar.tsx) pairs single-page anchor navigation (`/#home`, `/#projects`, `/#contact`) with responsive mobile state and auth awareness (`useAuth`). It conditionally renders Admin Dashboard/Logout controls when authenticated, and an Admin login link otherwise.
 
 ---
 
@@ -106,7 +111,7 @@ src/
 │
 ├── components/                  # 🔲 Phase 2 + 3 + 4
 │   ├── layout/                  #    Public layout shell
-│   │   ├── Navbar.tsx           #    Top nav with anchor links (Home, Projects, Contact)
+│   │   ├── Navbar.tsx           #    ✅ Top nav with anchor links (Home, Projects, Contact)
 │   │   ├── Footer.tsx           #    Social links (GitHub, LinkedIn, Email)
 │   │   └── PublicLayout.tsx     #    Navbar + <Outlet /> + Footer
 │   │
@@ -346,7 +351,7 @@ sequenceDiagram
 
 - [x] **2.1** — Create `components/ui/Button.tsx` — reusable button with variants
 - [x] **2.2** — Create `components/ui/Loader.tsx` — spinner/loading indicator
-- [ ] **2.3** — Create `components/layout/Navbar.tsx` — anchor links for single-page scroll
+- [x] **2.3** — Create `components/layout/Navbar.tsx` — anchor links for single-page scroll
 - [ ] **2.4** — Create `components/layout/Footer.tsx` — social links (GitHub, LinkedIn, Email)
 - [ ] **2.5** — Create `components/layout/PublicLayout.tsx` — Navbar + `<Outlet />` + Footer
 - [ ] **2.6** — Create `components/admin/AdminSidebar.tsx` — sidebar navigation
@@ -406,9 +411,9 @@ sequenceDiagram
 
 ### Automated
 
-- `npx tsc -b --noEmit` — TypeScript compiles with zero errors
+- `npx tsc -b --noEmit 2>&1` — Fast fail-fast TypeScript validation during development
 - `npm run lint` — ESLint passes with zero warnings
-- `npm run build` — Production build succeeds
+- `npm run build` — Production build succeeds (for final release verification only)
 
 ### Manual Testing Checklist
 

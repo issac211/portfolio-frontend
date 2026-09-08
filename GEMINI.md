@@ -9,6 +9,7 @@ We build software in vertical, fully functional slices.
 - Provide code for **one component, hook, or step at a time**.
 - Every step must result in executable and type-safe code.
 - **No placeholder code** (e.g., `// implement later`).
+- **Fast Type-Checking Only (Fail-Fast):** Do NOT run `npm run build` for code validation during development (it is slow and produces unwanted build artifacts like `dist/`). Always use `npx tsc -b --noEmit 2>&1` exclusively for rapid type-safety checks.
 - Wait for user confirmation before moving to the next step.
 
 ## 2. Mandatory Git Protocol
