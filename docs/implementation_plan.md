@@ -21,7 +21,7 @@
 src/
 ├── main.tsx                    # Entry point — renders <App />
 ├── App.tsx                     # Root — AuthProvider + AppRouter
-├── index.css                   # @import "tailwindcss"
+├── index.css                   # Inter font, smooth scroll, sticky offset, accessible base theme
 │
 ├── types/                      # ✅ Phase 0 — Complete
 │   ├── auth.ts                 #    Token, LoginRequest
@@ -51,7 +51,7 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-├── components/                 # ✅ Phase 2.1-2.7 — In Progress
+├── components/                 # ✅ Phase 2 — Complete
 │   ├── admin/                  #    Admin layout shell (SEPARATE from public)
 │   │   ├── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + Logout
 │   │   └── AdminLayout.tsx     #    Sidebar + <Outlet /> (two-pane application shell)
@@ -89,7 +89,7 @@ src/
 src/
 ├── main.tsx
 ├── App.tsx
-├── index.css
+├── index.css                    # ✅ Inter font, smooth scroll, sticky offset, base theme
 │
 ├── types/                       # ✅ Done
 │   ├── auth.ts
@@ -350,7 +350,7 @@ sequenceDiagram
 
 ---
 
-### 🔲 Phase 2: Layout Shell
+### ✅ Phase 2: Layout Shell — COMPLETE
 
 > **Goal:** Build the visual frame for both public site and admin panel.
 
@@ -361,7 +361,7 @@ sequenceDiagram
 - [x] **2.5** — Create `components/layout/PublicLayout.tsx` — Navbar + `<Outlet />` + Footer
 - [x] **2.6** — Create `components/admin/AdminSidebar.tsx` — sidebar navigation
 - [x] **2.7** — Create `components/admin/AdminLayout.tsx` — Sidebar + `<Outlet />`
-- [ ] **2.8** — Update global styles in `index.css` (fonts, base theme)
+- [x] **2.8** — Update global styles in `index.css` (fonts, base theme)
 
 **🎓 Concepts:** Component composition, props, children, `<Outlet />`, nested routes.
 

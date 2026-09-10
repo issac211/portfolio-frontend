@@ -1,1 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
+
+@layer base {
+  html {
+    /* Enables fluid gliding to anchor sections (#home, #projects, #contact) */
+    scroll-behavior: smooth;
+    /* Offsets scroll target so content is never obscured by the 4rem sticky navbar */
+    scroll-padding-top: 5rem;
+  }
+
+  /* Respect accessibility settings for visitors sensitive to motion sickness */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #0f172a;
+    background-color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Branded accent highlight on user text selection */
+  ::selection {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+  }
+}
