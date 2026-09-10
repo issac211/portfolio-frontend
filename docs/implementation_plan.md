@@ -51,9 +51,10 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-├── components/                 # ✅ Phase 2.1-2.6 — In Progress
+├── components/                 # ✅ Phase 2.1-2.7 — In Progress
 │   ├── admin/                  #    Admin layout shell (SEPARATE from public)
-│   │   └── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + Logout
+│   │   ├── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + Logout
+│   │   └── AdminLayout.tsx     #    Sidebar + <Outlet /> (two-pane application shell)
 │   ├── layout/                 #    Public layout shell
 │   │   ├── Navbar.tsx          #    Top nav with anchor links + auth controls + mobile menu
 │   │   ├── Footer.tsx          #    Social links (GitHub, LinkedIn, Email) + contact anchor
@@ -66,28 +67,19 @@ src/
 ### Key Implementation Details
 
 > [!IMPORTANT]
-> **FormData Content-Type Fix:** [`apiClient.ts`](../src/services/apiClient.ts) does NOT hardcode `Content-Type: application/json`. When the body is `FormData`, it skips the header entirely — the browser sets `multipart/form-data` with the correct boundary automatically. This is critical for image uploads in Phases 4+.
+> **FormData Content-Type (Uploads):** [`apiClient.ts`](../src/services/apiClient.ts) explicitly omits the `Content-Type` header when `body` is `FormData`. The browser must automatically set `multipart/form-data; boundary=...`. Hardcoding the header breaks image uploads.
+
+> [!IMPORTANT]
+> **Relative Image Path Resolution:** The backend API returns relative paths for images (e.g., `/media/...`). All components rendering images MUST prepend `IMAGE_BASE_URL` from [`constants.ts`](../src/config/constants.ts) (`${IMAGE_BASE_URL}${image_url}`).
 
 > [!NOTE]
-> **Auth Service Exception:** [`authService.ts`](../src/services/authService.ts) uses direct `fetch()` instead of `apiRequest`, because the login endpoint requires `application/x-www-form-urlencoded` (OAuth2 password flow), not JSON.
+> **OAuth2 Form-Urlencoded Flow:** [`authService.ts`](../src/services/authService.ts) bypasses `apiRequest` and uses direct `fetch()` with `URLSearchParams`, because `/auth/login` adheres to the OAuth2 password grant spec (`application/x-www-form-urlencoded`), unlike all other endpoints which exchange JSON.
 
 > [!NOTE]
-> **TOKEN_KEY Centralized:** The localStorage key `"portfolio_auth_token"` is defined once in [`constants.ts`](../src/config/constants.ts) and imported by [`apiClient.ts`](../src/services/apiClient.ts). [`AuthContext.tsx`](../src/context/AuthContext.tsx) accesses it indirectly via the token helper functions in `apiClient`.
+> **Fail-Fast Environment Configuration:** `API_BASE_URL` and `IMAGE_BASE_URL` in [`constants.ts`](../src/config/constants.ts) are strictly validated at startup via `getRequiredEnvVar()`. A missing or misconfigured `.env` halts execution immediately with an explicit error to prevent silent API failures.
 
 > [!NOTE]
-> **Environment Variables:** `API_BASE_URL` and `IMAGE_BASE_URL` in [`constants.ts`](../src/config/constants.ts) are loaded from `VITE_API_BASE_URL` and `VITE_IMAGE_BASE_URL` env vars via a fail-fast `getRequiredEnvVar()` helper. A `.env` file must exist locally (tracked in `.gitignore`).
-
-> [!NOTE]
-> **Navbar Anchor Links & Auth:** [`Navbar.tsx`](../src/components/layout/Navbar.tsx) pairs single-page anchor navigation (`/#home`, `/#projects`, `/#contact`) with responsive mobile state and auth awareness (`useAuth`). It conditionally renders Admin Dashboard/Logout controls when authenticated, and an Admin login link otherwise.
-
-> [!NOTE]
-> **Footer Contact Anchor & Security:** [`Footer.tsx`](../src/components/layout/Footer.tsx) incorporates `id="contact"` as the target anchor for single-page scroll navigation from Navbar, and applies `target="_blank"` with `rel="noopener noreferrer"` across all external social links to guard against tabnabbing.
-
-> [!NOTE]
-> **Sticky Footer Flexbox Layout:** [`PublicLayout.tsx`](../src/components/layout/PublicLayout.tsx) implements the sticky footer pattern using `min-h-screen flex flex-col` on the outer shell and `flex-1` on `<main>`. This ensures the `<Footer />` stays anchored to the bottom of the viewport even when pages (such as `/login` or short detail views) have minimal content.
-
-> [!NOTE]
-> **AdminSidebar Routing & Active State:** [`AdminSidebar.tsx`](../src/components/admin/AdminSidebar.tsx) uses React Router's `NavLink` with functional `className` callbacks to style active routes. It sets `end: true` for the `/admin` route so the Dashboard link does not stay active when visiting sub-routes like `/admin/profile`.
+> **Route Guarding Order:** In [`AppRouter.tsx`](../src/router/AppRouter.tsx), `<ProtectedRoute />` wraps `<AdminLayout />` at the outer route level. This ensures unauthenticated requests redirect to `/login` before any admin layout or sidebar components are mounted in DOM/memory, preventing UI flickers.
 
 ---
 
@@ -130,7 +122,7 @@ src/
 │   │
 │   ├── admin/                   #    Admin layout shell (SEPARATE from public)
 │   │   ├── AdminSidebar.tsx     #    ✅ Sidebar navigation (Dashboard, Profile, Projects)
-│   │   └── AdminLayout.tsx      #    Sidebar + <Outlet /> (no Navbar/Footer)
+│   │   └── AdminLayout.tsx      #    ✅ Sidebar + <Outlet /> (no Navbar/Footer)
 │   │
 │   ├── ui/                      #    Generic UI primitives
 │   │   ├── Button.tsx           #    ✅ Reusable button (variants + sizes + loading)
@@ -368,7 +360,7 @@ sequenceDiagram
 - [x] **2.4** — Create `components/layout/Footer.tsx` — social links (GitHub, LinkedIn, Email)
 - [x] **2.5** — Create `components/layout/PublicLayout.tsx` — Navbar + `<Outlet />` + Footer
 - [x] **2.6** — Create `components/admin/AdminSidebar.tsx` — sidebar navigation
-- [ ] **2.7** — Create `components/admin/AdminLayout.tsx` — Sidebar + `<Outlet />`
+- [x] **2.7** — Create `components/admin/AdminLayout.tsx` — Sidebar + `<Outlet />`
 - [ ] **2.8** — Update global styles in `index.css` (fonts, base theme)
 
 **🎓 Concepts:** Component composition, props, children, `<Outlet />`, nested routes.
