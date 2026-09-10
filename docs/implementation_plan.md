@@ -51,9 +51,10 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-├── components/                 # ✅ Phase 2.1-2.3 — In Progress
+├── components/                 # ✅ Phase 2.1-2.4 — In Progress
 │   ├── layout/                 #    Public layout shell
-│   │   └── Navbar.tsx          #    Top nav with anchor links + auth controls + mobile menu
+│   │   ├── Navbar.tsx          #    Top nav with anchor links + auth controls + mobile menu
+│   │   └── Footer.tsx          #    Social links (GitHub, LinkedIn, Email) + contact anchor
 │   └── ui/
 │       ├── Button.tsx          #    Reusable button (primary/secondary/danger + sizes)
 │       └── Loader.tsx          #    CSS-only spinner (sm/md/lg)
@@ -75,6 +76,9 @@ src/
 
 > [!NOTE]
 > **Navbar Anchor Links & Auth:** [`Navbar.tsx`](../src/components/layout/Navbar.tsx) pairs single-page anchor navigation (`/#home`, `/#projects`, `/#contact`) with responsive mobile state and auth awareness (`useAuth`). It conditionally renders Admin Dashboard/Logout controls when authenticated, and an Admin login link otherwise.
+
+> [!NOTE]
+> **Footer Contact Anchor & Security:** [`Footer.tsx`](../src/components/layout/Footer.tsx) incorporates `id="contact"` as the target anchor for single-page scroll navigation from Navbar, and applies `target="_blank"` with `rel="noopener noreferrer"` across all external social links to guard against tabnabbing.
 
 ---
 
@@ -112,7 +116,7 @@ src/
 ├── components/                  # 🔲 Phase 2 + 3 + 4
 │   ├── layout/                  #    Public layout shell
 │   │   ├── Navbar.tsx           #    ✅ Top nav with anchor links (Home, Projects, Contact)
-│   │   ├── Footer.tsx           #    Social links (GitHub, LinkedIn, Email)
+│   │   ├── Footer.tsx           #    ✅ Social links (GitHub, LinkedIn, Email)
 │   │   └── PublicLayout.tsx     #    Navbar + <Outlet /> + Footer
 │   │
 │   ├── admin/                   #    Admin layout shell (SEPARATE from public)
@@ -352,7 +356,7 @@ sequenceDiagram
 - [x] **2.1** — Create `components/ui/Button.tsx` — reusable button with variants
 - [x] **2.2** — Create `components/ui/Loader.tsx` — spinner/loading indicator
 - [x] **2.3** — Create `components/layout/Navbar.tsx` — anchor links for single-page scroll
-- [ ] **2.4** — Create `components/layout/Footer.tsx` — social links (GitHub, LinkedIn, Email)
+- [x] **2.4** — Create `components/layout/Footer.tsx` — social links (GitHub, LinkedIn, Email)
 - [ ] **2.5** — Create `components/layout/PublicLayout.tsx` — Navbar + `<Outlet />` + Footer
 - [ ] **2.6** — Create `components/admin/AdminSidebar.tsx` — sidebar navigation
 - [ ] **2.7** — Create `components/admin/AdminLayout.tsx` — Sidebar + `<Outlet />`
