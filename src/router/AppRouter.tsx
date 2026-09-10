@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { LoginPage } from "../pages/LoginPage";
 import { PublicLayout } from "../components/layout/PublicLayout";
+import { AdminLayout } from "../components/admin/AdminLayout";
 
 // ─── Temporary Page Stubs ────────────────────────────────────────
 // Replaced with real components as each Phase is completed.
@@ -25,19 +26,6 @@ function ProfileFormPage() {
 
 function ProjectFormPage() {
   return <h1>Project Form</h1>;
-}
-
-// ─── Temporary Layout Stubs ──────────────────────────────────────
-
-function AdminLayout() {
-  return (
-    <div style={{ display: "flex" }}>
-      <aside>Admin Sidebar</aside>
-      <main style={{ flex: 1 }}>
-        <Outlet />
-      </main>
-    </div>
-  );
 }
 
 // ─── Router ──────────────────────────────────────────────────────
