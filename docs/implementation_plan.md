@@ -51,7 +51,9 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-├── components/                 # ✅ Phase 2.1-2.5 — In Progress
+├── components/                 # ✅ Phase 2.1-2.6 — In Progress
+│   ├── admin/                  #    Admin layout shell (SEPARATE from public)
+│   │   └── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + Logout
 │   ├── layout/                 #    Public layout shell
 │   │   ├── Navbar.tsx          #    Top nav with anchor links + auth controls + mobile menu
 │   │   ├── Footer.tsx          #    Social links (GitHub, LinkedIn, Email) + contact anchor
@@ -83,6 +85,9 @@ src/
 
 > [!NOTE]
 > **Sticky Footer Flexbox Layout:** [`PublicLayout.tsx`](../src/components/layout/PublicLayout.tsx) implements the sticky footer pattern using `min-h-screen flex flex-col` on the outer shell and `flex-1` on `<main>`. This ensures the `<Footer />` stays anchored to the bottom of the viewport even when pages (such as `/login` or short detail views) have minimal content.
+
+> [!NOTE]
+> **AdminSidebar Routing & Active State:** [`AdminSidebar.tsx`](../src/components/admin/AdminSidebar.tsx) uses React Router's `NavLink` with functional `className` callbacks to style active routes. It sets `end: true` for the `/admin` route so the Dashboard link does not stay active when visiting sub-routes like `/admin/profile`.
 
 ---
 
@@ -124,7 +129,7 @@ src/
 │   │   └── PublicLayout.tsx     #    ✅ Navbar + <Outlet /> + Footer
 │   │
 │   ├── admin/                   #    Admin layout shell (SEPARATE from public)
-│   │   ├── AdminSidebar.tsx     #    Sidebar navigation (Dashboard, Profile, Projects)
+│   │   ├── AdminSidebar.tsx     #    ✅ Sidebar navigation (Dashboard, Profile, Projects)
 │   │   └── AdminLayout.tsx      #    Sidebar + <Outlet /> (no Navbar/Footer)
 │   │
 │   ├── ui/                      #    Generic UI primitives
@@ -362,7 +367,7 @@ sequenceDiagram
 - [x] **2.3** — Create `components/layout/Navbar.tsx` — anchor links for single-page scroll
 - [x] **2.4** — Create `components/layout/Footer.tsx` — social links (GitHub, LinkedIn, Email)
 - [x] **2.5** — Create `components/layout/PublicLayout.tsx` — Navbar + `<Outlet />` + Footer
-- [ ] **2.6** — Create `components/admin/AdminSidebar.tsx` — sidebar navigation
+- [x] **2.6** — Create `components/admin/AdminSidebar.tsx` — sidebar navigation
 - [ ] **2.7** — Create `components/admin/AdminLayout.tsx` — Sidebar + `<Outlet />`
 - [ ] **2.8** — Update global styles in `index.css` (fonts, base theme)
 
