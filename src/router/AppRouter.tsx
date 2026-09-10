@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { LoginPage } from "../pages/LoginPage";
+import { PublicLayout } from "../components/layout/PublicLayout";
 
 // ─── Temporary Page Stubs ────────────────────────────────────────
 // Replaced with real components as each Phase is completed.
@@ -27,18 +28,6 @@ function ProjectFormPage() {
 }
 
 // ─── Temporary Layout Stubs ──────────────────────────────────────
-
-function PublicLayout() {
-  return (
-    <>
-      <nav>Public Navbar</nav>
-      <main>
-        <Outlet />
-      </main>
-      <footer>Footer</footer>
-    </>
-  );
-}
 
 function AdminLayout() {
   return (

@@ -51,10 +51,11 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-├── components/                 # ✅ Phase 2.1-2.4 — In Progress
+├── components/                 # ✅ Phase 2.1-2.5 — In Progress
 │   ├── layout/                 #    Public layout shell
 │   │   ├── Navbar.tsx          #    Top nav with anchor links + auth controls + mobile menu
-│   │   └── Footer.tsx          #    Social links (GitHub, LinkedIn, Email) + contact anchor
+│   │   ├── Footer.tsx          #    Social links (GitHub, LinkedIn, Email) + contact anchor
+│   │   └── PublicLayout.tsx    #    Navbar + <Outlet /> + Footer (sticky footer flexbox shell)
 │   └── ui/
 │       ├── Button.tsx          #    Reusable button (primary/secondary/danger + sizes)
 │       └── Loader.tsx          #    CSS-only spinner (sm/md/lg)
@@ -79,6 +80,9 @@ src/
 
 > [!NOTE]
 > **Footer Contact Anchor & Security:** [`Footer.tsx`](../src/components/layout/Footer.tsx) incorporates `id="contact"` as the target anchor for single-page scroll navigation from Navbar, and applies `target="_blank"` with `rel="noopener noreferrer"` across all external social links to guard against tabnabbing.
+
+> [!NOTE]
+> **Sticky Footer Flexbox Layout:** [`PublicLayout.tsx`](../src/components/layout/PublicLayout.tsx) implements the sticky footer pattern using `min-h-screen flex flex-col` on the outer shell and `flex-1` on `<main>`. This ensures the `<Footer />` stays anchored to the bottom of the viewport even when pages (such as `/login` or short detail views) have minimal content.
 
 ---
 
@@ -117,7 +121,7 @@ src/
 │   ├── layout/                  #    Public layout shell
 │   │   ├── Navbar.tsx           #    ✅ Top nav with anchor links (Home, Projects, Contact)
 │   │   ├── Footer.tsx           #    ✅ Social links (GitHub, LinkedIn, Email)
-│   │   └── PublicLayout.tsx     #    Navbar + <Outlet /> + Footer
+│   │   └── PublicLayout.tsx     #    ✅ Navbar + <Outlet /> + Footer
 │   │
 │   ├── admin/                   #    Admin layout shell (SEPARATE from public)
 │   │   ├── AdminSidebar.tsx     #    Sidebar navigation (Dashboard, Profile, Projects)
@@ -357,7 +361,7 @@ sequenceDiagram
 - [x] **2.2** — Create `components/ui/Loader.tsx` — spinner/loading indicator
 - [x] **2.3** — Create `components/layout/Navbar.tsx` — anchor links for single-page scroll
 - [x] **2.4** — Create `components/layout/Footer.tsx` — social links (GitHub, LinkedIn, Email)
-- [ ] **2.5** — Create `components/layout/PublicLayout.tsx` — Navbar + `<Outlet />` + Footer
+- [x] **2.5** — Create `components/layout/PublicLayout.tsx` — Navbar + `<Outlet />` + Footer
 - [ ] **2.6** — Create `components/admin/AdminSidebar.tsx` — sidebar navigation
 - [ ] **2.7** — Create `components/admin/AdminLayout.tsx` — Sidebar + `<Outlet />`
 - [ ] **2.8** — Update global styles in `index.css` (fonts, base theme)
