@@ -41,9 +41,10 @@ src/
 ├── context/                    # ✅ Phase 1.1 — Complete
 │   └── AuthContext.tsx          #    AuthProvider + useAuthContext
 │
-├── hooks/                      # ✅ Phase 1.2 & 3.1 — In Progress
+├── hooks/                      # ✅ Phase 1.2, 3.1, 3.2 — Complete
 │   ├── useAuth.ts              #    handleLogin/handleLogout + loading/error state
-│   └── useProfile.ts           #    Fetch & manage profile data + refetch
+│   ├── useProfile.ts           #    Fetch & manage profile data + refetch
+│   └── useProjects.ts          #    Fetch & manage projects list + refetch
 │
 ├── router/                     # ✅ Phase 1.3-1.4 — Complete
 │   ├── ProtectedRoute.tsx       #    Auth guard — redirects to /login if unauthenticated
@@ -107,10 +108,10 @@ src/
 │   ├── profileService.ts
 │   └── projectService.ts
 │
-├── hooks/                       # 🔲 Phase 1 + 3 (useAuth ✅, useProfile ✅)
+├── hooks/                       # ✅ Done (Phase 1 + 3)
 │   ├── useAuth.ts               #    ✅ handleLogin/handleLogout + loading/error state
 │   ├── useProfile.ts            #    ✅ Fetch & cache profile data
-│   └── useProjects.ts           #    Fetch & cache projects data
+│   └── useProjects.ts           #    ✅ Fetch & cache projects data
 │
 ├── context/                     # ✅ Done (Phase 1.1)
 │   └── AuthContext.tsx           #    AuthProvider + useAuthContext
@@ -373,7 +374,7 @@ sequenceDiagram
 > **Goal:** Build what visitors see.
 
 - [x] **3.1** — Create `hooks/useProfile.ts` — fetches profile data
-- [ ] **3.2** — Create `hooks/useProjects.ts` — fetches all projects
+- [x] **3.2** — Create `hooks/useProjects.ts` — fetches all projects
 - [ ] **3.3** — Create `components/ui/SectionTitle.tsx`
 - [ ] **3.4** — Create `components/ui/Card.tsx`
 - [ ] **3.5** — Create `components/shared/ProfileHero.tsx` — name, bio, image, social links
