@@ -53,7 +53,7 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-├── components/                 # ✅ Phase 2 — Complete
+├── components/                 # ✅ Phase 2 & 3.3 — In Progress
 │   ├── admin/                  #    Admin layout shell (SEPARATE from public)
 │   │   ├── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + Logout
 │   │   └── AdminLayout.tsx     #    Sidebar + <Outlet /> (two-pane application shell)
@@ -63,7 +63,8 @@ src/
 │   │   └── PublicLayout.tsx    #    Navbar + <Outlet /> + Footer (sticky footer flexbox shell)
 │   └── ui/
 │       ├── Button.tsx          #    Reusable button (primary/secondary/danger + sizes)
-│       └── Loader.tsx          #    CSS-only spinner (sm/md/lg)
+│       ├── Loader.tsx          #    CSS-only spinner (sm/md/lg)
+│       └── SectionTitle.tsx    #    Reusable section header (h2, badge, subtitle, align)
 ```
 
 ### Key Implementation Details
@@ -131,7 +132,7 @@ src/
 │   │   ├── Card.tsx
 │   │   ├── Input.tsx
 │   │   ├── Loader.tsx           #    ✅ Spinner / skeleton
-│   │   └── SectionTitle.tsx     #    Reusable section header
+│   │   └── SectionTitle.tsx     #    ✅ Reusable section header
 │   │
 │   └── shared/                  #    Domain-aware shared components
 │       ├── ProjectCard.tsx      #    Single project display card
@@ -375,7 +376,7 @@ sequenceDiagram
 
 - [x] **3.1** — Create `hooks/useProfile.ts` — fetches profile data
 - [x] **3.2** — Create `hooks/useProjects.ts` — fetches all projects
-- [ ] **3.3** — Create `components/ui/SectionTitle.tsx`
+- [x] **3.3** — Create `components/ui/SectionTitle.tsx`
 - [ ] **3.4** — Create `components/ui/Card.tsx`
 - [ ] **3.5** — Create `components/shared/ProfileHero.tsx` — name, bio, image, social links
 - [ ] **3.6** — Create `components/shared/ProjectCard.tsx` — project preview card
