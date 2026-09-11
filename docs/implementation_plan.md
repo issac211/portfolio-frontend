@@ -53,7 +53,7 @@ src/
 ├── pages/                      # ✅ Phase 1.6 — In Progress
 │   └── LoginPage.tsx            #    Login form with error handling + redirect
 │
-├── components/                 # ✅ Phase 2 & 3.3-3.4 — In Progress
+├── components/                 # ✅ Phase 2 & 3.3-3.5 — In Progress
 │   ├── admin/                  #    Admin layout shell (SEPARATE from public)
 │   │   ├── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + Logout
 │   │   └── AdminLayout.tsx     #    Sidebar + <Outlet /> (two-pane application shell)
@@ -61,6 +61,8 @@ src/
 │   │   ├── Navbar.tsx          #    Top nav with anchor links + auth controls + mobile menu
 │   │   ├── Footer.tsx          #    Social links (GitHub, LinkedIn, Email) + contact anchor
 │   │   └── PublicLayout.tsx    #    Navbar + <Outlet /> + Footer (sticky footer flexbox shell)
+│   ├── shared/                 #    Domain-aware shared components
+│   │   └── ProfileHero.tsx     #    Hero section (single H1, bio, avatar with IMAGE_BASE_URL, CTAs)
 │   └── ui/
 │       ├── Button.tsx          #    Reusable button (primary/secondary/danger + sizes)
 │       ├── Card.tsx            #    Reusable surface card (polymorphic, hoverable, compound slots)
@@ -137,7 +139,7 @@ src/
 │   │
 │   └── shared/                  #    Domain-aware shared components
 │       ├── ProjectCard.tsx      #    Single project display card
-│       └── ProfileHero.tsx      #    Hero section with profile info + social links
+│       └── ProfileHero.tsx      #    ✅ Hero section with profile info + social links
 │
 ├── pages/                       # 🔲 Phase 1 + 3 + 4 (LoginPage ✅)
 │   ├── HomePage.tsx             #    Single-page: Hero + Projects sections (anchor scroll)
@@ -379,7 +381,7 @@ sequenceDiagram
 - [x] **3.2** — Create `hooks/useProjects.ts` — fetches all projects
 - [x] **3.3** — Create `components/ui/SectionTitle.tsx`
 - [x] **3.4** — Create `components/ui/Card.tsx`
-- [ ] **3.5** — Create `components/shared/ProfileHero.tsx` — name, bio, image, social links
+- [x] **3.5** — Create `components/shared/ProfileHero.tsx` — name, bio, image, social links
 - [ ] **3.6** — Create `components/shared/ProjectCard.tsx` — project preview card
 - [ ] **3.7** — Create `pages/HomePage.tsx` — Hero + Projects grid (anchor sections)
 - [ ] **3.8** — Create `pages/ProjectDetailPage.tsx` — full project view + tech badges
