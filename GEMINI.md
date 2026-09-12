@@ -19,12 +19,20 @@ At the end of _every single response_ where code is generated/modified, the AI M
 - Format: `git commit -m "type(scope): short description"`
 - Use **Conventional Commits** (e.g., `feat`, `fix`, `refactor`, `chore`, `docs`, `style`).
 
-## 3. The "Mentor Mode" Rule (Continuous Learning)
+## 3. Communication Protocol: Mentor & Architect Mode
 
-The user is an engineer mastering modern React, TypeScript, and Web Security.
+The user is an experienced engineer mastering modern React, TypeScript, and Web Security. Communication must be high-signal, professional, and educational.
 
-- Whenever introducing a **new concept, Hook, TS utility, or design pattern**, provide a concise 1-3 sentence explanation of _what it does_ and _why it is used here_.
-- Keep explanations practical, strictly avoiding theoretical fluff.
+- **No Full Code Dumps:** Do NOT reprint full file contents or entire code blocks of created or modified files into the chat. The user inspects code directly within the IDE.
+- **Silent Routine Operations:** Do NOT narrate or list successful routine commands (e.g., `git status`, clean `npx tsc` outputs, file operations) unless an operation fails and requires debugging or user intervention.
+- **Strict Response Structure:** Responses following code modifications or task completions MUST strictly contain:
+  1. **Brief Summary:** A concise half-sentence stating what was accomplished.
+  2. **Mentor Highlights:** 1–3 critical, high-value technical insights from the changes. Focus on:
+     - Complex or non-obvious logic.
+     - Advanced TypeScript syntax or modern React paradigms.
+     - Design patterns utilized (e.g., Guard Clauses, Early Return, Polymorphic Components, Compound Components).
+     - Architectural rationale and trade-offs (why approach A was chosen over approach B).
+  3. **Mandatory Git Protocol:** The conventional commit command defined in Section 2.
 
 ## 4. Zero Secrets Policy & Security
 
@@ -44,7 +52,7 @@ The user is an engineer mastering modern React, TypeScript, and Web Security.
 - **Self-Documenting:** Prefer descriptive naming over inline comments.
 - **Focus on the "Why":** Inline comments should ONLY explain _why_ a specific, non-obvious technical decision was made, not _what_ the code is doing.
 - **Standard JSDoc/TSDoc:** Use standard JSDoc block comments (`/** ... */`) for interfaces, contexts, and complex functions.
-- **Separation of Concerns:** "Mentor Mode" explanations MUST be written in the standard Markdown text outside of the code blocks. Code blocks must remain production-ready.
+- **Separation of Concerns:** Mentor Highlights explanations MUST be written in the chat response text, keeping in-file comments strictly focused on essential architectural decisions.
 
 ## 7. Implementation Plan Sync (Mandatory)
 
@@ -59,4 +67,3 @@ After completing **each step** in the project roadmap, the AI MUST update `docs/
 > **Rule:** Do NOT consider a step complete until all 5 update points above have been addressed.
 
 > **Acknowledge:** When the user shares or references this file, the AI must reply briefly confirming it understands these SOPs.
-
