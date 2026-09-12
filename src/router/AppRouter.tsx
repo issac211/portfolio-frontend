@@ -1,15 +1,12 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { HomePage } from "../pages/HomePage";
 import { LoginPage } from "../pages/LoginPage";
 import { PublicLayout } from "../components/layout/PublicLayout";
 import { AdminLayout } from "../components/admin/AdminLayout";
 
 // ─── Temporary Page Stubs ────────────────────────────────────────
 // Replaced with real components as each Phase is completed.
-
-function HomePage() {
-  return <h1>Home</h1>;
-}
 
 function ProjectDetailPage() {
   return <h1>Project Detail</h1>;
