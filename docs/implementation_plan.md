@@ -50,9 +50,10 @@ src/
 │   ├── ProtectedRoute.tsx       #    Auth guard — redirects to /login if unauthenticated
 │   └── AppRouter.tsx            #    Full route tree (public + admin) with temp stubs
 │
-├── pages/                      # ✅ Phase 1.6 & 3.7 — In Progress
+├── pages/                      # ✅ Phase 1.6, 3.7-3.8 — In Progress
 │   ├── LoginPage.tsx            #    Login form with error handling + redirect
-│   └── HomePage.tsx             #    Landing page (Hero + Projects grid + anchor scrolling)
+│   ├── HomePage.tsx             #    Landing page (Hero + Projects grid + anchor scrolling)
+│   └── ProjectDetailPage.tsx    #    Project deep-dive (media preview, tech stack, links)
 │
 ├── components/                 # ✅ Phase 2 & 3.3-3.6 — In Progress
 │   ├── admin/                  #    Admin layout shell (SEPARATE from public)
@@ -143,9 +144,9 @@ src/
 │       ├── ProjectCard.tsx      #    ✅ Single project display card
 │       └── ProfileHero.tsx      #    ✅ Hero section with profile info + social links
 │
-├── pages/                       # 🔲 Phase 1 + 3 + 4 (LoginPage, HomePage ✅)
+├── pages/                       # 🔲 Phase 1 + 3 + 4 (LoginPage, HomePage, ProjectDetailPage ✅)
 │   ├── HomePage.tsx             #    ✅ Single-page: Hero + Projects sections (anchor scroll)
-│   ├── ProjectDetailPage.tsx    #    Single project deep-dive (/projects/:id)
+│   ├── ProjectDetailPage.tsx    #    ✅ Single project deep-dive (/projects/:id)
 │   ├── LoginPage.tsx            #    ✅ Admin login form
 │   └── admin/                   #    Protected admin pages
 │       ├── DashboardPage.tsx    #    Admin overview + action links
@@ -375,7 +376,7 @@ sequenceDiagram
 
 ---
 
-### 🔲 Phase 3: Public Pages
+### ✅ Phase 3: Public Pages — COMPLETE
 
 > **Goal:** Build what visitors see.
 
@@ -386,7 +387,7 @@ sequenceDiagram
 - [x] **3.5** — Create `components/shared/ProfileHero.tsx` — name, bio, image, social links
 - [x] **3.6** — Create `components/shared/ProjectCard.tsx` — project preview card
 - [x] **3.7** — Create `pages/HomePage.tsx` — Hero + Projects grid (anchor sections)
-- [ ] **3.8** — Create `pages/ProjectDetailPage.tsx` — full project view + tech badges
+- [x] **3.8** — Create `pages/ProjectDetailPage.tsx` — full project view + tech badges
 
 **🎓 Concepts:** `useEffect` for data fetching, loading/error states, `map()` for lists, `useParams()`.
 
