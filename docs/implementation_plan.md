@@ -69,6 +69,7 @@ src/
 │   └── ui/
 │       ├── Button.tsx          #    Reusable button (primary/secondary/danger + sizes)
 │       ├── Card.tsx            #    Reusable surface card (polymorphic, hoverable, compound slots)
+│       ├── Input.tsx           #    Reusable form input (discriminated union: input/textarea + ARIA)
 │       ├── Loader.tsx          #    CSS-only spinner (sm/md/lg)
 │       └── SectionTitle.tsx    #    Reusable section header (h2, badge, subtitle, align)
 ```
@@ -136,7 +137,7 @@ src/
 │   ├── ui/                      #    Generic UI primitives
 │   │   ├── Button.tsx           #    ✅ Reusable button (variants + sizes + loading)
 │   │   ├── Card.tsx             #    ✅ Reusable surface card (polymorphic, compound slots)
-│   │   ├── Input.tsx
+│   │   ├── Input.tsx            #    ✅ Reusable form input (input/textarea)
 │   │   ├── Loader.tsx           #    ✅ Spinner / skeleton
 │   │   └── SectionTitle.tsx     #    ✅ Reusable section header
 │   │
@@ -397,7 +398,7 @@ sequenceDiagram
 
 > **Goal:** Build the content management interface.
 
-- [ ] **4.1** — Create `components/ui/Input.tsx` — reusable form input (text, url, date, textarea)
+- [x] **4.1** — Create `components/ui/Input.tsx` — reusable form input (text, url, date, textarea)
 - [ ] **4.2** — Create `pages/admin/DashboardPage.tsx` — admin home with action links
 - [ ] **4.3** — Create `pages/admin/ProfileFormPage.tsx` — edit profile + image upload
 - [ ] **4.4** — Create `pages/admin/ProjectFormPage.tsx` — create/edit project + image upload
