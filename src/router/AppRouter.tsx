@@ -4,15 +4,12 @@ import { HomePage } from "../pages/HomePage";
 import { ProjectDetailPage } from "../pages/ProjectDetailPage";
 import { LoginPage } from "../pages/LoginPage";
 import { DashboardPage } from "../pages/admin/DashboardPage";
+import { ProfileFormPage } from "../pages/admin/ProfileFormPage";
 import { PublicLayout } from "../components/layout/PublicLayout";
 import { AdminLayout } from "../components/admin/AdminLayout";
 
 // ─── Temporary Page Stubs ────────────────────────────────────────
 // Replaced with real components as each Phase is completed.
-
-function ProfileFormPage() {
-  return <h1>Edit Profile</h1>;
-}
 
 function ProjectFormPage() {
   return <h1>Project Form</h1>;

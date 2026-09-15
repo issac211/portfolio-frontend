@@ -50,12 +50,13 @@ src/
 │   ├── ProtectedRoute.tsx       #    Auth guard — redirects to /login if unauthenticated
 │   └── AppRouter.tsx            #    Full route tree (public + admin) with temp stubs
 │
-├── pages/                      # ✅ Phase 1.6, 3.7-3.8, 4.2 — In Progress
+├── pages/                      # ✅ Phase 1.6, 3.7-3.8, 4.2-4.3 — In Progress
 │   ├── LoginPage.tsx            #    Login form with error handling + redirect
 │   ├── HomePage.tsx             #    Landing page (Hero + Projects grid + anchor scrolling)
 │   ├── ProjectDetailPage.tsx    #    Project deep-dive (media preview, tech stack, links)
 │   └── admin/                   #    Protected admin pages
-│       └── DashboardPage.tsx    #    Admin overview + metrics + project management table
+│       ├── DashboardPage.tsx    #    Admin overview + metrics + project management table
+│       └── ProfileFormPage.tsx  #    Profile details form (upsert) + multipart photo upload
 │
 ├── components/                 # ✅ Phase 2 & 3.3-3.6 — In Progress
 │   ├── admin/                  #    Admin layout shell (SEPARATE from public)
@@ -147,13 +148,13 @@ src/
 │       ├── ProjectCard.tsx      #    ✅ Single project display card
 │       └── ProfileHero.tsx      #    ✅ Hero section with profile info + social links
 │
-├── pages/                       # 🔲 Phase 1 + 3 + 4 (LoginPage, HomePage, ProjectDetailPage, DashboardPage ✅)
+├── pages/                       # 🔲 Phase 1 + 3 + 4 (LoginPage, HomePage, ProjectDetailPage, DashboardPage, ProfileFormPage ✅)
 │   ├── HomePage.tsx             #    ✅ Single-page: Hero + Projects sections (anchor scroll)
 │   ├── ProjectDetailPage.tsx    #    ✅ Single project deep-dive (/projects/:id)
 │   ├── LoginPage.tsx            #    ✅ Admin login form
 │   └── admin/                   #    Protected admin pages
 │       ├── DashboardPage.tsx    #    ✅ Admin overview + action links
-│       ├── ProfileFormPage.tsx  #    Edit profile + upload image
+│       ├── ProfileFormPage.tsx  #    ✅ Edit profile + upload image
 │       └── ProjectFormPage.tsx  #    Create/Edit project + upload image
 │
 └── router/                      # ✅ Done
@@ -402,7 +403,7 @@ sequenceDiagram
 
 - [x] **4.1** — Create `components/ui/Input.tsx` — reusable form input (text, url, date, textarea)
 - [x] **4.2** — Create `pages/admin/DashboardPage.tsx` — admin home with action links
-- [ ] **4.3** — Create `pages/admin/ProfileFormPage.tsx` — edit profile + image upload
+- [x] **4.3** — Create `pages/admin/ProfileFormPage.tsx` — edit profile + image upload
 - [ ] **4.4** — Create `pages/admin/ProjectFormPage.tsx` — create/edit project + image upload
 
 **🎓 Concepts:** Controlled components, `onChange`, `FormData`, create vs. edit mode, `useNavigate()`.
