@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
+import { useState, useEffect, type SubmitEvent, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { useProfile } from "../../hooks/useProfile";
 import { upsertProfile, uploadProfileImage } from "../../services/profileService";
@@ -109,7 +109,7 @@ export function ProfileFormPage() {
     }
   }
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
 
     setSaveSuccess(null);
