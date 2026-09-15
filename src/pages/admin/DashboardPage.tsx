@@ -86,7 +86,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-4 sm:pb-6">
       {/* ── Page Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -129,7 +129,7 @@ export function DashboardPage() {
       )}
 
       {/* ── Key Metrics Cards ── */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {/* Metric 1: Total Projects */}
         <Card>
           <CardBody className="flex items-center gap-4 p-5">
@@ -312,7 +312,7 @@ export function DashboardPage() {
           </CardBody>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-600">
+            <table className="w-full min-w-[600px] text-left text-sm text-gray-600">
               <thead className="border-b border-gray-200 bg-gray-50 text-xs font-semibold text-gray-700 uppercase">
                 <tr>
                   <th scope="col" className="px-5 py-3">

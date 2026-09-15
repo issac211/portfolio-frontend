@@ -34,7 +34,7 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
     <section
       id="home"
       aria-label="Introduction"
-      className="relative overflow-hidden py-16 sm:py-24 lg:py-32"
+      className="relative overflow-hidden pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-16 lg:pb-24"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">

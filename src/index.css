@@ -6,7 +6,7 @@
     /* Enables fluid gliding to anchor sections (#home, #projects, #contact) */
     scroll-behavior: smooth;
     /* Offsets scroll target so content is never obscured by the 4rem sticky navbar */
-    scroll-padding-top: 5rem;
+    scroll-padding-top: 4rem;
   }
 
   /* Respect accessibility settings for visitors sensitive to motion sickness */

@@ -23,10 +23,10 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="flex items-center justify-center min-h-[60vh] px-4 py-8">
       <form
         onSubmit={onSubmit}
-        className="flex flex-col gap-4 w-full max-w-sm p-8 bg-white rounded-xl border border-slate-200 shadow-md"
+        className="flex flex-col gap-4 w-full max-w-sm p-6 sm:p-8 bg-white rounded-xl border border-slate-200 shadow-md"
       >
         <h1 className="text-2xl font-bold text-center">Admin Login</h1>
 

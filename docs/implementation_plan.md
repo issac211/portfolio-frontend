@@ -59,10 +59,10 @@ src/
 │       ├── ProfileFormPage.tsx  #    Profile details form (upsert) + multipart photo upload
 │       └── ProjectFormPage.tsx  #    Project create/edit form + multipart media upload
 │
-├── components/                 # ✅ Phase 2, 3.3-3.6, 4.1, 4.5 — Complete
-│   ├── admin/                  #    Admin layout shell (SEPARATE from public)
-│   │   ├── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + Logout
-│   │   └── AdminLayout.tsx     #    Sidebar + <Outlet /> (two-pane application shell)
+├── components/                 # ✅ Phase 2, 3.3-3.6, 4.1, 4.5, 5.1 — Complete
+│   ├── admin/                  #    Admin layout shell (responsive mobile drawer + desktop sidebar)
+│   │   ├── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + mobile drawer
+│   │   └── AdminLayout.tsx     #    Sidebar/drawer + mobile header + <Outlet />
 │   ├── layout/                 #    Public layout shell
 │   │   ├── Navbar.tsx          #    Top nav with anchor links + auth controls + mobile menu
 │   │   ├── Footer.tsx          #    Social links (GitHub, LinkedIn, Email) + contact anchor
@@ -77,7 +77,7 @@ src/
 │       ├── Input.tsx           #    Reusable form input (discriminated union: input/textarea + ARIA)
 │       ├── Loader.tsx          #    CSS-only spinner (sm/md/lg)
 │       ├── SectionTitle.tsx    #    Reusable section header (h2, badge, subtitle, align)
-│       └── icons/              #    SVG icon component library (16 named components + barrel index.ts)
+│       └── icons/              #    SVG icon component library (18 named components + barrel index.ts)
 ```
 
 ### Key Implementation Details
@@ -98,7 +98,16 @@ src/
 > **Route Guarding Order:** In [`AppRouter.tsx`](../src/router/AppRouter.tsx), `<ProtectedRoute />` wraps `<AdminLayout />` at the outer route level. This ensures unauthenticated requests redirect to `/login` before any admin layout or sidebar components are mounted in DOM/memory, preventing UI flickers.
 
 > [!NOTE]
-> **DRY Icon System:** All SVG icons are extracted into typed components under `components/ui/icons/` and re-exported from a single barrel `index.ts`. Consumers import by name (e.g., `import { TrashIcon } from "../ui/icons"`), keeping the icon file paths as an internal implementation detail — swapping an SVG path requires touching only one file.
+> **DRY Icon System:** All SVG icons are extracted into typed components under `components/ui/icons/` and re-exported from a single barrel `index.ts`. Consumers import by name (e.g., `import { TrashIcon } from "../ui/icons"`), keeping the icon file paths as an internal implementation detail — swapping an SVG path requires touching only one file. Includes 18 named icon components, with zero inline SVGs remaining in consumer components.
+
+> [!NOTE]
+> **Adaptive Admin Architecture & Mobile-First Drawer:** [`AdminLayout.tsx`](../src/components/admin/AdminLayout.tsx) and [`AdminSidebar.tsx`](../src/components/admin/AdminSidebar.tsx) support dual display modes: persistent side-by-side layout on desktop (`md:flex`), and an off-canvas drawer with backdrop blur on mobile (`< md:`). The drawer automatically closes upon route changes, backdrop taps, or explicit dismiss actions.
+
+> [!NOTE]
+> **Viewport Containment & Overscroll Isolation (`fixed inset-0`, `overscroll-contain`, `min-w-0`):** In [`AdminLayout.tsx`](../src/components/admin/AdminLayout.tsx), the shell root is pinned with `fixed inset-0` rather than `h-screen`, and the `<main>` viewport enforces `overscroll-contain` with `min-w-0 min-h-0`. This completely prevents scroll chaining from leaking into the `document.body` or creating empty dead areas below the sidebar. In [`DashboardPage.tsx`](../src/pages/admin/DashboardPage.tsx), the projects table enforces `min-w-[600px]` to maintain clean column geometry and confine horizontal overflow strictly inside its card container.
+
+> [!NOTE]
+> **Scroll Target Alignment & Header Offset:** In [`index.css`](../src/index.css), `scroll-padding-top` is calibrated to `4rem` (matching the exact height of the sticky `<Navbar />`). Combined with proportional top padding on `#home` and `#projects`, section anchors align crisply beneath the navbar without excessive blank gaps.
 
 ---
 
@@ -133,15 +142,15 @@ src/
 ├── context/                     # ✅ Done (Phase 1.1)
 │   └── AuthContext.tsx           #    AuthProvider + useAuthContext
 │
-├── components/                  # 🔲 Phase 2 + 3 + 4
+├── components/                  # ✅ Done (Phase 2 + 3 + 4 + 5.1)
 │   ├── layout/                  #    Public layout shell
 │   │   ├── Navbar.tsx           #    ✅ Top nav with anchor links (Home, Projects, Contact)
 │   │   ├── Footer.tsx           #    ✅ Social links (GitHub, LinkedIn, Email)
 │   │   └── PublicLayout.tsx     #    ✅ Navbar + <Outlet /> + Footer
 │   │
-│   ├── admin/                   #    Admin layout shell (SEPARATE from public)
-│   │   ├── AdminSidebar.tsx     #    ✅ Sidebar navigation (Dashboard, Profile, Projects)
-│   │   └── AdminLayout.tsx      #    ✅ Sidebar + <Outlet /> (no Navbar/Footer)
+│   ├── admin/                   #    Admin layout shell (SEPARATE from public, responsive)
+│   │   ├── AdminSidebar.tsx     #    ✅ Sidebar navigation (desktop persistent + mobile drawer)
+│   │   └── AdminLayout.tsx      #    ✅ Sidebar/drawer + mobile header + <Outlet />
 │   │
 │   ├── ui/                      #    Generic UI primitives
 │   │   ├── Badge.tsx            #    ✅ Tech-stack chip (default / primary variants)
@@ -150,7 +159,7 @@ src/
 │   │   ├── Input.tsx            #    ✅ Reusable form input (input/textarea)
 │   │   ├── Loader.tsx           #    ✅ Spinner / skeleton
 │   │   ├── SectionTitle.tsx     #    ✅ Reusable section header
-│   │   └── icons/               #    ✅ SVG icon components (16 icons + barrel index.ts)
+│   │   └── icons/               #    ✅ SVG icon components (18 icons + barrel index.ts)
 │   │
 │   └── shared/                  #    Domain-aware shared components
 │       ├── ProjectCard.tsx      #    ✅ Single project display card
@@ -434,7 +443,7 @@ sequenceDiagram
 
 > **Goal:** Make it feel professional.
 
-- [ ] **5.1** — Responsive design review (mobile-first)
+- [x] **5.1** — Responsive design review (mobile-first) — Mobile drawer for `AdminLayout`/`AdminSidebar` with left-side `MenuIcon` and `XIcon`, complete SVG extraction in `Navbar`, `LoginPage` mobile padding, anchor scroll alignment (`scroll-padding-top: 4rem`), Hero/Projects spacing optimization, and table `min-w-[600px]` containment
 - [ ] **5.2** — Error handling UI (toast/notification for API errors)
 - [ ] **5.3** — Empty states (no projects yet, no profile yet)
 - [ ] **5.4** — Loading skeletons instead of spinners

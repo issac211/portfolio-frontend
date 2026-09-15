@@ -45,7 +45,7 @@ export function HomePage() {
       <section
         id="projects"
         aria-label="Featured Projects"
-        className="border-t border-gray-100 bg-gray-50/50 py-16 sm:py-24"
+        className="border-t border-gray-100 bg-gray-50/50 pt-10 pb-16 sm:pt-12 sm:pb-20"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <SectionTitle

@@ -11,7 +11,10 @@ export { InboxIcon } from "./InboxIcon";
 export { LinkedInIcon } from "./LinkedInIcon";
 export { LogoutIcon } from "./LogoutIcon";
 export { MailIcon } from "./MailIcon";
+export { MenuIcon } from "./MenuIcon";
 export { PencilIcon } from "./PencilIcon";
 export { PlusIcon } from "./PlusIcon";
 export { TrashIcon } from "./TrashIcon";
 export { UserIcon } from "./UserIcon";
+export { XIcon } from "./XIcon";
+
