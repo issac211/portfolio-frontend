@@ -7,6 +7,7 @@ import { ProjectCard } from "../components/shared/ProjectCard";
 import { SectionTitle } from "../components/ui/SectionTitle";
 import { Loader } from "../components/ui/Loader";
 import { Button } from "../components/ui/Button";
+import { ExclamationCircleIcon, InboxIcon } from "../components/ui/icons";
 
 /**
  * Public portfolio landing page.
@@ -64,20 +65,7 @@ export function HomePage() {
           {/* Error State with Retry */}
           {!isProjectsLoading && projectsError && (
             <div className="rounded-xl border border-red-200 bg-red-50/80 p-8 text-center sm:p-12">
-              <svg
-                className="mx-auto h-10 w-10 text-red-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
-              </svg>
+              <ExclamationCircleIcon className="mx-auto h-10 w-10 text-red-500" />
               <h3 className="mt-4 text-base font-semibold text-red-900">
                 Failed to load projects
               </h3>
@@ -97,20 +85,7 @@ export function HomePage() {
           {/* Empty State */}
           {!isProjectsLoading && !projectsError && projects.length === 0 && (
             <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                />
-              </svg>
+              <InboxIcon className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-4 text-base font-semibold text-gray-900">
                 No projects published yet
               </h3>

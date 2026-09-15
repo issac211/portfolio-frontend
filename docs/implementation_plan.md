@@ -59,7 +59,7 @@ src/
 │       ├── ProfileFormPage.tsx  #    Profile details form (upsert) + multipart photo upload
 │       └── ProjectFormPage.tsx  #    Project create/edit form + multipart media upload
 │
-├── components/                 # ✅ Phase 2 & 3.3-3.6 — In Progress
+├── components/                 # ✅ Phase 2, 3.3-3.6, 4.1, 4.5 — Complete
 │   ├── admin/                  #    Admin layout shell (SEPARATE from public)
 │   │   ├── AdminSidebar.tsx    #    Sidebar navigation (Dashboard, Profile, Projects) + Logout
 │   │   └── AdminLayout.tsx     #    Sidebar + <Outlet /> (two-pane application shell)
@@ -71,11 +71,13 @@ src/
 │   │   ├── ProfileHero.tsx     #    Hero section (single H1, bio, avatar with IMAGE_BASE_URL, CTAs)
 │   │   └── ProjectCard.tsx     #    Project showcase card (16:9 media, line-clamp, badges, links)
 │   └── ui/
+│       ├── Badge.tsx           #    Tech-stack chip (default gray / primary blue+ring)
 │       ├── Button.tsx          #    Reusable button (primary/secondary/danger + sizes)
 │       ├── Card.tsx            #    Reusable surface card (polymorphic, hoverable, compound slots)
 │       ├── Input.tsx           #    Reusable form input (discriminated union: input/textarea + ARIA)
 │       ├── Loader.tsx          #    CSS-only spinner (sm/md/lg)
-│       └── SectionTitle.tsx    #    Reusable section header (h2, badge, subtitle, align)
+│       ├── SectionTitle.tsx    #    Reusable section header (h2, badge, subtitle, align)
+│       └── icons/              #    SVG icon component library (16 named components + barrel index.ts)
 ```
 
 ### Key Implementation Details
@@ -94,6 +96,9 @@ src/
 
 > [!NOTE]
 > **Route Guarding Order:** In [`AppRouter.tsx`](../src/router/AppRouter.tsx), `<ProtectedRoute />` wraps `<AdminLayout />` at the outer route level. This ensures unauthenticated requests redirect to `/login` before any admin layout or sidebar components are mounted in DOM/memory, preventing UI flickers.
+
+> [!NOTE]
+> **DRY Icon System:** All SVG icons are extracted into typed components under `components/ui/icons/` and re-exported from a single barrel `index.ts`. Consumers import by name (e.g., `import { TrashIcon } from "../ui/icons"`), keeping the icon file paths as an internal implementation detail — swapping an SVG path requires touching only one file.
 
 ---
 
@@ -139,11 +144,13 @@ src/
 │   │   └── AdminLayout.tsx      #    ✅ Sidebar + <Outlet /> (no Navbar/Footer)
 │   │
 │   ├── ui/                      #    Generic UI primitives
+│   │   ├── Badge.tsx            #    ✅ Tech-stack chip (default / primary variants)
 │   │   ├── Button.tsx           #    ✅ Reusable button (variants + sizes + loading)
 │   │   ├── Card.tsx             #    ✅ Reusable surface card (polymorphic, compound slots)
 │   │   ├── Input.tsx            #    ✅ Reusable form input (input/textarea)
 │   │   ├── Loader.tsx           #    ✅ Spinner / skeleton
-│   │   └── SectionTitle.tsx     #    ✅ Reusable section header
+│   │   ├── SectionTitle.tsx     #    ✅ Reusable section header
+│   │   └── icons/               #    ✅ SVG icon components (16 icons + barrel index.ts)
 │   │
 │   └── shared/                  #    Domain-aware shared components
 │       ├── ProjectCard.tsx      #    ✅ Single project display card
@@ -408,6 +415,18 @@ sequenceDiagram
 - [x] **4.4** — Create `pages/admin/ProjectFormPage.tsx` — create/edit project + image upload
 
 **🎓 Concepts:** Controlled components, `onChange`, `FormData`, create vs. edit mode, `useNavigate()`.
+
+---
+
+### ✅ Phase 4.5: DRY Refactor — COMPLETE
+
+> **Goal:** Eliminate code duplication — inline SVGs and repeated Tailwind class strings.
+
+- [x] **4.5.1** — Create `components/ui/Badge.tsx` — atomic tech-stack chip with `default` (gray) and `primary` (blue ring) variants
+- [x] **4.5.2** — Extract all inline SVGs into `components/ui/icons/` (16 named components + `index.ts` barrel)
+- [x] **4.5.3** — Update all consumer files: `ProjectCard`, `ProfileHero`, `Footer`, `AdminSidebar`, `DashboardPage`, `ProjectDetailPage`, `ProfileFormPage`, `ProjectFormPage`, `HomePage`
+
+**🎓 Concepts:** DRY principle, barrel exports as encapsulated API surfaces, component reference vs. closure in data arrays (`icon: GithubIcon` vs. `icon: ({ className }) => <svg...>`), style lookup tables (`Record<Variant, string>`) for exhaustive TypeScript variant checking.
 
 ---
 

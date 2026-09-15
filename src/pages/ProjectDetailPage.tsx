@@ -3,6 +3,14 @@ import { useParams, Link } from "react-router-dom";
 import { getProject } from "../services/projectService";
 import { IMAGE_BASE_URL } from "../config/constants";
 import { Loader } from "../components/ui/Loader";
+import { Badge } from "../components/ui/Badge";
+import {
+  ArrowLeftIcon,
+  ExclamationCircleIcon,
+  ImageIcon,
+  GithubIcon,
+  ExternalLinkIcon,
+} from "../components/ui/icons";
 import type { ProjectResponse } from "../types/project";
 import type { ApiError } from "../types/api";
 
@@ -71,20 +79,7 @@ export function ProjectDetailPage() {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-red-200 bg-red-50/70 p-8 text-center sm:p-12">
-          <svg
-            className="mx-auto h-12 w-12 text-red-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-            />
-          </svg>
+          <ExclamationCircleIcon className="mx-auto h-12 w-12 text-red-500" />
           <h2 className="mt-4 text-xl font-bold text-red-900">
             Project Not Found
           </h2>
@@ -96,20 +91,7 @@ export function ProjectDetailPage() {
               to="/#projects"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-xs ring-1 ring-gray-300 ring-inset transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                />
-              </svg>
+              <ArrowLeftIcon className="h-4 w-4" />
               <span>Back to Projects</span>
             </Link>
           </div>
@@ -131,20 +113,7 @@ export function ProjectDetailPage() {
             to="/#projects"
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-blue-600"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-              />
-            </svg>
+            <ArrowLeftIcon className="h-4 w-4" />
             <span>Back to Projects</span>
           </Link>
         </nav>
@@ -160,20 +129,7 @@ export function ProjectDetailPage() {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gray-50 text-gray-400">
-              <svg
-                className="h-16 w-16 text-gray-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                />
-              </svg>
+              <ImageIcon className="h-16 w-16 text-gray-300" />
             </div>
           )}
         </div>
@@ -196,20 +152,7 @@ export function ProjectDetailPage() {
                   className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <span>Live Demo</span>
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                    />
-                  </svg>
+                  <ExternalLinkIcon className="h-4 w-4" />
                 </a>
               )}
 
@@ -220,18 +163,7 @@ export function ProjectDetailPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                    />
-                  </svg>
+                  <GithubIcon className="h-4 w-4" />
                   <span>Repository</span>
                 </a>
               )}
@@ -242,12 +174,7 @@ export function ProjectDetailPage() {
           {project.tech_stack && project.tech_stack.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {project.tech_stack.map((tech) => (
-                <span
-                  key={tech}
-                  className="inline-flex items-center rounded-md bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset"
-                >
-                  {tech}
-                </span>
+                <Badge key={tech} variant="primary">{tech}</Badge>
               ))}
             </div>
           )}

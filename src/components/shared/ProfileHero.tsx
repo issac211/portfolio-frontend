@@ -1,4 +1,5 @@
 import { IMAGE_BASE_URL } from "../../config/constants";
+import { ArrowDownIcon, UserIcon } from "../ui/icons";
 import type { PersonalInfoResponse } from "../../types/profile";
 
 interface ProfileHeroProps {
@@ -78,20 +79,7 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 View Projects
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
-                  />
-                </svg>
+                <ArrowDownIcon className="h-4 w-4" />
               </a>
 
               <a
@@ -126,20 +114,7 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
                     {initials}
                   </span>
                 ) : (
-                  <svg
-                    className="h-28 w-28 text-gray-300"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                    />
-                  </svg>
+                  <UserIcon className="h-28 w-28 text-gray-300" />
                 )}
               </div>
             </div>

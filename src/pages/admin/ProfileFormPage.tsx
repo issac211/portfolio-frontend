@@ -2,9 +2,10 @@ import { useState, useEffect, type SubmitEvent, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { useProfile } from "../../hooks/useProfile";
 import { upsertProfile, uploadProfileImage } from "../../services/profileService";
-import { IMAGE_BASE_URL } from "../../config/constants";
+import { UserIcon } from "../../components/ui/icons";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
+import { IMAGE_BASE_URL } from "../../config/constants";
 import { Button } from "../../components/ui/Button";
 import { Loader } from "../../components/ui/Loader";
 import type { ApiError } from "../../types/api";
@@ -216,20 +217,7 @@ export function ProfileFormPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <svg
-                      className="h-16 w-16 text-gray-300"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                      />
-                    </svg>
+                    <UserIcon className="h-16 w-16 text-gray-300" />
                   )}
                 </div>
 
