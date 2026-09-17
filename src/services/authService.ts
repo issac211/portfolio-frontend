@@ -1,12 +1,12 @@
-import { API_BASE_URL } from "../config/constants";
 import type { LoginRequest, Token } from "../types/auth";
-import type { ApiError } from "../types/api";
+import { apiRequest } from "./apiClient";
 
 /**
  * Sends login credentials and returns a JWT token.
  *
- * Uses direct `fetch` instead of `apiRequest` because the endpoint
- * expects `application/x-www-form-urlencoded` (OAuth2 password flow), not JSON.
+ * FastAPI's OAuth2PasswordRequestForm expects `application/x-www-form-urlencoded`,
+ * which `URLSearchParams` produces. `apiRequest` detects it as a native body and
+ * lets the browser set Content-Type automatically.
  */
 export async function login(credentials: LoginRequest): Promise<Token> {
   const formBody = new URLSearchParams({
@@ -14,24 +14,9 @@ export async function login(credentials: LoginRequest): Promise<Token> {
     password: credentials.password,
   });
 
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+  return apiRequest<Token>("/auth/login", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
     body: formBody,
+    skipAuth: true,
   });
-
-  if (!response.ok) {
-    const apiError: ApiError = {
-      status: response.status,
-      message:
-        response.status === 401
-          ? "Invalid username or password"
-          : `Login failed: ${response.status} ${response.statusText}`,
-    };
-    throw apiError;
-  }
-
-  return response.json() as Promise<Token>;
 }

@@ -47,18 +47,34 @@ export async function apiRequest<T>(
     }
   }
 
-  // Content-Type is intentionally omitted for FormData —
-  // the browser must set it with the correct multipart boundary.
-  const isFormData = body instanceof FormData;
-  if (body && !isFormData) {
+  // Both FormData and URLSearchParams are self-describing bodies whose
+  // Content-Type (multipart/form-data and application/x-www-form-urlencoded)
+  // must be set by the browser to include the correct boundary or encoding.
+  const isNativeBody = body instanceof FormData || body instanceof URLSearchParams;
+  if (body && !isNativeBody) {
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method,
-    headers,
-    body: isFormData ? body : body ? JSON.stringify(body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method,
+      headers,
+      body: isNativeBody ? (body as BodyInit) : body ? JSON.stringify(body) : undefined,
+    });
+  } catch (err) {
+    // TypeError is thrown by the browser when the server is unreachable
+    // (network down, DNS failure, CORS preflight abort, etc.)
+    // Normalizing here means every hook/page automatically gets the
+    // friendly message without any per-call handling.
+    if (err instanceof TypeError) {
+      throw {
+        status: 0,
+        message: "Network error: Cannot connect to the server.",
+      } satisfies ApiError;
+    }
+    throw err;
+  }
 
   if (!response.ok) {
     const apiError: ApiError = {
