@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getAllProjects } from "../services/projectService";
+import { useToast } from "../context/ToastContext";
 import type { ProjectResponse } from "../types/project";
 import type { ApiError } from "../types/api";
 
@@ -18,6 +19,7 @@ interface UseProjectsReturn {
  * tracks loading and error states, and exposes a stable `refetch` callback for data synchronization.
  */
 export function useProjects(): UseProjectsReturn {
+  const { addToast } = useToast();
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
   // Initialized to true to prevent flash of empty list before initial fetch completes
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -33,7 +35,9 @@ export function useProjects(): UseProjectsReturn {
       return data;
     } catch (err) {
       const apiError = err as ApiError;
-      setError(apiError.message || "Failed to load projects");
+      const message = apiError.message || "Failed to load projects";
+      setError(message);
+      addToast({ message, variant: "error" });
       return [];
     } finally {
       setIsLoading(false);

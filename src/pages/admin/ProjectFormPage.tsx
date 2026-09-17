@@ -12,6 +12,7 @@ import {
   updateProject,
   uploadProjectImage,
 } from "../../services/projectService";
+import { useToast } from "../../context/ToastContext";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { ImageIcon } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
@@ -31,6 +32,7 @@ import type { ApiError } from "../../types/api";
 export function ProjectFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const isEditMode = Boolean(id);
   const projectId = id ? Number(id) : null;
@@ -51,6 +53,7 @@ export function ProjectFormPage() {
   // Status & loading state
   const [isLoadingProject, setIsLoadingProject] = useState(isEditMode);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Only used for 422 inline validation summary — system errors surface as toasts
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -88,7 +91,8 @@ export function ProjectFormPage() {
       })
       .catch((err: ApiError | Error) => {
         if (isMounted) {
-          setErrorMessage(err.message || "Failed to load project details.");
+          // Load failure is unexpected — no inline surface exists for it
+          addToast({ message: err.message || "Failed to load project details.", variant: "error" });
         }
       })
       .finally(() => {
@@ -120,8 +124,6 @@ export function ProjectFormPage() {
   }, [techStackInput]);
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    setErrorMessage(null);
-
     const file = e.target.files?.[0];
     if (!file) {
       setSelectedFile(null);
@@ -130,12 +132,12 @@ export function ProjectFormPage() {
     }
 
     if (!file.type.startsWith("image/")) {
-      setErrorMessage("Selected file must be an image (PNG, JPG, WebP, etc.).");
+      addToast({ message: "Selected file must be an image (PNG, JPG, WebP, etc.).", variant: "error" });
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMessage("Image file size must not exceed 5MB.");
+      addToast({ message: "Image file size must not exceed 5MB.", variant: "error" });
       return;
     }
 
@@ -186,35 +188,26 @@ export function ProjectFormPage() {
 
     try {
       if (isEditMode && projectId) {
-        // Update existing record
         await updateProject(projectId, payload);
-
-        // Upload media if new file was selected
         if (selectedFile) {
           await uploadProjectImage(projectId, selectedFile);
         }
+        addToast({ message: "Project updated successfully.", variant: "success" });
       } else {
-        // Create new record first to acquire generated ID
         const created = await createProject(payload);
-
-        // Upload media associated with new ID
         if (selectedFile) {
           await uploadProjectImage(created.id, selectedFile);
         }
+        addToast({ message: "Project created successfully.", variant: "success" });
       }
 
       navigate("/admin");
     } catch (err) {
       const apiErr = err as ApiError;
-      setErrorMessage(
-        apiErr.message ||
-          (isEditMode
-            ? "Failed to update project."
-            : "Failed to create project.")
-      );
 
-      // Map backend 422 validation errors if available
+      // 422 validation errors — map to inline field errors and show summary
       if (apiErr.validationErrors && apiErr.validationErrors.length > 0) {
+        setErrorMessage(apiErr.message || "Please fix the errors below.");
         const mappedErrors: Record<string, string> = {};
         for (const vErr of apiErr.validationErrors) {
           const field = vErr.loc[vErr.loc.length - 1];
@@ -223,6 +216,12 @@ export function ProjectFormPage() {
           }
         }
         setFieldErrors(mappedErrors);
+      } else {
+        // System/network failure — no inline surface; surface globally
+        addToast({
+          message: apiErr.message || (isEditMode ? "Failed to update project." : "Failed to create project."),
+          variant: "error",
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -263,10 +262,10 @@ export function ProjectFormPage() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Error Banner */}
+          {/* Inline 422 validation summary banner */}
           {errorMessage && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-              <p className="font-semibold">Error submitting project</p>
+              <p className="font-semibold">Please fix the following errors</p>
               <p className="mt-0.5 text-red-700">{errorMessage}</p>
             </div>
           )}

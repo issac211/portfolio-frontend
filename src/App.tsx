@@ -1,14 +1,20 @@
 import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
+import { ToastContainer } from "./components/ui/Toast";
 import { AppRouter } from "./router/AppRouter";
 
 /**
- * Root component. Wraps the entire app with `AuthProvider`
- * so auth state is available to all routes and components.
+ * Root component. Providers are layered outermost-first:
+ * ToastProvider → AuthProvider → Router, so any layer (including auth flows)
+ * can surface toast notifications.
  */
 export default function App() {
   return (
-    <AuthProvider>
-      <AppRouter />
-    </AuthProvider>
+    <ToastProvider>
+      <ToastContainer />
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
+    </ToastProvider>
   );
 }

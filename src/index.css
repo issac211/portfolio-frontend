@@ -31,3 +31,46 @@
     color: #1d4ed8;
   }
 }
+
+/* ─── Toast Keyframes ──────────────────────────────────────────── */
+/* Complex cubic-bezier timing and multi-property animations are kept
+   here because Tailwind's arbitrary value syntax for keyframes is
+   impractical for multi-step sequences like these. */
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(110%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-exit {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(110%);
+  }
+}
+
+.animate-toast-in {
+  animation: toast-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-toast-out {
+  animation: toast-exit 0.3s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-toast-in,
+  .animate-toast-out {
+    animation: none;
+  }
+}
+

@@ -1,6 +1,7 @@
 import { useState, useEffect, type SubmitEvent, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { useProfile } from "../../hooks/useProfile";
+import { useToast } from "../../context/ToastContext";
 import { upsertProfile, uploadProfileImage } from "../../services/profileService";
 import { UserIcon } from "../../components/ui/icons";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
@@ -19,6 +20,7 @@ import type { ApiError } from "../../types/api";
  */
 export function ProfileFormPage() {
   const { profile, isLoading: isProfileLoading, refetch } = useProfile();
+  const { addToast } = useToast();
 
   // Form field state
   const [firstName, setFirstName] = useState("");
@@ -28,7 +30,6 @@ export function ProfileFormPage() {
 
   // Submission & feedback state
   const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -36,7 +37,6 @@ export function ProfileFormPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [imageSuccess, setImageSuccess] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
 
   // Synchronize controlled form inputs once profile data arrives
@@ -60,7 +60,6 @@ export function ProfileFormPage() {
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     setImageError(null);
-    setImageSuccess(null);
 
     const file = e.target.files?.[0];
     if (!file) {
@@ -94,11 +93,10 @@ export function ProfileFormPage() {
 
     setIsUploadingImage(true);
     setImageError(null);
-    setImageSuccess(null);
 
     try {
       await uploadProfileImage(selectedFile);
-      setImageSuccess("Profile photo uploaded successfully!");
+      addToast({ message: "Profile photo uploaded successfully!", variant: "success" });
       setSelectedFile(null);
       setPreviewUrl(null);
       await refetch();
@@ -113,7 +111,6 @@ export function ProfileFormPage() {
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
 
-    setSaveSuccess(null);
     setSaveError(null);
     setFieldErrors({});
 
@@ -141,14 +138,14 @@ export function ProfileFormPage() {
         bio: bio.trim() || null,
       });
 
-      setSaveSuccess("Profile details saved successfully!");
+      addToast({ message: "Profile details saved successfully!", variant: "success" });
       await refetch();
     } catch (err) {
       const apiErr = err as ApiError;
-      setSaveError(apiErr.message || "Failed to save profile changes.");
 
-      // Map API 422 validation errors if provided
+      // 422 validation errors stay inline — anything else is a system/network failure
       if (apiErr.validationErrors && apiErr.validationErrors.length > 0) {
+        setSaveError(apiErr.message || "Please fix the errors below.");
         const mappedErrors: Record<string, string> = {};
         for (const vErr of apiErr.validationErrors) {
           const field = vErr.loc[vErr.loc.length - 1];
@@ -157,6 +154,8 @@ export function ProfileFormPage() {
           }
         }
         setFieldErrors(mappedErrors);
+      } else {
+        addToast({ message: apiErr.message || "Failed to save profile changes.", variant: "error" });
       }
     } finally {
       setIsSaving(false);
@@ -221,12 +220,6 @@ export function ProfileFormPage() {
                   )}
                 </div>
 
-                {/* Feedback Alerts */}
-                {imageSuccess && (
-                  <p className="mb-3 text-xs font-medium text-emerald-600">
-                    {imageSuccess}
-                  </p>
-                )}
                 {imageError && (
                   <p className="mb-3 text-xs font-medium text-red-600">
                     {imageError}
@@ -282,11 +275,6 @@ export function ProfileFormPage() {
               <CardBody className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Feedback Alerts */}
-                  {saveSuccess && (
-                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3.5 text-sm text-emerald-800">
-                      {saveSuccess}
-                    </div>
-                  )}
                   {saveError && (
                     <div className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-sm text-red-800">
                       {saveError}

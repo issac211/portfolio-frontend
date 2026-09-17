@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useProjects } from "../../hooks/useProjects";
 import { useProfile } from "../../hooks/useProfile";
+import { useToast } from "../../context/ToastContext";
 import { deleteProject } from "../../services/projectService";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
@@ -29,6 +30,7 @@ import type { ApiError } from "../../types/api";
  * with direct create, edit, view, and deletion workflows.
  */
 export function DashboardPage() {
+  const { addToast } = useToast();
   const {
     projects,
     isLoading: isProjectsLoading,
@@ -43,7 +45,6 @@ export function DashboardPage() {
   } = useProfile();
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
 
   // Compute total unique technologies utilized across all projects
   const uniqueTechCount = useMemo(() => {
@@ -72,14 +73,14 @@ export function DashboardPage() {
     }
 
     setDeletingId(id);
-    setActionError(null);
 
     try {
       await deleteProject(id);
       await refetchProjects();
+      addToast({ message: `"${title}" deleted successfully.`, variant: "success" });
     } catch (err) {
       const apiErr = err as ApiError;
-      setActionError(apiErr.message || "Failed to delete project.");
+      addToast({ message: apiErr.message || "Failed to delete project.", variant: "error" });
     } finally {
       setDeletingId(null);
     }
@@ -120,13 +121,6 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Action Error Banner */}
-      {actionError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          <p className="font-medium">Error performing action</p>
-          <p className="mt-0.5 text-red-700">{actionError}</p>
-        </div>
-      )}
 
       {/* ── Key Metrics Cards ── */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { login as loginRequest } from "../services/authService";
 import type { ApiError } from "../types/api";
 
@@ -7,9 +8,14 @@ import type { ApiError } from "../types/api";
  * Bridges `AuthContext` (state) with `authService` (API).
  * Returns auth state plus `handleLogin` / `handleLogout` actions
  * with built-in loading and error tracking.
+ *
+ * Error strategy:
+ * - 401 (wrong credentials) → `error` local state, rendered inline on LoginPage.
+ * - 5xx / network failure → global error toast (unexpected system failure).
  */
 export function useAuth() {
   const { token, isAuthenticated, saveToken, logout } = useAuthContext();
+  const { addToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +28,17 @@ export function useAuth() {
       saveToken(access_token);
     } catch (err) {
       const apiError = err as ApiError;
-      setError(apiError.message || "An unexpected error occurred");
+
+      // 401 = expected user error (wrong password) → stay inline
+      if (apiError.status === 401) {
+        setError("Invalid username or password.");
+      } else {
+        // Unexpected system/network failure → global toast
+        addToast({
+          message: apiError.message || "Login failed due to a server error. Please try again.",
+          variant: "error",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

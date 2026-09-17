@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getProfile } from "../services/profileService";
+import { useToast } from "../context/ToastContext";
 import type { PersonalInfoResponse } from "../types/profile";
 import type { ApiError } from "../types/api";
 
@@ -19,6 +20,7 @@ interface UseProfileReturn {
  * callback for on-demand synchronization after mutations.
  */
 export function useProfile(): UseProfileReturn {
+  const { addToast } = useToast();
   const [profile, setProfile] = useState<PersonalInfoResponse | null>(null);
   // Initialized to true to avoid flash of empty content prior to initial fetch
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -34,7 +36,9 @@ export function useProfile(): UseProfileReturn {
       return data;
     } catch (err) {
       const apiError = err as ApiError;
-      setError(apiError.message || "Failed to load profile");
+      const message = apiError.message || "Failed to load profile";
+      setError(message);
+      addToast({ message, variant: "error" });
       return null;
     } finally {
       setIsLoading(false);
