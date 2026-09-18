@@ -9,6 +9,7 @@ import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Loader } from "../../components/ui/Loader";
 import { Badge } from "../../components/ui/Badge";
+import { EmptyState } from "../../components/ui/EmptyState";
 import {
   DashboardIcon,
   CodeIcon,
@@ -287,22 +288,21 @@ export function DashboardPage() {
             </div>
           </CardBody>
         ) : projects.length === 0 ? (
-          <CardBody className="py-12 text-center">
-            <InboxIcon className="mx-auto h-10 w-10 text-gray-300" />
-            <h3 className="mt-3 text-sm font-semibold text-gray-900">
-              No projects created yet
-            </h3>
-            <p className="mt-1 text-xs text-gray-500">
-              Get started by creating your first showcase project.
-            </p>
-            <div className="mt-4">
-              <Link
-                to="/admin/projects/new"
-                className="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-700"
-              >
-                Create First Project
-              </Link>
-            </div>
+          <CardBody className="py-10">
+            <EmptyState
+              variant="solid"
+              icon={<InboxIcon className="h-8 w-8" />}
+              title="No projects created yet"
+              description="Get started by creating your first showcase project."
+              action={
+                <Link
+                  to="/admin/projects/new"
+                  className="inline-flex items-center rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-700"
+                >
+                  Create First Project
+                </Link>
+              }
+            />
           </CardBody>
         ) : (
           <div className="overflow-x-auto">

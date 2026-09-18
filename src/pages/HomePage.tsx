@@ -5,6 +5,7 @@ import { useProjects } from "../hooks/useProjects";
 import { ProfileHero } from "../components/shared/ProfileHero";
 import { ProjectCard } from "../components/shared/ProjectCard";
 import { SectionTitle } from "../components/ui/SectionTitle";
+import { EmptyState } from "../components/ui/EmptyState";
 import { Loader } from "../components/ui/Loader";
 import { Button } from "../components/ui/Button";
 import { ExclamationCircleIcon, InboxIcon } from "../components/ui/icons";
@@ -84,15 +85,11 @@ export function HomePage() {
 
           {/* Empty State */}
           {!isProjectsLoading && !projectsError && projects.length === 0 && (
-            <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-              <InboxIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-base font-semibold text-gray-900">
-                No projects published yet
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Check back soon or explore the GitHub repository.
-              </p>
-            </div>
+            <EmptyState
+              icon={<InboxIcon className="h-8 w-8" />}
+              title="No projects published yet"
+              description="Projects will appear here once they are added to the portfolio. Check back soon!"
+            />
           )}
 
           {/* Projects Grid */}

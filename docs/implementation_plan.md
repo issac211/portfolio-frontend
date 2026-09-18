@@ -445,7 +445,7 @@ sequenceDiagram
 
 - [x] **5.1** — Responsive design review (mobile-first) — Mobile drawer for `AdminLayout`/`AdminSidebar` with left-side `MenuIcon` and `XIcon`, complete SVG extraction in `Navbar`, `LoginPage` mobile padding, anchor scroll alignment (`scroll-padding-top: 4rem`), Hero/Projects spacing optimization, and table `min-w-[600px]` containment
 - [x] **5.2** — Error handling UI (toast/notification for API errors) — `ToastContext` with `addToast`/`removeToast` and timer-ref pattern; `ToastContainer` via `ReactDOM.createPortal`; slide-in/fade-out CSS keyframes; dual-layer strategy (form-level local state + global toast for background/unexpected failures); integrated into `useProjects` and `useProfile`
-- [ ] **5.3** — Empty states (no projects yet, no profile yet)
+- [x] **5.3** — Empty states (no projects yet, no profile yet) — reusable `EmptyState` component (icon backdrop + title + description + action slot, `dashed`/`solid` variants); applied to public `HomePage` projects grid, `ProfileHero` profile-not-configured notice (amber pill), and admin `DashboardPage` projects table
 - [ ] **5.4** — Loading skeletons instead of spinners
 - [ ] **5.5** — Smooth scroll behavior for anchor links
 - [ ] **5.6** — Subtle animations and transitions

@@ -72,6 +72,14 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
               </p>
             )}
 
+            {/* Profile not yet configured — visible only to site visitors before setup */}
+            {!profile && (
+              <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-1.5 text-xs font-medium text-amber-700">
+                <span aria-hidden="true">🚧</span>
+                Portfolio is being set up — check back soon!
+              </p>
+            )}
+
             {/* Action Buttons */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
               <a
