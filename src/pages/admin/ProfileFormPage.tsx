@@ -1,15 +1,18 @@
-import { useState, useEffect, type SubmitEvent, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
 import { Link } from "react-router-dom";
-import { useProfile } from "../../hooks/useProfile";
-import { useToast } from "../../context/ToastContext";
-import { useSEO } from "../../hooks/useSEO";
-import { upsertProfile, uploadProfileImage } from "../../services/profileService";
-import { UserIcon } from "../../components/ui/icons";
-import { Card, CardHeader, CardBody } from "../../components/ui/Card";
-import { Input } from "../../components/ui/Input";
-import { IMAGE_BASE_URL } from "../../config/constants";
 import { Button } from "../../components/ui/Button";
+import { Card, CardBody, CardHeader } from "../../components/ui/Card";
+import { UserIcon } from "../../components/ui/icons";
+import { Input } from "../../components/ui/Input";
 import { ProfileFormSkeleton } from "../../components/ui/Skeleton";
+import { IMAGE_BASE_URL } from "../../config/constants";
+import { useToast } from "../../context/ToastContext";
+import { useProfile } from "../../hooks/useProfile";
+import { useSEO } from "../../hooks/useSEO";
+import {
+  uploadProfileImage,
+  upsertProfile,
+} from "../../services/profileService";
 import type { ApiError } from "../../types/api";
 
 /**
@@ -25,7 +28,8 @@ export function ProfileFormPage() {
 
   useSEO({
     title: "Edit Profile",
-    description: "Update developer bio, personal information, and profile portrait.",
+    description:
+      "Update developer bio, personal information, and profile portrait.",
   });
 
   // Form field state
@@ -48,6 +52,8 @@ export function ProfileFormPage() {
   // Synchronize controlled form inputs once profile data arrives
   useEffect(() => {
     if (profile) {
+      // Architectural decision: Accept cascading render for initial client-side fetching
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFirstName(profile.first_name || "");
       setLastName(profile.last_name || "");
       setBirthDate(profile.birth_date ? profile.birth_date.split("T")[0] : "");
@@ -102,7 +108,10 @@ export function ProfileFormPage() {
 
     try {
       await uploadProfileImage(selectedFile);
-      addToast({ message: "Profile photo uploaded successfully!", variant: "success" });
+      addToast({
+        message: "Profile photo uploaded successfully!",
+        variant: "success",
+      });
       setSelectedFile(null);
       setPreviewUrl(null);
       await refetch();
@@ -144,7 +153,10 @@ export function ProfileFormPage() {
         bio: bio.trim() || null,
       });
 
-      addToast({ message: "Profile details saved successfully!", variant: "success" });
+      addToast({
+        message: "Profile details saved successfully!",
+        variant: "success",
+      });
       await refetch();
     } catch (err) {
       const apiErr = err as ApiError;
@@ -161,7 +173,10 @@ export function ProfileFormPage() {
         }
         setFieldErrors(mappedErrors);
       } else {
-        addToast({ message: apiErr.message || "Failed to save profile changes.", variant: "error" });
+        addToast({
+          message: apiErr.message || "Failed to save profile changes.",
+          variant: "error",
+        });
       }
     } finally {
       setIsSaving(false);

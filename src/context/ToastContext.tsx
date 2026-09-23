@@ -80,6 +80,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
 // ─── Consumer Hook ───────────────────────────────────────────────
 
 /** Reads toast state from the nearest `<ToastProvider>`. Throws if none exists. */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast(): ToastContextValue {
   const context = useContext(ToastContext);
   if (context === null) {

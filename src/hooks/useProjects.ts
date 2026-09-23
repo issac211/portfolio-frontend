@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { getAllProjects } from "../services/projectService";
+import { useCallback, useEffect, useState } from "react";
 import { useToast } from "../context/ToastContext";
-import type { ProjectResponse } from "../types/project";
+import { getAllProjects } from "../services/projectService";
 import type { ApiError } from "../types/api";
+import type { ProjectResponse } from "../types/project";
 
 /** Return value contract for the `useProjects` hook. */
 interface UseProjectsReturn {
@@ -42,9 +42,11 @@ export function useProjects(): UseProjectsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addToast]);
 
   useEffect(() => {
+    // Architectural decision: Accept cascading render for initial client-side fetching
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProjects();
   }, [fetchProjects]);
 

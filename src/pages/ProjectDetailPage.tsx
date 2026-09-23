@@ -1,20 +1,20 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProject } from "../services/projectService";
-import { IMAGE_BASE_URL } from "../config/constants";
-import { handleSmoothScroll } from "../utils/scroll";
-import { useSEO } from "../hooks/useSEO";
-import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
 import { Badge } from "../components/ui/Badge";
 import {
   ArrowLeftIcon,
   ExclamationCircleIcon,
-  ImageIcon,
-  GithubIcon,
   ExternalLinkIcon,
+  GithubIcon,
+  ImageIcon,
 } from "../components/ui/icons";
-import type { ProjectResponse } from "../types/project";
+import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
+import { IMAGE_BASE_URL } from "../config/constants";
+import { useSEO } from "../hooks/useSEO";
+import { getProject } from "../services/projectService";
 import type { ApiError } from "../types/api";
+import type { ProjectResponse } from "../types/project";
+import { handleSmoothScroll } from "../utils/scroll";
 
 /**
  * Deep-dive detail page for an individual project.
@@ -31,7 +31,11 @@ export function ProjectDetailPage() {
   const [error, setError] = useState<string | null>(null);
 
   useSEO({
-    title: project ? project.title : isLoading ? "Loading Project..." : "Project Details",
+    title: project
+      ? project.title
+      : isLoading
+        ? "Loading Project..."
+        : "Project Details",
     description:
       project?.description ||
       "Detailed project deep-dive showcasing technology stack, media preview, and architecture.",
@@ -46,6 +50,8 @@ export function ProjectDetailPage() {
     // Guard clause: validate parameter presence and integer format
     const projectId = Number(id);
     if (!id || Number.isNaN(projectId)) {
+      // Architectural decision: Accept cascading render for initial client-side fetching
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError("Invalid project identifier.");
       setIsLoading(false);
       return;
@@ -184,7 +190,9 @@ export function ProjectDetailPage() {
           {project.tech_stack && project.tech_stack.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {project.tech_stack.map((tech) => (
-                <Badge key={tech} variant="primary">{tech}</Badge>
+                <Badge key={tech} variant="primary">
+                  {tech}
+                </Badge>
               ))}
             </div>
           )}
@@ -192,9 +200,7 @@ export function ProjectDetailPage() {
 
         {/* Project Description Content */}
         <div className="py-8">
-          <h2 className="text-lg font-bold text-gray-900">
-            About the Project
-          </h2>
+          <h2 className="text-lg font-bold text-gray-900">About the Project</h2>
           <div className="mt-4 whitespace-pre-line text-base leading-relaxed text-gray-700 sm:text-lg">
             {project.description}
           </div>

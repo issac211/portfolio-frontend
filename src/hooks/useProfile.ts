@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { getProfile } from "../services/profileService";
+import { useCallback, useEffect, useState } from "react";
 import { useToast } from "../context/ToastContext";
-import type { PersonalInfoResponse } from "../types/profile";
+import { getProfile } from "../services/profileService";
 import type { ApiError } from "../types/api";
+import type { PersonalInfoResponse } from "../types/profile";
 
 /** Values exposed by the `useProfile` hook. */
 interface UseProfileReturn {
@@ -26,26 +26,29 @@ export function useProfile(): UseProfileReturn {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProfile = useCallback(async (): Promise<PersonalInfoResponse | null> => {
-    setIsLoading(true);
-    setError(null);
+  const fetchProfile =
+    useCallback(async (): Promise<PersonalInfoResponse | null> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const data = await getProfile();
-      setProfile(data);
-      return data;
-    } catch (err) {
-      const apiError = err as ApiError;
-      const message = apiError.message || "Failed to load profile";
-      setError(message);
-      addToast({ message, variant: "error" });
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        const data = await getProfile();
+        setProfile(data);
+        return data;
+      } catch (err) {
+        const apiError = err as ApiError;
+        const message = apiError.message || "Failed to load profile";
+        setError(message);
+        addToast({ message, variant: "error" });
+        return null;
+      } finally {
+        setIsLoading(false);
+      }
+    }, [addToast]);
 
   useEffect(() => {
+    // Architectural decision: Accept cascading render for initial client-side fetching
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProfile();
   }, [fetchProfile]);
 

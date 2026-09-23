@@ -2,16 +2,18 @@
 
 ## Architectural Decisions (Finalized)
 
-| Decision             | Choice                                          | Rationale                                                            |
-| -------------------- | ----------------------------------------------- | -------------------------------------------------------------------- |
-| **Navigation**       | Single page with anchor links (scroll sections) | Simpler UX for a portfolio — one smooth scroll experience            |
-| **Contact**          | No form — social/email links in Hero + Footer   | API has no contact endpoint; links are sufficient                    |
-| **Dark Mode**        | Skipped entirely — light theme only             | Reduces complexity; can be added later                               |
-| **Admin Layout**     | Separate layout with sidebar navigation         | Clear visual separation between public site and admin panel          |
-| **Token Storage**    | `localStorage` (not cookies)                    | Simple, works well with SPA + `Authorization: Bearer` header pattern |
-| **HTTP Client**      | Native `fetch()` via custom `apiClient.ts`      | KISS — no Axios dependency needed                                    |
-| **State Management** | `AuthContext` (global) + custom hooks (local)   | No Redux/Zustand — project scope doesn't justify it                  |
-| **Styling**          | Tailwind CSS v4 exclusively                     | Per project rules in GEMINI.md                                       |
+| Decision | Choice | Rationale |
+| --- | --- | --- |
+| **Navigation** | Single page with anchor links (scroll sections) | Simpler UX for a portfolio — one smooth scroll experience |
+| **Contact** | No form — social/email links in Hero + Footer | API has no contact endpoint; links are sufficient |
+| **Dark Mode** | Skipped entirely — light theme only | Reduces complexity; can be added later |
+| **Admin Layout** | Separate layout with sidebar navigation | Clear visual separation between public site and admin panel |
+| **Token Storage** | `localStorage` with 401 auto-clear | Simple, persistent across tabs; no SSR requirement means no cookie complexity |
+| **HTTP Client** | Native `fetch()` via custom `apiClient.ts` | YAGNI — no need for an abstraction layer like axios for this project scope |
+| **State Management** | React Context only (`AuthContext` + `ToastContext`) — no Redux/Zustand | KISS — global state scope is limited to Auth and Toasts |
+| **Styling** | Tailwind CSS v4 exclusively | Per project rules in GEMINI.md |
+| **Data Fetching** | Fetch-on-Render via `useEffect` (suppressing `react-hooks/set-state-in-effect`) | KISS/YAGNI — project scope does not justify React Router Loaders or Suspense. Cascading render (~2ms) is an acceptable trade-off for simplicity and fast delivery |
+| **SEO Strategy** | Hybrid: static baseline in `index.html` + dynamic `useSEO` hook | Static tags serve crawlers that don't execute JS; `useSEO` handles dynamic per-route updates for client-side navigation |
 
 ---
 

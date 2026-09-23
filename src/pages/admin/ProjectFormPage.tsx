@@ -1,25 +1,25 @@
 import {
-  useState,
   useEffect,
   useMemo,
-  type SubmitEvent,
+  useState,
   type ChangeEvent,
+  type SubmitEvent,
 } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Button } from "../../components/ui/Button";
+import { Card, CardBody, CardHeader } from "../../components/ui/Card";
+import { ImageIcon } from "../../components/ui/icons";
+import { Input } from "../../components/ui/Input";
+import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
+import { IMAGE_BASE_URL } from "../../config/constants";
+import { useToast } from "../../context/ToastContext";
+import { useSEO } from "../../hooks/useSEO";
 import {
-  getProject,
   createProject,
+  getProject,
   updateProject,
   uploadProjectImage,
 } from "../../services/projectService";
-import { useToast } from "../../context/ToastContext";
-import { useSEO } from "../../hooks/useSEO";
-import { IMAGE_BASE_URL } from "../../config/constants";
-import { ImageIcon } from "../../components/ui/icons";
-import { Input } from "../../components/ui/Input";
-import { Card, CardHeader, CardBody } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
-import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
 import type { ApiError } from "../../types/api";
 
 /**
@@ -70,6 +70,8 @@ export function ProjectFormPage() {
     if (!isEditMode || !projectId) return;
 
     if (Number.isNaN(projectId)) {
+      // Architectural decision: Accept cascading render for initial client-side fetching
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setErrorMessage("Invalid project ID provided in URL.");
       setIsLoadingProject(false);
       return;
@@ -87,12 +89,13 @@ export function ProjectFormPage() {
           setGithubUrl(project.github_url || "");
           setLiveUrl(project.live_url || "");
           setTechStackInput(
-            project.tech_stack ? project.tech_stack.join(", ") : ""
+            project.tech_stack ? project.tech_stack.join(", ") : "",
           );
           setDisplayOrder(
-            project.display_order !== null && project.display_order !== undefined
+            project.display_order !== null &&
+              project.display_order !== undefined
               ? String(project.display_order)
-              : ""
+              : "",
           );
           setExistingImageUrl(project.image_url || null);
         }
@@ -100,7 +103,10 @@ export function ProjectFormPage() {
       .catch((err: ApiError | Error) => {
         if (isMounted) {
           // Load failure is unexpected — no inline surface exists for it
-          addToast({ message: err.message || "Failed to load project details.", variant: "error" });
+          addToast({
+            message: err.message || "Failed to load project details.",
+            variant: "error",
+          });
         }
       })
       .finally(() => {
@@ -112,7 +118,7 @@ export function ProjectFormPage() {
     return () => {
       isMounted = false;
     };
-  }, [isEditMode, projectId]);
+  }, [isEditMode, projectId, addToast]);
 
   // Clean up Blob preview URLs to prevent memory leaks
   useEffect(() => {
@@ -140,12 +146,18 @@ export function ProjectFormPage() {
     }
 
     if (!file.type.startsWith("image/")) {
-      addToast({ message: "Selected file must be an image (PNG, JPG, WebP, etc.).", variant: "error" });
+      addToast({
+        message: "Selected file must be an image (PNG, JPG, WebP, etc.).",
+        variant: "error",
+      });
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      addToast({ message: "Image file size must not exceed 5MB.", variant: "error" });
+      addToast({
+        message: "Image file size must not exceed 5MB.",
+        variant: "error",
+      });
       return;
     }
 
@@ -189,9 +201,7 @@ export function ProjectFormPage() {
       live_url: liveUrl.trim() || null,
       tech_stack: techStackChips.length > 0 ? techStackChips : null,
       display_order:
-        parsedOrder !== null && !Number.isNaN(parsedOrder)
-          ? parsedOrder
-          : null,
+        parsedOrder !== null && !Number.isNaN(parsedOrder) ? parsedOrder : null,
     };
 
     try {
@@ -200,13 +210,19 @@ export function ProjectFormPage() {
         if (selectedFile) {
           await uploadProjectImage(projectId, selectedFile);
         }
-        addToast({ message: "Project updated successfully.", variant: "success" });
+        addToast({
+          message: "Project updated successfully.",
+          variant: "success",
+        });
       } else {
         const created = await createProject(payload);
         if (selectedFile) {
           await uploadProjectImage(created.id, selectedFile);
         }
-        addToast({ message: "Project created successfully.", variant: "success" });
+        addToast({
+          message: "Project created successfully.",
+          variant: "success",
+        });
       }
 
       navigate("/admin");
@@ -227,7 +243,11 @@ export function ProjectFormPage() {
       } else {
         // System/network failure — no inline surface; surface globally
         addToast({
-          message: apiErr.message || (isEditMode ? "Failed to update project." : "Failed to create project."),
+          message:
+            apiErr.message ||
+            (isEditMode
+              ? "Failed to update project."
+              : "Failed to create project."),
           variant: "error",
         });
       }
@@ -310,7 +330,9 @@ export function ProjectFormPage() {
                   {/* File Upload Trigger */}
                   <label className="w-full cursor-pointer">
                     <span className="inline-flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50">
-                      {selectedFile ? "Replace Selected File" : "Choose Project Image"}
+                      {selectedFile
+                        ? "Replace Selected File"
+                        : "Choose Project Image"}
                     </span>
                     <input
                       type="file"
@@ -337,7 +359,8 @@ export function ProjectFormPage() {
                     Project Details
                   </h2>
                   <p className="mt-0.5 text-xs text-gray-500">
-                    Core informational fields displayed on card and detail views.
+                    Core informational fields displayed on card and detail
+                    views.
                   </p>
                 </CardHeader>
                 <CardBody className="space-y-5 p-6">

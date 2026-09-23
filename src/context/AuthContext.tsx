@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import {
   getStoredToken,
-  setStoredToken,
   removeStoredToken,
+  setStoredToken,
 } from "../services/apiClient";
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -56,6 +56,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 // ─── Consumer Hook ───────────────────────────────────────────────
 
 /** Reads auth state from the nearest `<AuthProvider>`. Throws if none exists. */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuthContext(): AuthContextValue {
   const context = useContext(AuthContext);
   if (context === null) {
