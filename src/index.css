@@ -32,6 +32,53 @@
   }
 }
 
+/* ─── Global Animation Primitives & Transitions ────────────────── */
+/* Hardware-accelerated (transform & opacity only) transitions with
+   fluid cubic-bezier curves for polished entry states. */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* ─── Toast Keyframes ──────────────────────────────────────────── */
 /* Complex cubic-bezier timing and multi-property animations are kept
    here because Tailwind's arbitrary value syntax for keyframes is
@@ -69,8 +116,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-toast-in,
-  .animate-toast-out {
-    animation: none;
+  .animate-toast-out,
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-scale-in {
+    animation: none !important;
+    transition: none !important;
   }
 }
 

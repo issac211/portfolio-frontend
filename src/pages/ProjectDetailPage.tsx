@@ -103,7 +103,7 @@ export function ProjectDetailPage() {
     : null;
 
   return (
-    <article className="py-12 sm:py-16">
+    <article className="py-12 sm:py-16 animate-fade-in-up">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Back Navigation Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-8">

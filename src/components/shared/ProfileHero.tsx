@@ -40,7 +40,7 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
           {/* Left Column: Text & CTAs */}
-          <div className="flex flex-col items-center text-center lg:col-span-7 lg:items-start lg:text-left">
+          <div className="flex flex-col items-center text-center lg:col-span-7 lg:items-start lg:text-left animate-fade-in-up">
             {/* Status Pill */}
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-50/70 px-3.5 py-1 text-xs font-medium text-emerald-700">
               <span className="relative flex h-2 w-2">
@@ -86,7 +86,7 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
               <a
                 href="/#projects"
                 onClick={(e) => handleSmoothScroll(e, "/#projects")}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-150 ease-out hover:bg-blue-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 View Projects
                 <ArrowDownIcon className="h-4 w-4" />
@@ -95,7 +95,7 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
               <a
                 href="/#contact"
                 onClick={(e) => handleSmoothScroll(e, "/#contact")}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 shadow-xs transition-all duration-150 ease-out hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
               >
                 Contact Me
               </a>
@@ -103,16 +103,16 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
           </div>
 
           {/* Right Column: Avatar Portrait */}
-          <div className="flex justify-center lg:col-span-5">
+          <div className="flex justify-center lg:col-span-5 animate-fade-in">
             <div className="relative">
               {/* Radial gradient glow background */}
               <div
-                className="absolute -inset-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 opacity-20 blur-xl"
+                className="absolute -inset-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 opacity-20 blur-xl transition-opacity duration-300"
                 aria-hidden="true"
               />
 
               {/* Portrait Container with 3-tier fallback */}
-              <div className="relative flex h-60 w-60 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-gray-100 shadow-xl sm:h-72 sm:w-72 lg:h-80 lg:w-80">
+              <div className="relative flex h-60 w-60 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-gray-100 shadow-xl transition-transform duration-300 ease-out hover:scale-[1.02] sm:h-72 sm:w-72 lg:h-80 lg:w-80">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}

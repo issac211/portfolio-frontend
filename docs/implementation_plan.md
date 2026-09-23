@@ -21,7 +21,7 @@
 src/
 ├── main.tsx                    # Entry point — renders <App />
 ├── App.tsx                     # Root — AuthProvider + AppRouter
-├── index.css                   # Inter font, smooth scroll, sticky offset, accessible base theme
+├── index.css                   # Inter font, smooth scroll, animation keyframes, accessible base theme
 │
 ├── types/                      # ✅ Phase 0 — Complete
 │   ├── auth.ts                 #    Token, LoginRequest
@@ -109,6 +109,9 @@ src/
 > [!NOTE]
 > **Scroll Target Alignment & Header Offset:** In [`index.css`](../src/index.css), `scroll-padding-top` is calibrated to `4rem` (matching the exact height of the sticky `<Navbar />`). Combined with proportional top padding on `#home` and `#projects`, section anchors align crisply beneath the navbar without excessive blank gaps.
 
+> [!NOTE]
+> **Subtle Animations & Accessible Motion (GPU-Accelerated & Reduced-Motion):** Entry animations and interactive micro-interactions rely strictly on GPU-composited properties (`transform` and `opacity`) using fluid cubic-bezier curves (`cubic-bezier(0.16, 1, 0.3, 1)`) with `animation-fill-mode: both` to prevent 1-frame style flashes. Tactile press feedback on `Button` utilizes `active:scale-[0.98]` while safeguarding disabled states via `disabled:active:scale-100`. Crucially, `@media (prefers-reduced-motion: reduce)` strips all custom keyframes and transitions globally to protect motion-sensitive visitors.
+
 ---
 
 ## Target Folder Structure (Full)
@@ -117,7 +120,7 @@ src/
 src/
 ├── main.tsx
 ├── App.tsx
-├── index.css                    # ✅ Inter font, smooth scroll, sticky offset, base theme
+├── index.css                    # ✅ Inter font, smooth scroll, animation keyframes, base theme
 │
 ├── types/                       # ✅ Done
 │   ├── auth.ts
@@ -448,7 +451,7 @@ sequenceDiagram
 - [x] **5.3** — Empty states (no projects yet, no profile yet) — reusable `EmptyState` component (icon backdrop + title + description + action slot, `dashed`/`solid` variants); applied to public `HomePage` projects grid, `ProfileHero` profile-not-configured notice (amber pill), and admin `DashboardPage` projects table
 - [x] **5.4** — Loading skeletons instead of spinners — `Skeleton` primitive (`animate-pulse` shimmer) + 6 composed layouts (`ProjectsGridSkeleton`, `ProjectDetailSkeleton`, `ProfileCardSkeleton`, `ProjectsTableSkeleton`, `ProfileFormSkeleton`, `ProjectFormSkeleton`); replaces all `<Loader>` usages across public and admin pages
 - [x] **5.5** — Smooth scroll behavior for anchor links — `useScrollToHash` hook (rAF-deferred, dependency-aware) for hash navigation on `HomePage`; `handleSmoothScroll` utility extracted to `src/utils/scroll.ts` (scrollIntoView + pushState, graceful fallthrough when target not in DOM); wired globally to all hash anchors in `Navbar`, `Footer`, `ProfileHero`, and `ProjectDetailPage`; CSS foundation (`scroll-behavior: smooth`, `scroll-padding-top: 4rem`, `prefers-reduced-motion` override) in `index.css`
-- [ ] **5.6** — Subtle animations and transitions
+- [x] **5.6** — Subtle animations and transitions — GPU-accelerated keyframe primitives (`animate-fade-in`, `animate-fade-in-up`, `animate-scale-in`) with Apple-fluid cubic-bezier (`0.16, 1, 0.3, 1`) and `both` fill-mode in `index.css`; micro-interactions on `Button` (`active:scale-[0.98]`), `Card` (`ease-out`), `ProjectCard` (smooth image zoom, arrow glide, social icon scaling), and `Footer` links; smooth entry transitions for `ProfileHero`, `HomePage` projects grid, `ProjectDetailPage`, `Navbar` mobile menu, `AdminSidebar` backdrop, and `LoginPage`; comprehensive `prefers-reduced-motion: reduce` accessibility guard
 - [ ] **5.7** — SEO meta tags (title, description per page)
 - [ ] **5.8** — Final cross-browser testing
 

@@ -56,7 +56,7 @@ export function AdminSidebar({ isOpen = false, onClose }: AdminSidebarProps) {
       {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-gray-950/60 backdrop-blur-xs transition-opacity md:hidden"
+          className="fixed inset-0 z-40 bg-gray-950/60 backdrop-blur-xs animate-fade-in md:hidden"
           onClick={onClose}
           aria-hidden="true"
         />

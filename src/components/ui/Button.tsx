@@ -46,7 +46,7 @@ export function Button({
     <button
       disabled={disabled || isLoading}
       className={[
-        "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer",
+        "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-150 ease-out active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer",
         variantClasses[variant],
         sizeClasses[size],
         fullWidth ? "w-full" : "",

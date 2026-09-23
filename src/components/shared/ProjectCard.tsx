@@ -31,7 +31,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             src={imageUrl}
             alt={project.title}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gray-50 text-gray-400">
@@ -70,7 +70,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700"
         >
           <span>Learn more</span>
-          <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          <ArrowRightIcon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-1" />
         </Link>
 
         <div className="flex items-center gap-3">
@@ -80,7 +80,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`GitHub repository for ${project.title}`}
-              className="text-gray-400 transition-colors hover:text-gray-900"
+              className="text-gray-400 transition-all duration-200 hover:scale-110 active:scale-95 hover:text-gray-900"
             >
               <GithubIcon className="h-5 w-5" />
             </a>
@@ -92,7 +92,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Live demonstration for ${project.title}`}
-              className="text-gray-400 transition-colors hover:text-blue-600"
+              className="text-gray-400 transition-all duration-200 hover:scale-110 active:scale-95 hover:text-blue-600"
             >
               <ExternalLinkIcon className="h-5 w-5" />
             </a>

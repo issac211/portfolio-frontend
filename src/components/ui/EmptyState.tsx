@@ -35,7 +35,7 @@ export function EmptyState({
 
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-2xl border px-8 py-14 text-center ${borderClass}`}
+      className={`flex flex-col items-center justify-center rounded-2xl border px-8 py-14 text-center animate-fade-in ${borderClass}`}
     >
       {/* Icon wrapper — subtle circular backdrop */}
       <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-gray-400">

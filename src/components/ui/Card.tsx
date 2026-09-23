@@ -31,7 +31,7 @@ export function Card({
   return (
     <Component
       className={[
-        "overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-xs transition-all duration-200",
+        "overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-xs transition-all duration-200 ease-out",
         hoverable
           ? "hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md"
           : "",

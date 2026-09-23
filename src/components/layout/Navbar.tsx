@@ -100,7 +100,7 @@ export function Navbar() {
 
       {/* Mobile Dropdown Menu */}
       {isMenuOpen && (
-        <div className="border-b border-gray-200 bg-white/95 px-4 pt-2 pb-4 backdrop-blur-md md:hidden">
+        <div className="border-b border-gray-200 bg-white/95 px-4 pt-2 pb-4 backdrop-blur-md md:hidden animate-fade-in">
           <nav
             className="flex flex-col space-y-3"
             aria-label="Mobile navigation"
