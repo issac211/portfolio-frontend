@@ -5,8 +5,14 @@
   html {
     /* Enables fluid gliding to anchor sections (#home, #projects, #contact) */
     scroll-behavior: smooth;
-    /* Offsets scroll target so content is never obscured by the 4rem sticky navbar */
-    scroll-padding-top: 4rem;
+    /* Offsets scroll target so content is positioned cleanly below sticky navbar */
+    scroll-padding-top: 2rem;
+  }
+
+  /* Cross-browser offset for scrollIntoView (specifically mobile Safari & WebKit engines) */
+  section[id],
+  footer[id] {
+    scroll-margin-top: 2rem;
   }
 
   /* Respect accessibility settings for visitors sensitive to motion sickness */
@@ -17,7 +23,14 @@
   }
 
   body {
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
     color: #0f172a;
     background-color: #ffffff;
     -webkit-font-smoothing: antialiased;
@@ -124,4 +137,3 @@
     transition: none !important;
   }
 }
-
