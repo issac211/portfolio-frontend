@@ -1,7 +1,6 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { useProfile } from "../hooks/useProfile";
 import { useProjects } from "../hooks/useProjects";
+import { useScrollToHash } from "../hooks/useScrollToHash";
 import { ProfileHero } from "../components/shared/ProfileHero";
 import { ProjectCard } from "../components/shared/ProjectCard";
 import { SectionTitle } from "../components/ui/SectionTitle";
@@ -18,7 +17,6 @@ import { ExclamationCircleIcon, InboxIcon } from "../components/ui/icons";
  * and automatic smooth-scrolling to URL hash anchors.
  */
 export function HomePage() {
-  const location = useLocation();
   const { profile } = useProfile();
   const {
     projects,
@@ -27,15 +25,8 @@ export function HomePage() {
     refetch: refetchProjects,
   } = useProjects();
 
-  // Smooth-scroll to hash anchor after data/DOM stabilizes (e.g. navigation from sub-routes)
-  useEffect(() => {
-    if (location.hash) {
-      const element = document.getElementById(location.hash.slice(1));
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  }, [location.hash, isProjectsLoading]);
+  // Scroll to hash anchor once data resolves so the target section exists in the DOM
+  useScrollToHash(isProjectsLoading);
 
   return (
     <div className="flex flex-col">

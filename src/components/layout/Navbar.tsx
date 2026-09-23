@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../ui/Button";
 import { MenuIcon, XIcon } from "../ui/icons";
+import { handleSmoothScroll } from "../../utils/scroll";
 
 /** Navigation anchor link definition. */
 interface NavLinkItem {
@@ -49,6 +50,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
+              onClick={(e) => { closeMenu(); handleSmoothScroll(e, link.href); }}
               className="text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
             >
               {link.label}
@@ -107,7 +109,7 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                onClick={closeMenu}
+                onClick={(e) => { closeMenu(); handleSmoothScroll(e, link.href); }}
                 className="py-1 text-base font-medium text-gray-700 transition-colors hover:text-blue-600"
               >
                 {link.label}

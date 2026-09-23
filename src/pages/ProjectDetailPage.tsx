@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getProject } from "../services/projectService";
 import { IMAGE_BASE_URL } from "../config/constants";
+import { handleSmoothScroll } from "../utils/scroll";
 import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
 import { Badge } from "../components/ui/Badge";
 import {
@@ -83,13 +84,14 @@ export function ProjectDetailPage() {
             {error || "The requested project could not be found."}
           </p>
           <div className="mt-6">
-            <Link
-              to="/#projects"
+            <a
+              href="/#projects"
+              onClick={(e) => handleSmoothScroll(e, "/#projects")}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-xs ring-1 ring-gray-300 ring-inset transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <ArrowLeftIcon className="h-4 w-4" />
               <span>Back to Projects</span>
-            </Link>
+            </a>
           </div>
         </div>
       </div>
@@ -105,13 +107,14 @@ export function ProjectDetailPage() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Back Navigation Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-8">
-          <Link
-            to="/#projects"
+          <a
+            href="/#projects"
+            onClick={(e) => handleSmoothScroll(e, "/#projects")}
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-blue-600"
           >
             <ArrowLeftIcon className="h-4 w-4" />
             <span>Back to Projects</span>
-          </Link>
+          </a>
         </nav>
 
         {/* Media Preview Slot */}

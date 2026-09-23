@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { GithubIcon, LinkedInIcon, MailIcon } from "../ui/icons";
+import { handleSmoothScroll } from "../../utils/scroll";
 
 /** Social and contact link definition. */
 interface SocialLink {
@@ -84,6 +85,7 @@ export function Footer() {
                 <li key={link.href}>
                   <a
                     href={link.href}
+                    onClick={(e) => handleSmoothScroll(e, link.href)}
                     className="text-sm text-gray-600 transition-colors hover:text-blue-600"
                   >
                     {link.label}

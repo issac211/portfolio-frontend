@@ -1,5 +1,6 @@
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { ArrowDownIcon, UserIcon } from "../ui/icons";
+import { handleSmoothScroll } from "../../utils/scroll";
 import type { PersonalInfoResponse } from "../../types/profile";
 
 interface ProfileHeroProps {
@@ -84,6 +85,7 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
               <a
                 href="/#projects"
+                onClick={(e) => handleSmoothScroll(e, "/#projects")}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 View Projects
@@ -92,6 +94,7 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
 
               <a
                 href="/#contact"
+                onClick={(e) => handleSmoothScroll(e, "/#contact")}
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
               >
                 Contact Me

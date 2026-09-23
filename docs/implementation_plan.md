@@ -447,7 +447,7 @@ sequenceDiagram
 - [x] **5.2** — Error handling UI (toast/notification for API errors) — `ToastContext` with `addToast`/`removeToast` and timer-ref pattern; `ToastContainer` via `ReactDOM.createPortal`; slide-in/fade-out CSS keyframes; dual-layer strategy (form-level local state + global toast for background/unexpected failures); integrated into `useProjects` and `useProfile`
 - [x] **5.3** — Empty states (no projects yet, no profile yet) — reusable `EmptyState` component (icon backdrop + title + description + action slot, `dashed`/`solid` variants); applied to public `HomePage` projects grid, `ProfileHero` profile-not-configured notice (amber pill), and admin `DashboardPage` projects table
 - [x] **5.4** — Loading skeletons instead of spinners — `Skeleton` primitive (`animate-pulse` shimmer) + 6 composed layouts (`ProjectsGridSkeleton`, `ProjectDetailSkeleton`, `ProfileCardSkeleton`, `ProjectsTableSkeleton`, `ProfileFormSkeleton`, `ProjectFormSkeleton`); replaces all `<Loader>` usages across public and admin pages
-- [ ] **5.5** — Smooth scroll behavior for anchor links
+- [x] **5.5** — Smooth scroll behavior for anchor links — `useScrollToHash` hook (rAF-deferred, dependency-aware) for hash navigation on `HomePage`; `handleSmoothScroll` utility extracted to `src/utils/scroll.ts` (scrollIntoView + pushState, graceful fallthrough when target not in DOM); wired globally to all hash anchors in `Navbar`, `Footer`, `ProfileHero`, and `ProjectDetailPage`; CSS foundation (`scroll-behavior: smooth`, `scroll-padding-top: 4rem`, `prefers-reduced-motion` override) in `index.css`
 - [ ] **5.6** — Subtle animations and transitions
 - [ ] **5.7** — SEO meta tags (title, description per page)
 - [ ] **5.8** — Final cross-browser testing
