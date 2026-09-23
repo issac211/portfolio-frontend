@@ -1,6 +1,7 @@
 import { useProfile } from "../hooks/useProfile";
 import { useProjects } from "../hooks/useProjects";
 import { useScrollToHash } from "../hooks/useScrollToHash";
+import { useSEO } from "../hooks/useSEO";
 import { ProfileHero } from "../components/shared/ProfileHero";
 import { ProjectCard } from "../components/shared/ProjectCard";
 import { SectionTitle } from "../components/ui/SectionTitle";
@@ -24,6 +25,12 @@ export function HomePage() {
     error: projectsError,
     refetch: refetchProjects,
   } = useProjects();
+
+  useSEO({
+    title: "Home",
+    description:
+      "Explore modern web applications, scalable system architectures, and open-source contributions by Itzik.",
+  });
 
   // Scroll to hash anchor once data resolves so the target section exists in the DOM
   useScrollToHash(isProjectsLoading);

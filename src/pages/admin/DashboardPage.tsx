@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useProjects } from "../../hooks/useProjects";
 import { useProfile } from "../../hooks/useProfile";
+import { useSEO } from "../../hooks/useSEO";
 import { useToast } from "../../context/ToastContext";
 import { deleteProject } from "../../services/projectService";
 import { IMAGE_BASE_URL } from "../../config/constants";
@@ -32,6 +33,11 @@ import type { ApiError } from "../../types/api";
  */
 export function DashboardPage() {
   const { addToast } = useToast();
+
+  useSEO({
+    title: "Dashboard",
+    description: "Portfolio administration panel: overview metrics and project management.",
+  });
   const {
     projects,
     isLoading: isProjectsLoading,

@@ -2,6 +2,7 @@ import { useState, useEffect, type SubmitEvent, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { useProfile } from "../../hooks/useProfile";
 import { useToast } from "../../context/ToastContext";
+import { useSEO } from "../../hooks/useSEO";
 import { upsertProfile, uploadProfileImage } from "../../services/profileService";
 import { UserIcon } from "../../components/ui/icons";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
@@ -21,6 +22,11 @@ import type { ApiError } from "../../types/api";
 export function ProfileFormPage() {
   const { profile, isLoading: isProfileLoading, refetch } = useProfile();
   const { addToast } = useToast();
+
+  useSEO({
+    title: "Edit Profile",
+    description: "Update developer bio, personal information, and profile portrait.",
+  });
 
   // Form field state
   const [firstName, setFirstName] = useState("");

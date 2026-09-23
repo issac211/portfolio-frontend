@@ -41,10 +41,15 @@ src/
 ├── context/                    # ✅ Phase 1.1 — Complete
 │   └── AuthContext.tsx          #    AuthProvider + useAuthContext
 │
-├── hooks/                      # ✅ Phase 1.2, 3.1, 3.2 — Complete
+├── hooks/                      # ✅ Phase 1.2, 3.1, 3.2, 5.5, 5.7 — Complete
 │   ├── useAuth.ts              #    handleLogin/handleLogout + loading/error state
 │   ├── useProfile.ts           #    Fetch & manage profile data + refetch
-│   └── useProjects.ts          #    Fetch & manage projects list + refetch
+│   ├── useProjects.ts          #    Fetch & manage projects list + refetch
+│   ├── useScrollToHash.ts      #    rAF-deferred smooth scrolling to hash anchors
+│   └── useSEO.ts               #    Dynamic per-page document.title & meta tag sync
+│
+├── utils/                      # ✅ Phase 5.5 — Complete
+│   └── scroll.ts               #    handleSmoothScroll (scrollIntoView + pushState)
 │
 ├── router/                     # ✅ Phase 1.3-1.4 — Complete
 │   ├── ProtectedRoute.tsx       #    Auth guard — redirects to /login if unauthenticated
@@ -112,6 +117,9 @@ src/
 > [!NOTE]
 > **Subtle Animations & Accessible Motion (GPU-Accelerated & Reduced-Motion):** Entry animations and interactive micro-interactions rely strictly on GPU-composited properties (`transform` and `opacity`) using fluid cubic-bezier curves (`cubic-bezier(0.16, 1, 0.3, 1)`) with `animation-fill-mode: both` to prevent 1-frame style flashes. Tactile press feedback on `Button` utilizes `active:scale-[0.98]` while safeguarding disabled states via `disabled:active:scale-100`. Crucially, `@media (prefers-reduced-motion: reduce)` strips all custom keyframes and transitions globally to protect motion-sensitive visitors.
 
+> [!NOTE]
+> **Dynamic SPA Metadata & SEO Lifecycle (`useSEO`):** Client-side routing lacks automatic HTML document title and meta tag updates. The [`useSEO.ts`](../src/hooks/useSEO.ts) hook synchronizes `document.title`, `<meta name="description">`, Open Graph (`og:title`, `og:description`, `og:image`), and Twitter card (`twitter:title`, `twitter:description`, `twitter:image`) tags dynamically upon route mounts or async data resolution (e.g. project title and screenshot loading in detail views). To satisfy strict social crawler specifications (WhatsApp, LinkedIn, Twitter/X), relative image assets are dynamically resolved to absolute URLs via `window.location.origin`. Crucially, the hook's cleanup function restores baseline portfolio metadata on unmount to prevent stale state leaking between routes. Baseline metadata is also pre-configured in `index.html` with production-domain reminders for direct crawlability.
+
 ---
 
 ## Target Folder Structure (Full)
@@ -137,10 +145,15 @@ src/
 │   ├── profileService.ts
 │   └── projectService.ts
 │
-├── hooks/                       # ✅ Done (Phase 1 + 3)
+├── hooks/                       # ✅ Done (Phase 1 + 3 + 5.5 + 5.7)
 │   ├── useAuth.ts               #    ✅ handleLogin/handleLogout + loading/error state
 │   ├── useProfile.ts            #    ✅ Fetch & cache profile data
-│   └── useProjects.ts           #    ✅ Fetch & cache projects data
+│   ├── useProjects.ts           #    ✅ Fetch & cache projects data
+│   ├── useScrollToHash.ts       #    ✅ rAF-deferred hash navigation
+│   └── useSEO.ts                #    ✅ Dynamic per-page SEO metadata sync
+│
+├── utils/                       # ✅ Done (Phase 5.5)
+│   └── scroll.ts                #    ✅ handleSmoothScroll utility
 │
 ├── context/                     # ✅ Done (Phase 1.1)
 │   └── AuthContext.tsx           #    AuthProvider + useAuthContext
@@ -452,7 +465,7 @@ sequenceDiagram
 - [x] **5.4** — Loading skeletons instead of spinners — `Skeleton` primitive (`animate-pulse` shimmer) + 6 composed layouts (`ProjectsGridSkeleton`, `ProjectDetailSkeleton`, `ProfileCardSkeleton`, `ProjectsTableSkeleton`, `ProfileFormSkeleton`, `ProjectFormSkeleton`); replaces all `<Loader>` usages across public and admin pages
 - [x] **5.5** — Smooth scroll behavior for anchor links — `useScrollToHash` hook (rAF-deferred, dependency-aware) for hash navigation on `HomePage`; `handleSmoothScroll` utility extracted to `src/utils/scroll.ts` (scrollIntoView + pushState, graceful fallthrough when target not in DOM); wired globally to all hash anchors in `Navbar`, `Footer`, `ProfileHero`, and `ProjectDetailPage`; CSS foundation (`scroll-behavior: smooth`, `scroll-padding-top: 4rem`, `prefers-reduced-motion` override) in `index.css`
 - [x] **5.6** — Subtle animations and transitions — GPU-accelerated keyframe primitives (`animate-fade-in`, `animate-fade-in-up`, `animate-scale-in`) with Apple-fluid cubic-bezier (`0.16, 1, 0.3, 1`) and `both` fill-mode in `index.css`; micro-interactions on `Button` (`active:scale-[0.98]`), `Card` (`ease-out`), `ProjectCard` (smooth image zoom, arrow glide, social icon scaling), and `Footer` links; smooth entry transitions for `ProfileHero`, `HomePage` projects grid, `ProjectDetailPage`, `Navbar` mobile menu, `AdminSidebar` backdrop, and `LoginPage`; comprehensive `prefers-reduced-motion: reduce` accessibility guard
-- [ ] **5.7** — SEO meta tags (title, description per page)
+- [x] **5.7** — SEO meta tags (title, description, preview image per page) — `useSEO` custom hook managing dynamic `document.title`, `<meta name="description">`, Open Graph (`og:image`), and Twitter card (`twitter:image`) tags per route with automated unmount cleanup; integrated across `HomePage`, `ProjectDetailPage` (dynamic project title and screenshot resolution), `LoginPage`, `DashboardPage`, `ProfileFormPage`, and `ProjectFormPage`; production-grade baseline metadata pre-configured in `index.html` for crawler indexability and rich social sharing (WhatsApp, LinkedIn)
 - [ ] **5.8** — Final cross-browser testing
 
 ---

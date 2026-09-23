@@ -1,11 +1,17 @@
 import { useState, useEffect, type SubmitEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useSEO } from "../hooks/useSEO";
 
 /** Login page — redirects to `/admin` on successful authentication. */
 export function LoginPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, error, handleLogin } = useAuth();
+
+  useSEO({
+    title: "Admin Login",
+    description: "Secure administrator sign-in portal for portfolio management.",
+  });
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

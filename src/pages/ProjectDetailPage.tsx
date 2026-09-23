@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { getProject } from "../services/projectService";
 import { IMAGE_BASE_URL } from "../config/constants";
 import { handleSmoothScroll } from "../utils/scroll";
+import { useSEO } from "../hooks/useSEO";
 import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
 import { Badge } from "../components/ui/Badge";
 import {
@@ -28,6 +29,16 @@ export function ProjectDetailPage() {
   const [project, setProject] = useState<ProjectResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  useSEO({
+    title: project ? project.title : isLoading ? "Loading Project..." : "Project Details",
+    description:
+      project?.description ||
+      "Detailed project deep-dive showcasing technology stack, media preview, and architecture.",
+    image: project?.image_url
+      ? `${IMAGE_BASE_URL}${project.image_url}`
+      : undefined,
+  });
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });

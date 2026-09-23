@@ -13,6 +13,7 @@ import {
   uploadProjectImage,
 } from "../../services/projectService";
 import { useToast } from "../../context/ToastContext";
+import { useSEO } from "../../hooks/useSEO";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { ImageIcon } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
@@ -36,6 +37,13 @@ export function ProjectFormPage() {
 
   const isEditMode = Boolean(id);
   const projectId = id ? Number(id) : null;
+
+  useSEO({
+    title: isEditMode ? "Edit Project" : "New Project",
+    description: isEditMode
+      ? "Modify project metadata, tech stack, and media."
+      : "Create and publish a new project showcase.",
+  });
 
   // Form fields
   const [title, setTitle] = useState("");
