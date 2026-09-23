@@ -1,0 +1,256 @@
+// ─── Skeleton Primitive ───────────────────────────────────────────
+
+interface SkeletonProps {
+  className?: string;
+}
+
+/**
+ * Single shimmer block. Compose multiple instances to build
+ * page-specific skeleton layouts.
+ */
+export function Skeleton({ className = "" }: SkeletonProps) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`animate-pulse rounded-md bg-gray-200 ${className}`}
+    />
+  );
+}
+
+// ─── Composed Skeleton Layouts ────────────────────────────────────
+
+/**
+ * 3-column project card grid skeleton.
+ * Mirrors the `ProjectCard` grid in `HomePage`.
+ */
+export function ProjectsGridSkeleton() {
+  return (
+    <div
+      aria-label="Loading projects…"
+      role="status"
+      className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"
+    >
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          {/* Image placeholder */}
+          <Skeleton className="aspect-video w-full rounded-none" />
+          <div className="space-y-3 p-5">
+            {/* Title */}
+            <Skeleton className="h-5 w-3/4" />
+            {/* Description lines */}
+            <Skeleton className="h-3.5 w-full" />
+            <Skeleton className="h-3.5 w-5/6" />
+            {/* Tags row */}
+            <div className="flex gap-2 pt-1">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-14 rounded-full" />
+              <Skeleton className="h-5 w-12 rounded-full" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Project detail page skeleton.
+ * Mirrors the article layout in `ProjectDetailPage`.
+ */
+export function ProjectDetailSkeleton() {
+  return (
+    <div
+      aria-label="Loading project…"
+      role="status"
+      className="py-12 sm:py-16"
+    >
+      <div className="mx-auto max-w-4xl space-y-8 px-4 sm:px-6 lg:px-8">
+        {/* Back link */}
+        <Skeleton className="h-4 w-28" />
+        {/* Hero image */}
+        <Skeleton className="aspect-video w-full rounded-2xl" />
+        {/* Title */}
+        <Skeleton className="h-9 w-2/3" />
+        {/* Tags */}
+        <div className="flex gap-2">
+          <Skeleton className="h-6 w-20 rounded-full" />
+          <Skeleton className="h-6 w-16 rounded-full" />
+          <Skeleton className="h-6 w-24 rounded-full" />
+        </div>
+        {/* Body text lines */}
+        <div className="space-y-3">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-4/5" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Dashboard profile card skeleton.
+ * Mirrors the avatar + name/bio layout in `DashboardPage`.
+ */
+export function ProfileCardSkeleton() {
+  return (
+    <div
+      aria-label="Loading profile…"
+      role="status"
+      className="flex items-center gap-4 py-2"
+    >
+      <Skeleton className="h-14 w-14 rounded-full" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-3.5 w-56" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Dashboard projects table skeleton.
+ * Renders 4 placeholder rows matching the table column structure.
+ */
+export function ProjectsTableSkeleton() {
+  return (
+    <div
+      aria-label="Loading projects…"
+      role="status"
+      className="divide-y divide-gray-200"
+    >
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 px-5 py-4">
+          {/* Thumbnail */}
+          <Skeleton className="h-10 w-14 shrink-0 rounded-md" />
+          {/* Title + description */}
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-3 w-56" />
+          </div>
+          {/* Tech badges */}
+          <div className="hidden gap-1.5 sm:flex">
+            <Skeleton className="h-5 w-14 rounded-full" />
+            <Skeleton className="h-5 w-12 rounded-full" />
+          </div>
+          {/* Order badge */}
+          <Skeleton className="h-5 w-8 rounded-full" />
+          {/* Action icons */}
+          <div className="flex gap-2">
+            <Skeleton className="h-7 w-7 rounded-md" />
+            <Skeleton className="h-7 w-7 rounded-md" />
+            <Skeleton className="h-7 w-7 rounded-md" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Profile form page skeleton.
+ * Mirrors the avatar column + personal details form layout.
+ */
+export function ProfileFormSkeleton() {
+  return (
+    <div
+      aria-label="Loading profile settings…"
+      role="status"
+      className="grid grid-cols-1 gap-8 lg:grid-cols-12"
+    >
+      {/* Left: avatar card */}
+      <div className="lg:col-span-4">
+        <div className="rounded-2xl border border-gray-200 p-6">
+          <Skeleton className="mb-4 h-5 w-28" />
+          <Skeleton className="mx-auto mb-5 h-36 w-36 rounded-full" />
+          <Skeleton className="h-9 w-full rounded-lg" />
+        </div>
+      </div>
+      {/* Right: form card */}
+      <div className="lg:col-span-8">
+        <div className="rounded-2xl border border-gray-200 p-6 space-y-6">
+          <Skeleton className="h-5 w-36" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Skeleton className="h-3.5 w-20" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-3.5 w-20" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-24" />
+            <Skeleton className="h-10 w-full rounded-lg" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-28 w-full rounded-lg" />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Skeleton className="h-10 w-24 rounded-lg" />
+            <Skeleton className="h-10 w-36 rounded-lg" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Project form page skeleton.
+ * Mirrors the media preview column + project details form layout.
+ */
+export function ProjectFormSkeleton() {
+  return (
+    <div
+      aria-label="Loading project…"
+      role="status"
+      className="grid grid-cols-1 gap-8 lg:grid-cols-12"
+    >
+      {/* Left: media card */}
+      <div className="lg:col-span-4">
+        <div className="rounded-2xl border border-gray-200 p-5 space-y-4">
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="aspect-video w-full rounded-lg" />
+          <Skeleton className="h-9 w-full rounded-lg" />
+        </div>
+      </div>
+      {/* Right: details card */}
+      <div className="lg:col-span-8 space-y-6">
+        <div className="rounded-2xl border border-gray-200 p-6 space-y-5">
+          <Skeleton className="h-5 w-32" />
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-24" />
+            <Skeleton className="h-10 w-full rounded-lg" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-24" />
+            <Skeleton className="h-28 w-full rounded-lg" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-10 w-full rounded-lg" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Skeleton className="h-3.5 w-20" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-3.5 w-20" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-3">
+          <Skeleton className="h-10 w-24 rounded-lg" />
+          <Skeleton className="h-10 w-32 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}

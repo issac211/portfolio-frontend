@@ -6,7 +6,7 @@ import { ProfileHero } from "../components/shared/ProfileHero";
 import { ProjectCard } from "../components/shared/ProjectCard";
 import { SectionTitle } from "../components/ui/SectionTitle";
 import { EmptyState } from "../components/ui/EmptyState";
-import { Loader } from "../components/ui/Loader";
+import { ProjectsGridSkeleton } from "../components/ui/Skeleton";
 import { Button } from "../components/ui/Button";
 import { ExclamationCircleIcon, InboxIcon } from "../components/ui/icons";
 
@@ -57,11 +57,7 @@ export function HomePage() {
           />
 
           {/* Loading State */}
-          {isProjectsLoading && (
-            <div className="flex min-h-[280px] items-center justify-center">
-              <Loader size="lg" />
-            </div>
-          )}
+          {isProjectsLoading && <ProjectsGridSkeleton />}
 
           {/* Error State with Retry */}
           {!isProjectsLoading && projectsError && (

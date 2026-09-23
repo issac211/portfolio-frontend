@@ -8,7 +8,7 @@ import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { Button } from "../../components/ui/Button";
-import { Loader } from "../../components/ui/Loader";
+import { ProfileFormSkeleton } from "../../components/ui/Skeleton";
 import type { ApiError } from "../../types/api";
 
 /**
@@ -190,8 +190,8 @@ export function ProfileFormPage() {
       </div>
 
       {isProfileLoading && !profile ? (
-        <div className="py-16">
-          <Loader size="lg" />
+        <div className="py-4">
+          <ProfileFormSkeleton />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">

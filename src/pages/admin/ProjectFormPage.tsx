@@ -18,7 +18,7 @@ import { ImageIcon } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
-import { Loader } from "../../components/ui/Loader";
+import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
 import type { ApiError } from "../../types/api";
 
 /**
@@ -257,8 +257,8 @@ export function ProjectFormPage() {
       </div>
 
       {isLoadingProject ? (
-        <div className="py-16">
-          <Loader size="lg" />
+        <div className="py-4">
+          <ProjectFormSkeleton />
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-8">

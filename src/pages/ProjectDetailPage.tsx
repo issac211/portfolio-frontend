@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getProject } from "../services/projectService";
 import { IMAGE_BASE_URL } from "../config/constants";
-import { Loader } from "../components/ui/Loader";
+import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
 import { Badge } from "../components/ui/Badge";
 import {
   ArrowLeftIcon,
@@ -67,11 +67,7 @@ export function ProjectDetailPage() {
 
   // Loading State
   if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader size="lg" />
-      </div>
-    );
+    return <ProjectDetailSkeleton />;
   }
 
   // Error State / Not Found

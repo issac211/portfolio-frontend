@@ -7,9 +7,9 @@ import { deleteProject } from "../../services/projectService";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
-import { Loader } from "../../components/ui/Loader";
 import { Badge } from "../../components/ui/Badge";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { ProfileCardSkeleton, ProjectsTableSkeleton } from "../../components/ui/Skeleton";
 import {
   DashboardIcon,
   CodeIcon,
@@ -196,8 +196,8 @@ export function DashboardPage() {
         </CardHeader>
         <CardBody>
           {isProfileLoading ? (
-            <div className="py-4">
-              <Loader size="sm" />
+            <div className="py-2">
+              <ProfileCardSkeleton />
             </div>
           ) : profileError ? (
             <p className="text-sm text-red-600">{profileError}</p>
@@ -271,9 +271,7 @@ export function DashboardPage() {
         </CardHeader>
 
         {isProjectsLoading ? (
-          <div className="py-12">
-            <Loader size="md" />
-          </div>
+          <ProjectsTableSkeleton />
         ) : projectsError ? (
           <CardBody className="py-8 text-center">
             <p className="text-sm text-red-600">{projectsError}</p>
