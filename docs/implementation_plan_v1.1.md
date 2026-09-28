@@ -1,0 +1,408 @@
+# Frontend Implementation Plan — v1.1
+
+## Architectural Decisions (v1.1)
+
+| Decision                        | Choice                                                                                                                        | Rationale                                                                                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Server state management         | React Query (`@tanstack/react-query`) for Profile & Projects                                                                 | Mandatory across all server state — fetch-once/caching, automatic deduplication, stale-while-revalidate, and unified mutation lifecycle    |
+| Query key architecture          | Centralized `QUERY_KEYS` constant in `config/constants.ts`                                                                    | Single Source of Truth for cache keys (`profile`, `projects`); prevents typo drift and fragmented invalidations across hooks and components |
+| Mutation & cache invalidation   | `useMutation` with `queryClient.invalidateQueries` on write ops                                                               | All PUT/POST/DELETE operations trigger automated targeted query invalidation to ensure UI state instantly mirrors the database             |
+| Controlled form state safety    | Null-coalescing (`?? ""`) on all nullable fields in form state                                                                | Coalesces database `null` values to empty strings during form initialization, preventing React uncontrolled-to-controlled component warnings |
+| Hardcoding elimination strategy | Replace all static strings with data from `GET /api/profile/`                                                                 | Single Source of Truth from the backend; zero hardcoded marketing copy                                                                    |
+| Project description split (UI)  | Two separate `<textarea>` inputs in Admin form; `ProjectCard` uses `summary`, `ProjectDetailPage` uses `content`              | Matches the new backend schema; clear separation of concerns                                                                              |
+| Image deletion UX               | Trash icon button with inline confirmation                                                                                    | Lightweight, no modal overhead for a reversible-ish action                                                                                |
+| Profile deletion UX             | Danger-zone button + strict confirmation modal                                                                                | Destructive action requires explicit user intent; mirrors common SaaS patterns                                                            |
+| Native Fetch preserved          | Continue using `services/apiClient.ts`                                                                                        | SOP Section 5 mandates native fetch — React Query wraps fetch calls, not replaces `apiClient`                                             |
+| Domain vocabulary refactoring   | Rename `tech_stack` → `tags` in all TypeScript interfaces, UI labels, and form fields                                         | Mirrors backend rename; generalizes concept to include status labels ("WIP", "Open Source") and categories beyond technologies            |
+| Availability indicator (UI)     | Map `status_indicator` string to Tailwind dot classes in `ProfileHero` (`success` → pulsing green, `error` → solid red, etc.) | Dynamic, backend-driven visual state; avoids boolean flags; uses a semantic string→class lookup instead of conditional chains             |
+| API contract-driven development | Validate TS interfaces against `api-contract.json` (OpenAPI) exported by the backend after each schema phase                  | Frontend work begins only after the contract is updated; prevents type drift and integration surprises                                    |
+
+---
+
+## Current Project State (Baseline v1.0)
+
+```
+frontend/
+├── .env
+├── .env.example
+├── api-contract.json
+├── eslint.config.js
+├── GEMINI.md
+├── index.html
+├── package.json
+├── package-lock.json
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vite.config.ts
+├── docs/
+│   ├── implementation_plan.md            # v1.0 archive — do not modify
+│   └── phase_5_2_toast_system.md
+├── public/
+│   ├── favicon.svg
+│   └── og-image.jpg
+└── src/
+    ├── App.tsx
+    ├── index.css
+    ├── main.tsx
+    ├── components/
+    │   ├── admin/
+    │   │   ├── AdminLayout.tsx
+    │   │   └── AdminSidebar.tsx
+    │   ├── layout/
+    │   │   ├── Footer.tsx
+    │   │   ├── Navbar.tsx
+    │   │   └── PublicLayout.tsx
+    │   ├── shared/
+    │   │   ├── ProfileHero.tsx
+    │   │   └── ProjectCard.tsx
+    │   └── ui/
+    │       ├── Badge.tsx
+    │       ├── Button.tsx
+    │       ├── Card.tsx
+    │       ├── EmptyState.tsx
+    │       ├── Input.tsx
+    │       ├── Loader.tsx
+    │       ├── SectionTitle.tsx
+    │       ├── Skeleton.tsx
+    │       ├── Toast.tsx
+    │       └── icons/
+    │           ├── index.ts
+    │           ├── ArrowDownIcon.tsx
+    │           ├── ArrowLeftIcon.tsx
+    │           ├── ArrowRightIcon.tsx
+    │           ├── CheckCircleIcon.tsx
+    │           ├── CodeIcon.tsx
+    │           ├── DashboardIcon.tsx
+    │           ├── ExclamationCircleIcon.tsx
+    │           ├── ExternalLinkIcon.tsx
+    │           ├── GithubIcon.tsx
+    │           ├── ImageIcon.tsx
+    │           ├── InboxIcon.tsx
+    │           ├── InfoCircleIcon.tsx
+    │           ├── LinkedInIcon.tsx
+    │           ├── LogoutIcon.tsx
+    │           ├── MailIcon.tsx
+    │           ├── MenuIcon.tsx
+    │           ├── PencilIcon.tsx
+    │           ├── PlusIcon.tsx
+    │           ├── TrashIcon.tsx
+    │           ├── UserIcon.tsx
+    │           └── XIcon.tsx
+    ├── config/
+    │   └── constants.ts
+    ├── context/
+    │   ├── AuthContext.tsx
+    │   └── ToastContext.tsx
+    ├── hooks/
+    │   ├── useAuth.ts
+    │   ├── useProfile.ts
+    │   ├── useProjects.ts
+    │   ├── useScrollToHash.ts
+    │   └── useSEO.ts
+    ├── pages/
+    │   ├── HomePage.tsx
+    │   ├── LoginPage.tsx
+    │   ├── ProjectDetailPage.tsx
+    │   └── admin/
+    │       ├── DashboardPage.tsx
+    │       ├── ProfileFormPage.tsx
+    │       └── ProjectFormPage.tsx
+    ├── router/
+    │   ├── AppRouter.tsx
+    │   └── ProtectedRoute.tsx
+    ├── services/
+    │   ├── apiClient.ts
+    │   ├── authService.ts
+    │   ├── profileService.ts
+    │   └── projectService.ts
+    ├── types/
+    │   ├── api.ts
+    │   ├── auth.ts
+    │   ├── profile.ts
+    │   └── project.ts
+    └── utils/
+        └── scroll.ts
+```
+
+### Current `PersonalInfoResponse` Type (v1.0)
+
+```typescript
+interface PersonalInfoResponse {
+  id: number;
+  first_name: string;
+  last_name: string;
+  birth_date: string | null;
+  bio: string | null;
+  image_url: string | null;
+}
+```
+
+### Current `ProjectResponse` Type (v1.0)
+
+```typescript
+interface ProjectResponse {
+  id: number;
+  title: string;
+  description: string;
+  github_url: string | null;
+  live_url: string | null;
+  tech_stack: string[] | null;
+  display_order: number | null;
+  image_url: string | null;
+}
+```
+
+---
+
+## Key Implementation Details
+
+> [!IMPORTANT]
+> **React Query Integration — SOP Compliance:**
+> The current SOP (Section 5) states: _"Native Fetch Only. Do NOT use `axios` or `react-query`."_
+> This SOP rule **must be updated** before Phase 2 begins. React Query will be used as a **caching/state layer** on top of the existing `apiClient.ts` fetch calls — it does **not** replace `fetch`. The SOP update should clarify: _"React Query is permitted as a caching layer. All HTTP calls must still go through `services/apiClient.ts`."_
+
+> [!IMPORTANT]
+> **React Query Mutations & Cache Invalidation (Strict Requirement):**
+> When using React Query, all API write operations (`PUT`, `POST`, `DELETE`) MUST use `useMutation`.
+> Upon `onSuccess`, you MUST call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })` (or `QUERY_KEYS.projects`) to instantly refresh the UI and guarantee client-side cache consistency with the server. Never bypass query invalidation or perform manual out-of-band cache mutations when standard invalidation suffices.
+
+> [!IMPORTANT]
+> **Centralized Query Keys (Best Practice):**
+> All React Query hooks and mutation callbacks MUST import and use the centralized `QUERY_KEYS` constant from [`constants.ts`](../src/config/constants.ts) (e.g., `QUERY_KEYS.profile`, `QUERY_KEYS.projects`). Hardcoded string literals for query keys are strictly forbidden to eliminate typo drift and disjoint cache states.
+
+> [!IMPORTANT]
+> **Controlled Components & Null Coalescing (`ProfileFormPage`):**
+> Because the backend migration initializes new nullable columns as `null`, the `ProfileFormPage` state initialization MUST coalesce all `null` values to empty strings (e.g., `hero_title: data.hero_title ?? ""`, `availability_status: data.availability_status ?? ""`, `short_bio: data.short_bio ?? ""`, etc.). Passing `null` to `<input value={...}>` or `<textarea value={...}>` causes React to switch from an uncontrolled to a controlled component, triggering console warnings (`component is changing an uncontrolled input to be controlled`).
+
+> [!IMPORTANT]
+> **Type Changes — `ProjectResponse`:**
+>
+> - `description: string` → **removed**
+> - `summary: string` → **added** (replaces `description`)
+> - `content: string | null` → **added**
+>
+> This is a **breaking type change**. Every component consuming `ProjectResponse` must be updated: `ProjectCard`, `ProjectDetailPage`, `ProjectFormPage`, `useProjects`.
+
+> [!IMPORTANT]
+> **Type Changes — `PersonalInfoResponse`:**
+> New fields:
+>
+> ```typescript
+> hero_title: string | null;
+> availability_status: string | null;
+> short_bio: string | null;
+> long_bio: string | null;
+> github_url: string | null;
+> linkedin_url: string | null;
+> email: string | null;
+> ```
+>
+> Components that currently hardcode these values (`Navbar`, `Footer`, `ProfileHero`) must be refactored to consume them from the global profile state.
+
+> [!IMPORTANT]
+> **`status_indicator` → Tailwind Dot Mapping (ProfileHero):**
+> The backend provides `status_indicator: "success" | "warning" | "error" | "neutral" | null`. The `ProfileHero` component must map this value to a visual availability dot using a **lookup object** (not a chain of `if/else`):
+>
+> ```typescript
+> const STATUS_DOT_CLASSES: Record<string, string> = {
+>   success: "bg-green-500 animate-pulse", // Available — pulsing green
+>   warning: "bg-yellow-500 animate-pulse", // Limited — pulsing yellow
+>   error: "bg-red-500", // Unavailable — solid red
+>   neutral: "bg-gray-400", // No status — solid gray
+> };
+> ```
+>
+> Fallback to `neutral` if the value is `null` or unrecognized. The Admin `ProfileFormPage` must render a `<select>` dropdown (not a text input) with these four options. Do NOT use a boolean flag.
+
+> [!NOTE]
+> **API Contract-Driven Development (Frontend Side):**
+> Each frontend phase that depends on backend schema changes (Phases 2, 3, 4) must **not begin** until the backend has exported an updated `api-contract.json` to the `frontend/` root. Before updating TS interfaces, cross-reference the OpenAPI spec to verify field names, types, and nullability. This prevents type drift and catches mismatches early.
+
+> [!NOTE]
+> **Hardcoded Data Audit:** Before implementation, audit every component in `components/layout/` and `components/shared/` for hardcoded strings (hero titles, social URLs, availability badges, bios). Document each occurrence so nothing is missed during the refactor.
+
+> [!NOTE]
+> **Image Deletion Service Calls:** Add `deleteProfileImage()` and `deleteProjectImage(id)` to the respective service files. Both call `DELETE` endpoints and return `void` (204 responses). The UI must optimistically clear the image preview on success.
+
+> [!NOTE]
+> **Confirmation Modal for Profile Deletion:** Reuse or extend existing UI components. The modal must require explicit text confirmation (e.g., typing "DELETE") to prevent accidental profile destruction.
+
+> [!NOTE]
+> **Domain Vocabulary Refactoring — `tech_stack` → `tags`:**
+>
+> - **Types:** Rename `tech_stack: string[] | null` → `tags: string[] | null` in `ProjectResponse`, `ProjectCreate`, and `ProjectUpdate` interfaces.
+> - **UI Labels:** All user-facing strings referencing "Tech Stack" must be updated to "Tags" (e.g., form field labels in `ProjectFormPage`, badge section headers in `ProjectCard` and `ProjectDetailPage`).
+> - **Badge Mapping:** The `Badge` component renders each tag — no structural change needed, but verify that any tech-stack-specific styling or icon logic is generalized.
+> - **Admin Form:** The tags input field (likely a comma-separated text input or similar) retains its UX but the label and placeholder text change from "Tech Stack" to "Tags".
+> - This rename must be coordinated with the backend Phase 4 to avoid API contract mismatches.
+
+---
+
+## Target Folder Structure (v1.1)
+
+```
+frontend/
+├── .env
+├── .env.example
+├── api-contract.json                     [UPDATE] — refreshed by backend after each schema phase (source of truth for TS interfaces)
+├── eslint.config.js
+├── GEMINI.md                             [UPDATE] — SOP Section 7 file reference
+├── index.html
+├── package.json                          [UPDATE] — add @tanstack/react-query
+├── package-lock.json                     [UPDATE] — lockfile refresh
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vite.config.ts
+├── docs/
+│   ├── implementation_plan.md            # v1.0 archive — untouched
+│   ├── implementation_plan_v1.1.md       [NEW] — this file
+│   └── phase_5_2_toast_system.md
+├── public/
+│   ├── favicon.svg
+│   └── og-image.jpg
+└── src/
+    ├── App.tsx                           [UPDATE] — wrap with QueryClientProvider
+    ├── index.css
+    ├── main.tsx
+    ├── components/
+    │   ├── admin/
+    │   │   ├── AdminLayout.tsx
+    │   │   ├── AdminSidebar.tsx
+    │   │   └── ConfirmDeleteModal.tsx    [NEW] — reusable confirmation modal for destructive actions
+    │   ├── layout/
+    │   │   ├── Footer.tsx               [UPDATE] — consume profile data from global state
+    │   │   ├── Navbar.tsx               [UPDATE] — consume profile data from global state
+    │   │   └── PublicLayout.tsx
+    │   ├── shared/
+    │   │   ├── ProfileHero.tsx          [UPDATE] — consume hero_title, availability_status, short_bio + status_indicator dot mapping
+    │   │   └── ProjectCard.tsx          [UPDATE] — use `summary` instead of `description`
+    │   └── ui/
+    │       ├── Badge.tsx
+    │       ├── Button.tsx
+    │       ├── Card.tsx
+    │       ├── EmptyState.tsx
+    │       ├── Input.tsx
+    │       ├── Loader.tsx
+    │       ├── SectionTitle.tsx
+    │       ├── Skeleton.tsx
+    │       ├── Toast.tsx
+    │       └── icons/
+    │           └── ... (no changes)
+    ├── config/
+    │   └── constants.ts                 [UPDATE] — define centralized QUERY_KEYS object
+    ├── context/
+    │   ├── AuthContext.tsx
+    │   └── ToastContext.tsx
+    ├── hooks/
+    │   ├── useAuth.ts
+    │   ├── useProfile.ts               [UPDATE] — refactor to React Query (useQuery + useMutation with QUERY_KEYS.profile invalidation)
+    │   ├── useProjects.ts              [UPDATE] — refactor to React Query (mandatory: useQuery + useMutation with QUERY_KEYS.projects invalidation)
+    │   ├── useScrollToHash.ts
+    │   └── useSEO.ts
+    ├── pages/
+    │   ├── HomePage.tsx
+    │   ├── LoginPage.tsx
+    │   ├── ProjectDetailPage.tsx        [UPDATE] — render `content` instead of `description`
+    │   └── admin/
+    │       ├── DashboardPage.tsx
+    │       ├── ProfileFormPage.tsx       [UPDATE] — new fields + image delete button + profile delete
+    │       └── ProjectFormPage.tsx       [UPDATE] — summary + content textareas + image delete button
+    ├── router/
+    │   ├── AppRouter.tsx
+    │   └── ProtectedRoute.tsx
+    ├── services/
+    │   ├── apiClient.ts
+    │   ├── authService.ts
+    │   ├── profileService.ts            [UPDATE] — add deleteProfileImage(), deleteProfile()
+    │   └── projectService.ts            [UPDATE] — add deleteProjectImage()
+    ├── types/
+    │   ├── api.ts
+    │   ├── auth.ts
+    │   ├── profile.ts                   [UPDATE] — new fields in all interfaces + status_indicator type
+    │   └── project.ts                   [UPDATE] — summary + content, remove description; tech_stack → tags
+    └── utils/
+        └── scroll.ts
+```
+
+---
+
+## Step-by-Step Roadmap
+
+### Phase 1: React Query Setup & Global State Foundation
+
+- [ ] Install `@tanstack/react-query`: `npm install @tanstack/react-query`
+- [ ] Update SOP in `GEMINI.md` Section 5 — clarify that React Query is permitted as a caching/mutation layer over `apiClient.ts`
+- [ ] Define centralized `QUERY_KEYS` constant in `src/config/constants.ts` (`profile: ["profile"]`, `projects: ["projects"]` as `const`) — all hooks and mutations MUST consume this object instead of hardcoded strings
+- [ ] Create `QueryClient` instance and wrap `<App />` with `<QueryClientProvider>` in `App.tsx` (or `main.tsx`)
+- [ ] Refactor `hooks/useProfile.ts` to use `useQuery` with `QUERY_KEYS.profile` — fetch profile data once at the app root level
+- [ ] Refactor `hooks/useProjects.ts` to use React Query (mandatory) — replace manual `useEffect` fetch/loading/error state with `useQuery` (`QUERY_KEYS.projects`) and `useMutation` for project CRUD, invalidating `QUERY_KEYS.projects` on success
+- [ ] Verify existing profile- and project-dependent components still render correctly with cached state
+- [ ] Type-check: `npx tsc -b --noEmit`
+
+### Phase 2: PersonalInfo Type Expansion & Hardcoding Elimination
+
+- [ ] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 2 contract sync) before proceeding
+- [ ] Update `types/profile.ts` — add new fields to `PersonalInfoResponse`: `hero_title`, `availability_status`, `short_bio`, `long_bio`, `github_url`, `linkedin_url`, `email`, `status_indicator`
+- [ ] Update `types/profile.ts` — add `status_indicator` type as `"success" | "warning" | "error" | "neutral" | null` (match backend `Literal` values)
+- [ ] Update `types/profile.ts` — add new fields to `PersonalInfoCreate` and `PersonalInfoUpdate`
+- [ ] Audit `components/layout/Navbar.tsx` for hardcoded data → refactor to consume global profile state
+- [ ] Audit `components/layout/Footer.tsx` for hardcoded data → refactor to consume global profile state (social links, email, short_bio)
+- [ ] Audit `components/shared/ProfileHero.tsx` for hardcoded data → refactor to consume `hero_title`, `availability_status`, `short_bio`
+- [ ] Implement `status_indicator` → Tailwind dot mapping in `ProfileHero.tsx` — use a `Record<string, string>` lookup object (e.g., `success` → `"bg-green-500 animate-pulse"`, `error` → `"bg-red-500"`); fallback to `neutral` for `null`/unknown
+- [ ] Update `pages/admin/ProfileFormPage.tsx` — add form inputs for all new fields
+- [ ] In `ProfileFormPage.tsx`, ensure state initialization coalesces all nullable fields from `null` to empty strings (e.g., `hero_title: data.hero_title ?? ""`, `availability_status: data.availability_status ?? ""`, etc.) to prevent React "uncontrolled to controlled" component warnings
+- [ ] Add a `<select>` dropdown for `status_indicator` in `ProfileFormPage.tsx` — options: `success`, `warning`, `error`, `neutral` (do NOT use a free-text input)
+- [ ] In `ProfileFormPage.tsx` / `hooks/useProfile.ts`, wrap profile update in `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })` and display a success toast
+- [ ] Update `services/profileService.ts` — ensure create/update payloads include new fields
+- [ ] Type-check: `npx tsc -b --noEmit`
+
+### Phase 3: Project Description Split (Summary vs. Content)
+
+- [ ] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 3 contract sync) — confirm `summary` + `content` fields are present
+- [ ] Update `types/project.ts` — replace `description` with `summary` + `content` in `ProjectResponse`, `ProjectCreate`, `ProjectUpdate`
+- [ ] Update `components/shared/ProjectCard.tsx` — render `summary` instead of `description`
+- [ ] Update `pages/ProjectDetailPage.tsx` — render `content` (full write-up) instead of `description`
+- [ ] Update `pages/admin/ProjectFormPage.tsx` — replace single description textarea with two inputs: "Summary" and "Content"
+- [ ] Update `services/projectService.ts` — ensure create/update payloads use `summary` + `content`
+- [ ] Update `hooks/useProjects.ts` if it references `description` anywhere
+- [ ] Type-check: `npx tsc -b --noEmit`
+
+### Phase 4: Domain Vocabulary Refactoring (Tech Stack → Tags)
+
+- [ ] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 4 contract sync) — confirm `tags` field replaces `tech_stack`
+- [ ] Update `types/project.ts` — rename `tech_stack: string[] | null` → `tags: string[] | null` in `ProjectResponse`, `ProjectCreate`, `ProjectUpdate`
+- [ ] Update `components/shared/ProjectCard.tsx` — rename `tech_stack` references to `tags`; update any UI labels from "Tech Stack" to "Tags"
+- [ ] Update `pages/ProjectDetailPage.tsx` — rename any `tech_stack` references to `tags`; update section headers/labels
+- [ ] Update `pages/admin/ProjectFormPage.tsx` — rename form field label from "Tech Stack" to "Tags"; update field name bindings
+- [ ] Update `services/projectService.ts` — ensure create/update payloads use `tags` instead of `tech_stack`
+- [ ] Update `hooks/useProjects.ts` — rename any `tech_stack` references to `tags`
+- [ ] Audit `components/ui/Badge.tsx` — verify no tech-stack-specific logic; ensure it works generically for tags
+- [ ] Type-check: `npx tsc -b --noEmit`
+
+### Phase 5: Image Deletion & Profile Deletion UI
+
+- [ ] **Profile Image Deletion:**
+  - [ ] Add `deleteProfileImage()` to `services/profileService.ts` — calls `DELETE /api/profile/image`
+  - [ ] In `pages/admin/ProfileFormPage.tsx`, implement image deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })`, clear preview, and display a success toast
+  - [ ] Add "Remove Image" button (trash icon) to `pages/admin/ProfileFormPage.tsx`
+- [ ] **Project Image Deletion:**
+  - [ ] Add `deleteProjectImage(id: number)` to `services/projectService.ts` — calls `DELETE /api/projects/{id}/image`
+  - [ ] In `pages/admin/ProjectFormPage.tsx`, implement project image deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects })`, clear preview, and display a success toast
+  - [ ] Add "Remove Image" button (trash icon) to `pages/admin/ProjectFormPage.tsx`
+- [ ] **Profile Soft Delete:**
+  - [ ] Add `deleteProfile()` to `services/profileService.ts` — calls `DELETE /api/profile/`
+  - [ ] Create `components/admin/ConfirmDeleteModal.tsx` — reusable danger-zone confirmation modal
+  - [ ] Add danger-zone section to `pages/admin/ProfileFormPage.tsx` with delete button that triggers the confirmation modal
+  - [ ] Implement profile deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })`, redirect to dashboard, and display a success toast
+- [ ] Type-check: `npx tsc -b --noEmit`
+
+### Phase 6: Final Verification & Cleanup
+
+- [ ] Full type-check pass: `npx tsc -b --noEmit`
+- [ ] Manual smoke test: all public pages render profile data from API (no hardcoded strings)
+- [ ] Manual smoke test: admin forms handle all new fields correctly
+- [ ] Manual smoke test: image deletion and profile deletion flows work end-to-end
+- [ ] Manual smoke test: tags render correctly on ProjectCard and ProjectDetailPage (no residual "Tech Stack" labels)
+- [ ] Verify React Query caching: profile data fetched once, shared across Navbar/Footer/Hero without duplicate requests
