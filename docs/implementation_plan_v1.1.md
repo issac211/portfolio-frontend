@@ -2,20 +2,20 @@
 
 ## Architectural Decisions (v1.1)
 
-| Decision                        | Choice                                                                                                                        | Rationale                                                                                                                                 |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Server state management         | React Query (`@tanstack/react-query`) for Profile & Projects                                                                 | Mandatory across all server state — fetch-once/caching, automatic deduplication, stale-while-revalidate, and unified mutation lifecycle    |
-| Query key architecture          | Centralized `QUERY_KEYS` constant in `config/constants.ts`                                                                    | Single Source of Truth for cache keys (`profile`, `projects`); prevents typo drift and fragmented invalidations across hooks and components |
-| Mutation & cache invalidation   | `useMutation` with `queryClient.invalidateQueries` on write ops                                                               | All PUT/POST/DELETE operations trigger automated targeted query invalidation to ensure UI state instantly mirrors the database             |
+| Decision                        | Choice                                                                                                                        | Rationale                                                                                                                                    |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Server state management         | React Query (`@tanstack/react-query`) for Profile & Projects                                                                  | Mandatory across all server state — fetch-once/caching, automatic deduplication, stale-while-revalidate, and unified mutation lifecycle      |
+| Query key architecture          | Centralized `QUERY_KEYS` constant in `config/constants.ts`                                                                    | Single Source of Truth for cache keys (`profile`, `projects`); prevents typo drift and fragmented invalidations across hooks and components  |
+| Mutation & cache invalidation   | `useMutation` with `queryClient.invalidateQueries` on write ops                                                               | All PUT/POST/DELETE operations trigger automated targeted query invalidation to ensure UI state instantly mirrors the database               |
 | Controlled form state safety    | Null-coalescing (`?? ""`) on all nullable fields in form state                                                                | Coalesces database `null` values to empty strings during form initialization, preventing React uncontrolled-to-controlled component warnings |
-| Hardcoding elimination strategy | Replace all static strings with data from `GET /api/profile/`                                                                 | Single Source of Truth from the backend; zero hardcoded marketing copy                                                                    |
-| Project description split (UI)  | Two separate `<textarea>` inputs in Admin form; `ProjectCard` uses `summary`, `ProjectDetailPage` uses `content`              | Matches the new backend schema; clear separation of concerns                                                                              |
-| Image deletion UX               | Trash icon button with inline confirmation                                                                                    | Lightweight, no modal overhead for a reversible-ish action                                                                                |
-| Profile deletion UX             | Danger-zone button + strict confirmation modal                                                                                | Destructive action requires explicit user intent; mirrors common SaaS patterns                                                            |
-| Native Fetch preserved          | Continue using `services/apiClient.ts`                                                                                        | SOP Section 5 mandates native fetch — React Query wraps fetch calls, not replaces `apiClient`                                             |
-| Domain vocabulary refactoring   | Rename `tech_stack` → `tags` in all TypeScript interfaces, UI labels, and form fields                                         | Mirrors backend rename; generalizes concept to include status labels ("WIP", "Open Source") and categories beyond technologies            |
-| Availability indicator (UI)     | Map `status_indicator` string to Tailwind dot classes in `ProfileHero` (`success` → pulsing green, `error` → solid red, etc.) | Dynamic, backend-driven visual state; avoids boolean flags; uses a semantic string→class lookup instead of conditional chains             |
-| API contract-driven development | Validate TS interfaces against `api-contract.json` (OpenAPI) exported by the backend after each schema phase                  | Frontend work begins only after the contract is updated; prevents type drift and integration surprises                                    |
+| Hardcoding elimination strategy | Replace all static strings with data from `GET /api/profile/`                                                                 | Single Source of Truth from the backend; zero hardcoded marketing copy                                                                       |
+| Project description split (UI)  | Two separate `<textarea>` inputs in Admin form; `ProjectCard` uses `summary`, `ProjectDetailPage` uses `content`              | Matches the new backend schema; clear separation of concerns                                                                                 |
+| Image deletion UX               | Trash icon button with inline confirmation                                                                                    | Lightweight, no modal overhead for a reversible-ish action                                                                                   |
+| Profile deletion UX             | Danger-zone button + strict confirmation modal                                                                                | Destructive action requires explicit user intent; mirrors common SaaS patterns                                                               |
+| Native Fetch preserved          | Continue using `services/apiClient.ts`                                                                                        | SOP Section 5 mandates native fetch — React Query wraps fetch calls, not replaces `apiClient`                                                |
+| Domain vocabulary refactoring   | Rename `tech_stack` → `tags` in all TypeScript interfaces, UI labels, and form fields                                         | Mirrors backend rename; generalizes concept to include status labels ("WIP", "Open Source") and categories beyond technologies               |
+| Availability indicator (UI)     | Map `status_indicator` string to Tailwind dot classes in `ProfileHero` (`success` → pulsing green, `error` → solid red, etc.) | Dynamic, backend-driven visual state; avoids boolean flags; uses a semantic string→class lookup instead of conditional chains                |
+| API contract-driven development | Validate TS interfaces against `api-contract.json` (OpenAPI) exported by the backend after each schema phase                  | Frontend work begins only after the contract is updated; prevents type drift and integration surprises                                       |
 
 ---
 
@@ -343,7 +343,7 @@ frontend/
 
 ### Phase 2: PersonalInfo Type Expansion & Hardcoding Elimination
 
-- [ ] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 2 contract sync) before proceeding
+- [x] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 2 contract sync) before proceeding
 - [ ] Update `types/profile.ts` — add new fields to `PersonalInfoResponse`: `hero_title`, `availability_status`, `short_bio`, `long_bio`, `github_url`, `linkedin_url`, `email`, `status_indicator`
 - [ ] Update `types/profile.ts` — add `status_indicator` type as `"success" | "warning" | "error" | "neutral" | null` (match backend `Literal` values)
 - [ ] Update `types/profile.ts` — add new fields to `PersonalInfoCreate` and `PersonalInfoUpdate`
@@ -360,7 +360,7 @@ frontend/
 
 ### Phase 3: Project Description Split (Summary vs. Content)
 
-- [ ] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 3 contract sync) — confirm `summary` + `content` fields are present
+- [x] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 3 contract sync) — confirm `summary` + `content` fields are present
 - [ ] Update `types/project.ts` — replace `description` with `summary` + `content` in `ProjectResponse`, `ProjectCreate`, `ProjectUpdate`
 - [ ] Update `components/shared/ProjectCard.tsx` — render `summary` instead of `description`
 - [ ] Update `pages/ProjectDetailPage.tsx` — render `content` (full write-up) instead of `description`
@@ -371,7 +371,7 @@ frontend/
 
 ### Phase 4: Domain Vocabulary Refactoring (Tech Stack → Tags)
 
-- [ ] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 4 contract sync) — confirm `tags` field replaces `tech_stack`
+- [x] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 4 contract sync) — confirm `tags` field replaces `tech_stack`
 - [ ] Update `types/project.ts` — rename `tech_stack: string[] | null` → `tags: string[] | null` in `ProjectResponse`, `ProjectCreate`, `ProjectUpdate`
 - [ ] Update `components/shared/ProjectCard.tsx` — rename `tech_stack` references to `tags`; update any UI labels from "Tech Stack" to "Tags"
 - [ ] Update `pages/ProjectDetailPage.tsx` — rename any `tech_stack` references to `tags`; update section headers/labels
