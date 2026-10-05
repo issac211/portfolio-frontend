@@ -415,7 +415,7 @@ export function ProfileFormPage() {
                     onChange={(e) => setHeroTitle(e.target.value)}
                     error={fieldErrors.hero_title}
                     placeholder="e.g., Building scalable, modern web applications"
-                    helperText="Headline displayed prominently in the public Hero section."
+                    helperText="Headline displayed in the Hero section. Use '|' to manually choose the gradient highlight (e.g. 'Engineering scalable | modern apps'), or leave as-is for auto-highlight."
                   />
 
                   {/* Availability Status & Status Indicator (2 Columns) */}

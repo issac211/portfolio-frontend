@@ -217,6 +217,12 @@ interface ProjectResponse {
 >
 > Components that previously hardcoded these values (`Navbar`, `Footer`, `ProfileHero`) have been refactored to consume them dynamically from the global profile state.
 
+> [!NOTE]
+> **Hero Title Two-Tone Gradient Styling (`ProfileHero`):**
+> `ProfileHero` splits `hero_title` into a primary dark text block and a vibrant gradient highlight (`bg-gradient-to-r from-blue-600 to-indigo-600`).
+> - **Smart Auto-Split:** Phrases with 4+ words automatically highlight the final 2 words (e.g. `"Building scalable, modern | web applications"`). Shorter phrases highlight the final word.
+> - **Manual Delimiter Support:** Developers can supply an explicit pipe delimiter `|` in `ProfileFormPage` (e.g. `"Cloud-Native Engineer | AI & Systems"`) to manually curate the exact split boundary.
+
 
 > [!IMPORTANT]
 > **`status_indicator` → Tailwind Dot & Default Text Mapping (`ProfileHero` & `Footer`):**

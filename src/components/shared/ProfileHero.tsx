@@ -43,6 +43,47 @@ const STATUS_STYLES: Record<string, StatusStyle> = {
 };
 
 /**
+ * Splits the hero headline into a primary text segment and a stylized gradient highlight.
+ *
+ * Supports an optional explicit pipe delimiter (`|`) for manual curation (e.g. "Headline | Highlighted"),
+ * while automatically falling back to styling the final 1-2 words if no delimiter is supplied.
+ */
+function splitHeroTitle(title: string | null | undefined): {
+  primary: string;
+  highlight: string;
+} {
+  const trimmed = title?.trim();
+  if (!trimmed) {
+    return {
+      primary: "Building scalable, modern",
+      highlight: "web applications",
+    };
+  }
+
+  // Explicit manual delimiter support
+  if (trimmed.includes("|")) {
+    const parts = trimmed.split("|");
+    const primary = parts[0].trim();
+    const highlight = parts.slice(1).join("|").trim();
+    if (primary && highlight) {
+      return { primary, highlight };
+    }
+  }
+
+  const words = trimmed.split(/\s+/);
+  if (words.length <= 1) {
+    return { primary: "", highlight: words[0] || "" };
+  }
+
+  // Highlight the final 2 words for phrases with 4+ words, or the final word for shorter phrases
+  const splitIndex = words.length > 3 ? words.length - 2 : words.length - 1;
+  const primary = words.slice(0, splitIndex).join(" ");
+  const highlight = words.slice(splitIndex).join(" ");
+
+  return { primary, highlight };
+}
+
+/**
  * Top-of-page Hero section displaying developer introduction and portrait.
  *
  * Anchors the page with `id="home"`, serves as the sole semantic `<h1>` on the
@@ -67,6 +108,8 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
 
   const availabilityText =
     profile?.availability_status?.trim() || statusConfig.defaultText;
+
+  const heroHeading = splitHeroTitle(profile?.hero_title);
 
   // Prepend IMAGE_BASE_URL to relative backend image path
   const avatarUrl = profile?.image_url
@@ -106,16 +149,10 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
 
             {/* Primary SEO Heading (Single H1 rule) */}
             <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-              {profile?.hero_title ? (
-                profile.hero_title
-              ) : (
-                <>
-                  Building scalable, modern{" "}
-                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    web applications
-                  </span>
-                </>
-              )}
+              {heroHeading.primary ? `${heroHeading.primary} ` : ""}
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                {heroHeading.highlight}
+              </span>
             </h1>
 
             {/* Render developer name only when present in database */}
