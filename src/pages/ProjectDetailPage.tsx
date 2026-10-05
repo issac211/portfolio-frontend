@@ -21,7 +21,7 @@ import { handleSmoothScroll } from "../utils/scroll";
  *
  * Fetches project metadata by ID from the URL parameters, renders an accessible
  * back-navigation breadcrumb, displays high-resolution media with responsive aspect ratios,
- * lists technology stack tags, and provides secure external links to live deployments
+ * lists project tags, and provides secure external links to live deployments
  * and source code repositories.
  */
 export function ProjectDetailPage() {
@@ -38,7 +38,7 @@ export function ProjectDetailPage() {
         : "Project Details",
     description:
       project?.summary ||
-      "Detailed project deep-dive showcasing technology stack, media preview, and architecture.",
+      "Detailed project deep-dive showcasing tags, media preview, and architecture.",
     image: project?.image_url
       ? `${IMAGE_BASE_URL}${project.image_url}`
       : undefined,
@@ -186,12 +186,12 @@ export function ProjectDetailPage() {
             </div>
           </div>
 
-          {/* Tech Stack Badges */}
-          {project.tech_stack && project.tech_stack.length > 0 && (
+          {/* Tag Badges */}
+          {project.tags && project.tags.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
-              {project.tech_stack.map((tech) => (
-                <Badge key={tech} variant="primary">
-                  {tech}
+              {project.tags.map((tag) => (
+                <Badge key={tag} variant="primary">
+                  {tag}
                 </Badge>
               ))}
             </div>

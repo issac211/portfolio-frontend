@@ -28,7 +28,7 @@ import type { ApiError } from "../../types/api";
  * Administrative project creation and editing page.
  *
  * Automatically detects edit vs. create mode via route params, manages
- * controlled form fields, parses tech stack tags, handles media file
+ * controlled form fields, parses comma-separated tags, handles media file
  * selection with preview, and coordinates multipart image uploads
  * following entity persistence.
  */
@@ -45,7 +45,7 @@ export function ProjectFormPage() {
   useSEO({
     title: isEditMode ? "Edit Project" : "New Project",
     description: isEditMode
-      ? "Modify project metadata, tech stack, and media."
+      ? "Modify project metadata, tags, and media."
       : "Create and publish a new project showcase.",
   });
 
@@ -55,7 +55,7 @@ export function ProjectFormPage() {
   const [content, setContent] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
   const [liveUrl, setLiveUrl] = useState("");
-  const [techStackInput, setTechStackInput] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
   const [displayOrder, setDisplayOrder] = useState("");
 
   // Media state
@@ -94,9 +94,7 @@ export function ProjectFormPage() {
           setContent(project.content || "");
           setGithubUrl(project.github_url || "");
           setLiveUrl(project.live_url || "");
-          setTechStackInput(
-            project.tech_stack ? project.tech_stack.join(", ") : "",
-          );
+          setTagsInput(project.tags ? project.tags.join(", ") : "");
           setDisplayOrder(
             project.display_order !== null &&
               project.display_order !== undefined
@@ -135,13 +133,13 @@ export function ProjectFormPage() {
     };
   }, [previewUrl]);
 
-  // Parse comma-separated tech stack for real-time chip previews
-  const techStackChips = useMemo(() => {
-    return techStackInput
+  // Parse comma-separated tags for real-time chip previews
+  const tagChips = useMemo(() => {
+    return tagsInput
       .split(",")
       .map((tag) => tag.trim())
       .filter(Boolean);
-  }, [techStackInput]);
+  }, [tagsInput]);
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -206,7 +204,7 @@ export function ProjectFormPage() {
       content: content.trim() || null,
       github_url: githubUrl.trim() || null,
       live_url: liveUrl.trim() || null,
-      tech_stack: techStackChips.length > 0 ? techStackChips : null,
+      tags: tagChips.length > 0 ? tagChips : null,
       display_order:
         parsedOrder !== null && !Number.isNaN(parsedOrder) ? parsedOrder : null,
     };
@@ -406,26 +404,26 @@ export function ProjectFormPage() {
                     helperText="Optional full project case study displayed on the detail page."
                   />
 
-                  {/* Tech Stack Input & Live Preview */}
+                  {/* Tags Input & Live Preview */}
                   <div>
                     <Input
-                      label="Technology Stack"
-                      value={techStackInput}
-                      onChange={(e) => setTechStackInput(e.target.value)}
-                      placeholder="e.g., React, TypeScript, Tailwind, FastAPI, PostgreSQL"
-                      helperText="Separate technologies with commas."
+                      label="Tags"
+                      value={tagsInput}
+                      onChange={(e) => setTagsInput(e.target.value)}
+                      placeholder="e.g., React, TypeScript, FastAPI, Open Source, WIP"
+                      helperText="Separate tags with commas. Use them for technologies, categories, or status labels."
                     />
 
                     {/* Live Chip Preview */}
-                    {techStackChips.length > 0 && (
+                    {tagChips.length > 0 && (
                       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                         <span className="text-xs text-gray-400">Preview:</span>
-                        {techStackChips.map((tech) => (
+                        {tagChips.map((tag) => (
                           <span
-                            key={tech}
+                            key={tag}
                             className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset"
                           >
-                            {tech}
+                            {tag}
                           </span>
                         ))}
                       </div>

@@ -159,8 +159,7 @@ interface ProjectResponse {
   content: string | null;
   github_url: string | null;
   live_url: string | null;
-  tech_stack: string[] | null;
-  tags?: string[] | null;
+  tags: string[] | null;
   display_order: number | null;
   image_url: string | null;
 }
@@ -247,13 +246,13 @@ interface ProjectResponse {
 > **Confirmation Modal for Profile Deletion:** Reuse or extend existing UI components. The modal must require explicit text confirmation (e.g., typing "DELETE") to prevent accidental profile destruction.
 
 > [!NOTE]
-> **Domain Vocabulary Refactoring — `tech_stack` → `tags`:**
+> **Domain Vocabulary Refactoring — `tech_stack` → `tags` (✅ Done):**
 >
-> - **Types:** Rename `tech_stack: string[] | null` → `tags: string[] | null` in `ProjectResponse`, `ProjectCreate`, and `ProjectUpdate` interfaces.
-> - **UI Labels:** All user-facing strings referencing "Tech Stack" must be updated to "Tags" (e.g., form field labels in `ProjectFormPage`, badge section headers in `ProjectCard` and `ProjectDetailPage`).
-> - **Badge Mapping:** The `Badge` component renders each tag — no structural change needed, but verify that any tech-stack-specific styling or icon logic is generalized.
-> - **Admin Form:** The tags input field (likely a comma-separated text input or similar) retains its UX but the label and placeholder text change from "Tech Stack" to "Tags".
-> - This rename must be coordinated with the backend Phase 4 to avoid API contract mismatches.
+> - **Types:** `tech_stack` was removed outright (not kept as a deprecated alias) and replaced by `tags: string[] | null` in `ProjectResponse`, `ProjectCreate`, and `ProjectUpdate`, mirroring `api-contract.json`. A hard rename lets the compiler surface every stale consumer instead of silently falling back to `undefined`.
+> - **UI Labels:** All user-facing "Tech Stack" / "Technology Stack" / "Technologies" strings are now "Tags" (admin form field, dashboard table column and metric card). Internal identifiers were renamed too (`tagsInput`, `tagChips`, `uniqueTagCount`).
+> - **Badge Mapping:** `Badge` contained no tech-specific logic — only its JSDoc wording was generalized.
+> - **Admin Form:** The tags input remains a comma-separated text field with live chip preview; helper text now explains tags may represent technologies, categories, or status labels (e.g. "WIP", "Open Source").
+> - `projectService.ts` and `useProjects.ts` required no changes: they are typed against `ProjectCreate`/`ProjectUpdate`, so the rename propagates through the interfaces.
 
 ---
 
@@ -295,9 +294,9 @@ frontend/
     │   │   └── PublicLayout.tsx
     │   ├── shared/
     │   │   ├── ProfileHero.tsx          ✅ Done — consumed hero_title, availability_status, short_bio + status_indicator dot mapping
-    │   │   └── ProjectCard.tsx          ✅ Done — uses `summary` instead of `description`
+    │   │   └── ProjectCard.tsx          ✅ Done — uses `summary` instead of `description`; renders `tags`
     │   └── ui/
-    │       ├── Badge.tsx
+    │       ├── Badge.tsx                ✅ Done — audited, JSDoc generalized for tags
     │       ├── Button.tsx
     │       ├── Card.tsx
     │       ├── EmptyState.tsx
@@ -322,11 +321,11 @@ frontend/
     ├── pages/
     │   ├── HomePage.tsx
     │   ├── LoginPage.tsx
-    │   ├── ProjectDetailPage.tsx        ✅ Done — renders `content` (full write-up) with fallback to `summary`
+    │   ├── ProjectDetailPage.tsx        ✅ Done — renders `content` (full write-up) with fallback to `summary`; renders `tags`
     │   └── admin/
-    │       ├── DashboardPage.tsx
+    │       ├── DashboardPage.tsx         ✅ Done — delete mutation + `tags` column/metric
     │       ├── ProfileFormPage.tsx       [UPDATE] — new fields form inputs + useUpsertProfileMutation done; image/profile delete in Phase 5
-    │       └── ProjectFormPage.tsx       [UPDATE] — summary + content textareas + React Query mutations done; image delete button in Phase 5
+    │       └── ProjectFormPage.tsx       [UPDATE] — summary + content + tags inputs + React Query mutations done; image delete button in Phase 5
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
@@ -339,7 +338,7 @@ frontend/
     │   ├── api.ts
     │   ├── auth.ts
     │   ├── profile.ts                   ✅ Done — new fields in all interfaces + status_indicator type
-    │   └── project.ts                   [UPDATE] — summary + content added, description removed; tech_stack → tags pending Phase 4
+    │   └── project.ts                   ✅ Done — summary + content added, description removed, tech_stack → tags
     └── utils/
         └── scroll.ts
 ```
@@ -390,14 +389,15 @@ frontend/
 ### Phase 4: Domain Vocabulary Refactoring (Tech Stack → Tags)
 
 - [x] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 4 contract sync) — confirm `tags` field replaces `tech_stack`
-- [ ] Update `types/project.ts` — rename `tech_stack: string[] | null` → `tags: string[] | null` in `ProjectResponse`, `ProjectCreate`, `ProjectUpdate`
-- [ ] Update `components/shared/ProjectCard.tsx` — rename `tech_stack` references to `tags`; update any UI labels from "Tech Stack" to "Tags"
-- [ ] Update `pages/ProjectDetailPage.tsx` — rename any `tech_stack` references to `tags`; update section headers/labels
-- [ ] Update `pages/admin/ProjectFormPage.tsx` — rename form field label from "Tech Stack" to "Tags"; update field name bindings
-- [ ] Update `services/projectService.ts` — ensure create/update payloads use `tags` instead of `tech_stack`
-- [ ] Update `hooks/useProjects.ts` — rename any `tech_stack` references to `tags`
-- [ ] Audit `components/ui/Badge.tsx` — verify no tech-stack-specific logic; ensure it works generically for tags
-- [ ] Type-check: `npx tsc -b --noEmit`
+- [x] Update `types/project.ts` — rename `tech_stack: string[] | null` → `tags: string[] | null` in `ProjectResponse`, `ProjectCreate`, `ProjectUpdate`
+- [x] Update `components/shared/ProjectCard.tsx` — rename `tech_stack` references to `tags`; update any UI labels from "Tech Stack" to "Tags"
+- [x] Update `pages/ProjectDetailPage.tsx` — rename any `tech_stack` references to `tags`; update section headers/labels
+- [x] Update `pages/admin/ProjectFormPage.tsx` — rename form field label from "Tech Stack" to "Tags"; update field name bindings
+- [x] Update `pages/admin/DashboardPage.tsx` — rename `tech_stack` references, table column header, and "Technologies" metric card to "Tags"
+- [x] Update `services/projectService.ts` — ensure create/update payloads use `tags` instead of `tech_stack` (verified: typed via `ProjectCreate`/`ProjectUpdate`, no code change needed)
+- [x] Update `hooks/useProjects.ts` — rename any `tech_stack` references to `tags` (verified: no references)
+- [x] Audit `components/ui/Badge.tsx` — verify no tech-stack-specific logic; ensure it works generically for tags
+- [x] Type-check: `npx tsc -b --noEmit`
 
 ### Phase 5: Image Deletion & Profile Deletion UI
 

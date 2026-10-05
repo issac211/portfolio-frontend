@@ -6,8 +6,7 @@ export interface ProjectResponse {
   content: string | null;
   github_url: string | null;
   live_url: string | null;
-  tech_stack: string[] | null;
-  tags?: string[] | null;
+  tags: string[] | null;
   display_order: number | null;
   image_url: string | null;
 }
@@ -19,7 +18,6 @@ export interface ProjectCreate {
   content?: string | null;
   github_url?: string | null;
   live_url?: string | null;
-  tech_stack?: string[] | null;
   tags?: string[] | null;
   display_order?: number | null;
 }
@@ -31,8 +29,6 @@ export interface ProjectUpdate {
   content?: string | null;
   github_url?: string | null;
   live_url?: string | null;
-  tech_stack?: string[] | null;
   tags?: string[] | null;
   display_order?: number | null;
 }
-

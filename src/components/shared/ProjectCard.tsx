@@ -40,7 +40,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         )}
       </div>
 
-      {/* Content Slot: Title, Description, Tech Stack */}
+      {/* Content Slot: Title, Summary, Tags */}
       <CardBody className="flex flex-1 flex-col">
         {/* Semantic h3 preserves document heading hierarchy under section h2 */}
         <h3 className="text-xl font-bold tracking-tight text-gray-900 transition-colors group-hover:text-blue-600">
@@ -53,11 +53,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {project.summary}
         </p>
 
-        {/* Tech Stack Badges */}
-        {project.tech_stack && project.tech_stack.length > 0 && (
+        {/* Tag Badges */}
+        {project.tags && project.tags.length > 0 && (
           <div className="mt-auto pt-4 flex flex-wrap gap-1.5">
-            {project.tech_stack.map((tech) => (
-              <Badge key={tech}>{tech}</Badge>
+            {project.tags.map((tag) => (
+              <Badge key={tag}>{tag}</Badge>
             ))}
           </div>
         )}

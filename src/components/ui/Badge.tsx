@@ -5,7 +5,7 @@ interface BadgeProps {
 }
 
 /**
- * Atomic tech-stack badge primitive.
+ * Atomic tag badge primitive (technologies, categories, or status labels).
  *
  * `default` — neutral gray, used in project cards and admin table.
  * `primary` — blue-tinted with ring, used in project detail deep-dives.

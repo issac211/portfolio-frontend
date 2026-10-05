@@ -53,17 +53,17 @@ export function DashboardPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const deleteProjectMutation = useDeleteProjectMutation();
 
-  // Compute total unique technologies utilized across all projects
-  const uniqueTechCount = useMemo(() => {
-    const techSet = new Set<string>();
+  // Compute total unique tags utilized across all projects
+  const uniqueTagCount = useMemo(() => {
+    const tagSet = new Set<string>();
     for (const p of projects) {
-      if (p.tech_stack) {
-        for (const tech of p.tech_stack) {
-          techSet.add(tech);
+      if (p.tags) {
+        for (const tag of p.tags) {
+          tagSet.add(tag);
         }
       }
     }
-    return techSet.size;
+    return tagSet.size;
   }, [projects]);
 
   const fullName = profile
@@ -147,7 +147,7 @@ export function DashboardPage() {
           </CardBody>
         </Card>
 
-        {/* Metric 2: Technologies */}
+        {/* Metric 2: Tags */}
         <Card>
           <CardBody className="flex items-center gap-4 p-5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
@@ -155,10 +155,10 @@ export function DashboardPage() {
             </div>
             <div>
               <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                Technologies
+                Tags
               </p>
               <p className="mt-1 text-2xl font-bold tracking-tight text-gray-900">
-                {isProjectsLoading ? "—" : uniqueTechCount}
+                {isProjectsLoading ? "—" : uniqueTagCount}
               </p>
             </div>
           </CardBody>
@@ -316,7 +316,7 @@ export function DashboardPage() {
                     Project
                   </th>
                   <th scope="col" className="px-5 py-3">
-                    Tech Stack
+                    Tags
                   </th>
                   <th scope="col" className="px-5 py-3 text-center">
                     Order
@@ -366,20 +366,20 @@ export function DashboardPage() {
                         </div>
                       </td>
 
-                      {/* Tech Stack Badges */}
+                      {/* Tag Badges */}
                       <td className="px-5 py-4">
                         <div className="flex flex-wrap gap-1">
-                          {project.tech_stack && project.tech_stack.length > 0 ? (
-                            project.tech_stack.slice(0, 3).map((tech) => (
-                              <Badge key={tech}>{tech}</Badge>
+                          {project.tags && project.tags.length > 0 ? (
+                            project.tags.slice(0, 3).map((tag) => (
+                              <Badge key={tag}>{tag}</Badge>
                             ))
                           ) : (
                             <span className="text-xs text-gray-400">—</span>
                           )}
-                          {project.tech_stack &&
-                            project.tech_stack.length > 3 && (
+                          {project.tags &&
+                            project.tags.length > 3 && (
                               <span className="inline-flex items-center rounded-md bg-gray-50 px-1.5 py-0.5 text-xs text-gray-500">
-                                +{project.tech_stack.length - 3}
+                                +{project.tags.length - 3}
                               </span>
                             )}
                         </div>
