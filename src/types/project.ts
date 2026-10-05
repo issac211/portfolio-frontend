@@ -2,10 +2,12 @@
 export interface ProjectResponse {
   id: number;
   title: string;
-  description: string;
+  summary: string;
+  content: string | null;
   github_url: string | null;
   live_url: string | null;
   tech_stack: string[] | null;
+  tags?: string[] | null;
   display_order: number | null;
   image_url: string | null;
 }
@@ -13,19 +15,24 @@ export interface ProjectResponse {
 /** Payload for `POST /projects/`. */
 export interface ProjectCreate {
   title: string;
-  description: string;
+  summary: string;
+  content?: string | null;
   github_url?: string | null;
   live_url?: string | null;
   tech_stack?: string[] | null;
+  tags?: string[] | null;
   display_order?: number | null;
 }
 
 /** Partial update payload for `PATCH /projects/:id`. All fields optional. */
 export interface ProjectUpdate {
   title?: string | null;
-  description?: string | null;
+  summary?: string | null;
+  content?: string | null;
   github_url?: string | null;
   live_url?: string | null;
   tech_stack?: string[] | null;
+  tags?: string[] | null;
   display_order?: number | null;
 }
+

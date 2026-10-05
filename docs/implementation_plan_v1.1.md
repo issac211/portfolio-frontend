@@ -149,20 +149,23 @@ interface PersonalInfoResponse {
 ```
 
 
-### Current `ProjectResponse` Type (v1.0)
+### Current `ProjectResponse` Type (v1.1)
 
 ```typescript
 interface ProjectResponse {
   id: number;
   title: string;
-  description: string;
+  summary: string;
+  content: string | null;
   github_url: string | null;
   live_url: string | null;
   tech_stack: string[] | null;
+  tags?: string[] | null;
   display_order: number | null;
   image_url: string | null;
 }
 ```
+
 
 ---
 
@@ -190,10 +193,11 @@ interface ProjectResponse {
 > **Type Changes — `ProjectResponse`:**
 >
 > - `description: string` → **removed**
-> - `summary: string` → **added** (replaces `description`)
-> - `content: string | null` → **added**
+> - `summary: string` → **added** (replaces `description` on cards and dashboard)
+> - `content: string | null` → **added** (rendered on detail page with fallback to `summary`)
 >
-> This is a **breaking type change**. Every component consuming `ProjectResponse` must be updated: `ProjectCard`, `ProjectDetailPage`, `ProjectFormPage`, `useProjects`.
+> All components consuming `ProjectResponse` have been updated: `ProjectCard`, `ProjectDetailPage`, `ProjectFormPage`, `DashboardPage`, `useProjects`, and `projectService`.
+
 
 > [!IMPORTANT]
 > **Type Changes — `PersonalInfoResponse`:**
@@ -291,7 +295,7 @@ frontend/
     │   │   └── PublicLayout.tsx
     │   ├── shared/
     │   │   ├── ProfileHero.tsx          ✅ Done — consumed hero_title, availability_status, short_bio + status_indicator dot mapping
-    │   │   └── ProjectCard.tsx          [UPDATE] — use `summary` instead of `description`
+    │   │   └── ProjectCard.tsx          ✅ Done — uses `summary` instead of `description`
     │   └── ui/
     │       ├── Badge.tsx
     │       ├── Button.tsx
@@ -318,11 +322,11 @@ frontend/
     ├── pages/
     │   ├── HomePage.tsx
     │   ├── LoginPage.tsx
-    │   ├── ProjectDetailPage.tsx        [UPDATE] — render `content` instead of `description`
+    │   ├── ProjectDetailPage.tsx        ✅ Done — renders `content` (full write-up) with fallback to `summary`
     │   └── admin/
     │       ├── DashboardPage.tsx
     │       ├── ProfileFormPage.tsx       [UPDATE] — new fields form inputs + useUpsertProfileMutation done; image/profile delete in Phase 5
-    │       └── ProjectFormPage.tsx       [UPDATE] — summary + content textareas + image delete button
+    │       └── ProjectFormPage.tsx       [UPDATE] — summary + content textareas + React Query mutations done; image delete button in Phase 5
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
@@ -335,7 +339,7 @@ frontend/
     │   ├── api.ts
     │   ├── auth.ts
     │   ├── profile.ts                   ✅ Done — new fields in all interfaces + status_indicator type
-    │   └── project.ts                   [UPDATE] — summary + content, remove description; tech_stack → tags
+    │   └── project.ts                   [UPDATE] — summary + content added, description removed; tech_stack → tags pending Phase 4
     └── utils/
         └── scroll.ts
 ```
@@ -375,13 +379,13 @@ frontend/
 ### Phase 3: Project Description Split (Summary vs. Content)
 
 - [x] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 3 contract sync) — confirm `summary` + `content` fields are present
-- [ ] Update `types/project.ts` — replace `description` with `summary` + `content` in `ProjectResponse`, `ProjectCreate`, `ProjectUpdate`
-- [ ] Update `components/shared/ProjectCard.tsx` — render `summary` instead of `description`
-- [ ] Update `pages/ProjectDetailPage.tsx` — render `content` (full write-up) instead of `description`
-- [ ] Update `pages/admin/ProjectFormPage.tsx` — replace single description textarea with two inputs: "Summary" and "Content"
-- [ ] Update `services/projectService.ts` — ensure create/update payloads use `summary` + `content`
-- [ ] Update `hooks/useProjects.ts` if it references `description` anywhere
-- [ ] Type-check: `npx tsc -b --noEmit`
+- [x] Update `types/project.ts` — replace `description` with `summary` + `content` in `ProjectResponse`, `ProjectCreate`, `ProjectUpdate`
+- [x] Update `components/shared/ProjectCard.tsx` — render `summary` instead of `description`
+- [x] Update `pages/ProjectDetailPage.tsx` — render `content` (full write-up) instead of `description` (with fallback to `summary`)
+- [x] Update `pages/admin/ProjectFormPage.tsx` — replace single description textarea with two inputs: "Summary" and "Content"
+- [x] Update `services/projectService.ts` — ensure create/update payloads use `summary` + `content`
+- [x] Update `hooks/useProjects.ts` if it references `description` anywhere
+- [x] Type-check: `npx tsc -b --noEmit`
 
 ### Phase 4: Domain Vocabulary Refactoring (Tech Stack → Tags)
 

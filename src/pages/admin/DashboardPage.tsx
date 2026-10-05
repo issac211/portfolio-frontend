@@ -1,10 +1,9 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useProjects } from "../../hooks/useProjects";
+import { useProjects, useDeleteProjectMutation } from "../../hooks/useProjects";
 import { useProfile } from "../../hooks/useProfile";
 import { useSEO } from "../../hooks/useSEO";
 import { useToast } from "../../context/ToastContext";
-import { deleteProject } from "../../services/projectService";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -52,6 +51,7 @@ export function DashboardPage() {
   } = useProfile();
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const deleteProjectMutation = useDeleteProjectMutation();
 
   // Compute total unique technologies utilized across all projects
   const uniqueTechCount = useMemo(() => {
@@ -82,8 +82,7 @@ export function DashboardPage() {
     setDeletingId(id);
 
     try {
-      await deleteProject(id);
-      await refetchProjects();
+      await deleteProjectMutation.mutateAsync(id);
       addToast({ message: `"${title}" deleted successfully.`, variant: "success" });
     } catch (err) {
       const apiErr = err as ApiError;
@@ -361,7 +360,7 @@ export function DashboardPage() {
                               {project.title}
                             </p>
                             <p className="line-clamp-1 text-xs text-gray-500">
-                              {project.description}
+                              {project.summary}
                             </p>
                           </div>
                         </div>

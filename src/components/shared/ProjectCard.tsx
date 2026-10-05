@@ -50,7 +50,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </h3>
 
         <p className="mt-2.5 line-clamp-3 text-sm leading-relaxed text-gray-600">
-          {project.description}
+          {project.summary}
         </p>
 
         {/* Tech Stack Badges */}

@@ -13,11 +13,13 @@ import { Input } from "../../components/ui/Input";
 import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { useToast } from "../../context/ToastContext";
+import {
+  useCreateProjectMutation,
+  useUpdateProjectMutation,
+} from "../../hooks/useProjects";
 import { useSEO } from "../../hooks/useSEO";
 import {
-  createProject,
   getProject,
-  updateProject,
   uploadProjectImage,
 } from "../../services/projectService";
 import type { ApiError } from "../../types/api";
@@ -34,6 +36,8 @@ export function ProjectFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const createMutation = useCreateProjectMutation();
+  const updateMutation = useUpdateProjectMutation();
 
   const isEditMode = Boolean(id);
   const projectId = id ? Number(id) : null;
@@ -47,7 +51,8 @@ export function ProjectFormPage() {
 
   // Form fields
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [summary, setSummary] = useState("");
+  const [content, setContent] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
   const [liveUrl, setLiveUrl] = useState("");
   const [techStackInput, setTechStackInput] = useState("");
@@ -85,7 +90,8 @@ export function ProjectFormPage() {
       .then((project) => {
         if (isMounted) {
           setTitle(project.title || "");
-          setDescription(project.description || "");
+          setSummary(project.summary || "");
+          setContent(project.content || "");
           setGithubUrl(project.github_url || "");
           setLiveUrl(project.live_url || "");
           setTechStackInput(
@@ -180,8 +186,8 @@ export function ProjectFormPage() {
     if (!title.trim()) {
       errors.title = "Project title is required.";
     }
-    if (!description.trim()) {
-      errors.description = "Project description is required.";
+    if (!summary.trim()) {
+      errors.summary = "Project summary is required.";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -196,7 +202,8 @@ export function ProjectFormPage() {
 
     const payload = {
       title: title.trim(),
-      description: description.trim(),
+      summary: summary.trim(),
+      content: content.trim() || null,
       github_url: githubUrl.trim() || null,
       live_url: liveUrl.trim() || null,
       tech_stack: techStackChips.length > 0 ? techStackChips : null,
@@ -206,7 +213,7 @@ export function ProjectFormPage() {
 
     try {
       if (isEditMode && projectId) {
-        await updateProject(projectId, payload);
+        await updateMutation.mutateAsync({ id: projectId, data: payload });
         if (selectedFile) {
           await uploadProjectImage(projectId, selectedFile);
         }
@@ -215,7 +222,7 @@ export function ProjectFormPage() {
           variant: "success",
         });
       } else {
-        const created = await createProject(payload);
+        const created = await createMutation.mutateAsync(payload);
         if (selectedFile) {
           await uploadProjectImage(created.id, selectedFile);
         }
@@ -374,16 +381,29 @@ export function ProjectFormPage() {
                     placeholder="e.g., Cloud-Native Analytics Engine"
                   />
 
-                  {/* Description */}
+                  {/* Summary */}
                   <Input
                     as="textarea"
-                    label="Description"
+                    label="Summary"
                     required
-                    rows={5}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    error={fieldErrors.description}
-                    placeholder="Provide an overview of the system architecture, business challenge, and solution..."
+                    rows={3}
+                    value={summary}
+                    onChange={(e) => setSummary(e.target.value)}
+                    error={fieldErrors.summary}
+                    placeholder="Concise overview displayed on the portfolio project card (max 300 characters)..."
+                    helperText="Brief summary displayed on project cards in the public grid."
+                  />
+
+                  {/* Content / Full Write-up */}
+                  <Input
+                    as="textarea"
+                    label="Detailed Content (Full Write-up)"
+                    rows={8}
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    error={fieldErrors.content}
+                    placeholder="Provide a comprehensive deep-dive into the system architecture, business challenges, and technical solutions..."
+                    helperText="Optional full project case study displayed on the detail page."
                   />
 
                   {/* Tech Stack Input & Live Preview */}
@@ -456,7 +476,11 @@ export function ProjectFormPage() {
                 <Button
                   type="submit"
                   variant="primary"
-                  isLoading={isSubmitting}
+                  isLoading={
+                    isSubmitting ||
+                    createMutation.isPending ||
+                    updateMutation.isPending
+                  }
                 >
                   {isEditMode ? "Save Changes" : "Create Project"}
                 </Button>
@@ -468,3 +492,4 @@ export function ProjectFormPage() {
     </div>
   );
 }
+

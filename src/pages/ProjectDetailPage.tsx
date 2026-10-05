@@ -37,7 +37,7 @@ export function ProjectDetailPage() {
         ? "Loading Project..."
         : "Project Details",
     description:
-      project?.description ||
+      project?.summary ||
       "Detailed project deep-dive showcasing technology stack, media preview, and architecture.",
     image: project?.image_url
       ? `${IMAGE_BASE_URL}${project.image_url}`
@@ -198,11 +198,11 @@ export function ProjectDetailPage() {
           )}
         </header>
 
-        {/* Project Description Content */}
+        {/* Project Content / Full Write-up */}
         <div className="py-8">
           <h2 className="text-lg font-bold text-gray-900">About the Project</h2>
           <div className="mt-4 whitespace-pre-line text-base leading-relaxed text-gray-700 sm:text-lg">
-            {project.description}
+            {project.content || project.summary}
           </div>
         </div>
       </div>
