@@ -3,6 +3,7 @@ import { QUERY_KEYS } from "../config/constants";
 import {
   createProject,
   deleteProject,
+  deleteProjectImage,
   getAllProjects,
   updateProject,
 } from "../services/projectService";
@@ -93,3 +94,17 @@ export function useDeleteProjectMutation() {
     },
   });
 }
+
+/**
+ * Mutation hook for deleting a project image, invalidating QUERY_KEYS.projects on success.
+ */
+export function useDeleteProjectImageMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<void, ApiError, number>({
+    mutationFn: (id: number) => deleteProjectImage(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects });
+    },
+  });
+}
+

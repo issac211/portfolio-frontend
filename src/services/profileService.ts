@@ -28,3 +28,17 @@ export async function uploadProfileImage(
     body: formData,
   });
 }
+
+/** Removes the personal profile image. Auth required. */
+export async function deleteProfileImage(): Promise<void> {
+  return apiRequest<void>("/profile/image", {
+    method: "DELETE",
+  });
+}
+
+/** Soft deletes the personal profile by setting is_active = False. Auth required. */
+export async function deleteProfile(): Promise<void> {
+  return apiRequest<void>("/profile/", {
+    method: "DELETE",
+  });
+}

@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "../config/constants";
-import { getProfile, upsertProfile } from "../services/profileService";
+import {
+  deleteProfile,
+  deleteProfileImage,
+  getProfile,
+  upsertProfile,
+} from "../services/profileService";
 import type { ApiError } from "../types/api";
 import type {
   PersonalInfoCreate,
@@ -63,3 +68,30 @@ export function useUpsertProfileMutation() {
     },
   });
 }
+
+/**
+ * Mutation hook for deleting the profile image, invalidating QUERY_KEYS.profile on success.
+ */
+export function useDeleteProfileImageMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<void, ApiError, void>({
+    mutationFn: () => deleteProfileImage(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile });
+    },
+  });
+}
+
+/**
+ * Mutation hook for soft-deleting the profile, invalidating QUERY_KEYS.profile on success.
+ */
+export function useDeleteProfileMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<void, ApiError, void>({
+    mutationFn: () => deleteProfile(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile });
+    },
+  });
+}
+

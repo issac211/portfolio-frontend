@@ -1,13 +1,19 @@
 import { useEffect, useState, type ChangeEvent, type SubmitEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ConfirmDeleteModal } from "../../components/admin/ConfirmDeleteModal";
 import { Button } from "../../components/ui/Button";
 import { Card, CardBody, CardHeader } from "../../components/ui/Card";
-import { UserIcon } from "../../components/ui/icons";
+import { TrashIcon, UserIcon } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
 import { ProfileFormSkeleton } from "../../components/ui/Skeleton";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { useToast } from "../../context/ToastContext";
-import { useProfile, useUpsertProfileMutation } from "../../hooks/useProfile";
+import {
+  useDeleteProfileImageMutation,
+  useDeleteProfileMutation,
+  useProfile,
+  useUpsertProfileMutation,
+} from "../../hooks/useProfile";
 import { useSEO } from "../../hooks/useSEO";
 import { uploadProfileImage } from "../../services/profileService";
 import type { ApiError } from "../../types/api";
@@ -21,8 +27,11 @@ import type { StatusIndicator } from "../../types/profile";
  * via upsert API semantics, and upload high-resolution profile imagery via multipart FormData.
  */
 export function ProfileFormPage() {
+  const navigate = useNavigate();
   const { profile, isLoading: isProfileLoading, refetch } = useProfile();
   const upsertMutation = useUpsertProfileMutation();
+  const deleteImageMutation = useDeleteProfileImageMutation();
+  const deleteProfileMutation = useDeleteProfileMutation();
   const { addToast } = useToast();
 
   useSEO({
@@ -53,6 +62,9 @@ export function ProfileFormPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+
+  // Danger zone deletion state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Synchronize controlled form inputs once profile data arrives (with null coalescing)
   useEffect(() => {
@@ -132,6 +144,45 @@ export function ProfileFormPage() {
       setImageError(apiErr.message || "Failed to upload profile photo.");
     } finally {
       setIsUploadingImage(false);
+    }
+  }
+
+  async function handleDeleteImage() {
+    if (!window.confirm("Are you sure you want to remove your profile photo?")) {
+      return;
+    }
+
+    setImageError(null);
+
+    try {
+      await deleteImageMutation.mutateAsync();
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      addToast({
+        message: "Profile photo removed successfully.",
+        variant: "success",
+      });
+    } catch (err) {
+      const apiErr = err as ApiError;
+      setImageError(apiErr.message || "Failed to remove profile photo.");
+    }
+  }
+
+  async function handleDeleteProfile() {
+    try {
+      await deleteProfileMutation.mutateAsync();
+      addToast({
+        message: "Profile deleted successfully.",
+        variant: "success",
+      });
+      setIsDeleteModalOpen(false);
+      navigate("/admin");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      addToast({
+        message: apiErr.message || "Failed to delete profile.",
+        variant: "error",
+      });
     }
   }
 
@@ -229,7 +280,8 @@ export function ProfileFormPage() {
           <ProfileFormSkeleton />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <>
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           {/* ── Left Column: Avatar Management ── */}
           <div className="lg:col-span-4">
             <Card>
@@ -287,6 +339,25 @@ export function ProfileFormPage() {
                       onClick={handleImageUpload}
                     >
                       Upload Selected Photo
+                    </Button>
+                  </div>
+                )}
+
+                {/* Remove Existing Photo */}
+                {profile?.image_url && !selectedFile && (
+                  <div className="mt-3 w-full">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      disabled={deleteImageMutation.isPending}
+                      isLoading={deleteImageMutation.isPending}
+                      onClick={handleDeleteImage}
+                      className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      <TrashIcon className="h-4 w-4 text-red-500" />
+                      <span>Remove Photo</span>
                     </Button>
                   </div>
                 )}
@@ -477,7 +548,44 @@ export function ProfileFormPage() {
             </Card>
           </div>
         </div>
-      )}
-    </div>
-  );
+
+        {/* ── Danger Zone: Soft Delete Profile ── */}
+        {profile && (
+          <div className="mt-8 rounded-xl border border-red-200 bg-red-50/40 p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-base font-semibold text-red-900">
+                  Danger Zone: Deactivate Profile
+                </h3>
+                <p className="mt-1 text-sm text-red-700">
+                  Soft-delete your personal developer profile. This sets its status
+                  to inactive and removes it from public views.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                Delete Profile
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Confirm Delete Modal ── */}
+        <ConfirmDeleteModal
+          isOpen={isDeleteModalOpen}
+          title="Delete Developer Profile"
+          description="Are you sure you want to deactivate your developer profile? This action soft-deletes the profile by setting it inactive."
+          confirmKeyword="DELETE"
+          confirmButtonText="Deactivate Profile"
+          isLoading={deleteProfileMutation.isPending}
+          onConfirm={handleDeleteProfile}
+          onClose={() => setIsDeleteModalOpen(false)}
+        />
+      </>
+    )}
+  </div>
+);
 }

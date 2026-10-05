@@ -52,3 +52,10 @@ export async function uploadProjectImage(
     body: formData,
   });
 }
+
+/** Removes the image associated with a specific project. Auth required. */
+export async function deleteProjectImage(id: number): Promise<void> {
+  return apiRequest<void>(`/projects/${id}/image`, {
+    method: "DELETE",
+  });
+}

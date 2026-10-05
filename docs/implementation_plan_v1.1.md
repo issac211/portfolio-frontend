@@ -48,7 +48,8 @@ frontend/
     ├── components/
     │   ├── admin/
     │   │   ├── AdminLayout.tsx
-    │   │   └── AdminSidebar.tsx
+    │   │   ├── AdminSidebar.tsx
+    │   │   └── ConfirmDeleteModal.tsx  # Accessible danger-zone confirmation modal with typed keyword check (Phase 5)
     │   ├── layout/
     │   │   ├── Footer.tsx
     │   │   ├── Navbar.tsx
@@ -96,8 +97,8 @@ frontend/
     │   └── ToastContext.tsx
     ├── hooks/
     │   ├── useAuth.ts
-    │   ├── useProfile.ts           # React Query useQuery + useUpsertProfileMutation (Phase 1)
-    │   ├── useProjects.ts          # React Query useQuery + project CRUD mutations (Phase 1)
+    │   ├── useProfile.ts           # React Query useQuery + upsert & delete image/profile mutations (Phase 5)
+    │   ├── useProjects.ts          # React Query useQuery + project CRUD & delete image mutations (Phase 5)
     │   ├── useScrollToHash.ts
     │   └── useSEO.ts
     ├── pages/
@@ -106,16 +107,16 @@ frontend/
     │   ├── ProjectDetailPage.tsx
     │   └── admin/
     │       ├── DashboardPage.tsx
-    │       ├── ProfileFormPage.tsx
-    │       └── ProjectFormPage.tsx
+    │       ├── ProfileFormPage.tsx     # Full profile CRUD + image deletion + danger zone soft delete (Phase 5)
+    │       └── ProjectFormPage.tsx     # Full project CRUD + image deletion (Phase 5)
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
     ├── services/
     │   ├── apiClient.ts
     │   ├── authService.ts
-    │   ├── profileService.ts
-    │   └── projectService.ts
+    │   ├── profileService.ts       # getProfile, upsertProfile, uploadProfileImage, deleteProfileImage, deleteProfile (Phase 5)
+    │   └── projectService.ts       # project CRUD + uploadProjectImage + deleteProjectImage (Phase 5)
     ├── types/
     │   ├── api.ts
     │   ├── auth.ts
@@ -240,10 +241,11 @@ interface ProjectResponse {
 > **Hardcoded Data Audit:** Before implementation, audit every component in `components/layout/` and `components/shared/` for hardcoded strings (hero titles, social URLs, availability badges, bios). Document each occurrence so nothing is missed during the refactor.
 
 > [!NOTE]
-> **Image Deletion Service Calls:** Add `deleteProfileImage()` and `deleteProjectImage(id)` to the respective service files. Both call `DELETE` endpoints and return `void` (204 responses). The UI must optimistically clear the image preview on success.
-
-> [!NOTE]
-> **Confirmation Modal for Profile Deletion:** Reuse or extend existing UI components. The modal must require explicit text confirmation (e.g., typing "DELETE") to prevent accidental profile destruction.
+> **Image Deletion & Profile Danger-Zone Deletion (✅ Done):**
+> - **Service Calls:** `deleteProfileImage()`, `deleteProfile()`, and `deleteProjectImage(id)` implemented in `profileService.ts` and `projectService.ts` calling `DELETE` endpoints and returning `void` (204 No Content).
+> - **React Query Mutations:** Dedicated mutation hooks (`useDeleteProfileImageMutation`, `useDeleteProfileMutation`, `useDeleteProjectImageMutation`) trigger automatic cache invalidation (`QUERY_KEYS.profile`, `QUERY_KEYS.projects`).
+> - **Lightweight Image Removal UX:** "Remove Photo" / "Remove Image" buttons with `TrashIcon` provide inline browser confirmation and optimistic preview state clearing upon success.
+> - **Accessible Danger-Zone Modal:** `ConfirmDeleteModal.tsx` implements strict safety with typed keyword confirmation (`confirmKeyword="DELETE"`). To prevent React 19 cascading render warnings, the modal dialog uses a mount-based component lifecycle rather than resetting state synchronously inside a `useEffect`.
 
 > [!NOTE]
 > **Domain Vocabulary Refactoring — `tech_stack` → `tags` (✅ Done):**
@@ -287,7 +289,7 @@ frontend/
     │   ├── admin/
     │   │   ├── AdminLayout.tsx
     │   │   ├── AdminSidebar.tsx
-    │   │   └── ConfirmDeleteModal.tsx    [NEW] — reusable confirmation modal for destructive actions
+    │   │   └── ConfirmDeleteModal.tsx    ✅ Done — reusable accessible confirmation modal with typed keyword verification
     │   ├── layout/
     │   │   ├── Footer.tsx               ✅ Done — consumed profile data from global state
     │   │   ├── Navbar.tsx               ✅ Done — consumed profile data from global state
@@ -314,8 +316,8 @@ frontend/
     │   └── ToastContext.tsx
     ├── hooks/
     │   ├── useAuth.ts
-    │   ├── useProfile.ts               ✅ Done — refactored to React Query (useQuery + useUpsertProfileMutation)
-    │   ├── useProjects.ts              ✅ Done — refactored to React Query (useQuery + project CRUD mutations)
+    │   ├── useProfile.ts               ✅ Done — refactored to React Query (useQuery + upsert & delete mutations)
+    │   ├── useProjects.ts              ✅ Done — refactored to React Query (useQuery + project CRUD & delete image mutations)
     │   ├── useScrollToHash.ts
     │   └── useSEO.ts
     ├── pages/
@@ -324,16 +326,16 @@ frontend/
     │   ├── ProjectDetailPage.tsx        ✅ Done — renders `content` (full write-up) with fallback to `summary`; renders `tags`
     │   └── admin/
     │       ├── DashboardPage.tsx         ✅ Done — delete mutation + `tags` column/metric
-    │       ├── ProfileFormPage.tsx       [UPDATE] — new fields form inputs + useUpsertProfileMutation done; image/profile delete in Phase 5
-    │       └── ProjectFormPage.tsx       [UPDATE] — summary + content + tags inputs + React Query mutations done; image delete button in Phase 5
+    │       ├── ProfileFormPage.tsx       ✅ Done — profile inputs, upsert mutation, image remove button & soft-delete danger zone
+    │       └── ProjectFormPage.tsx       ✅ Done — summary + content + tags inputs, CRUD mutations & project image remove button
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
     ├── services/
     │   ├── apiClient.ts
     │   ├── authService.ts
-    │   ├── profileService.ts            [UPDATE] — add deleteProfileImage(), deleteProfile()
-    │   └── projectService.ts            [UPDATE] — add deleteProjectImage()
+    │   ├── profileService.ts            ✅ Done — getProfile, upsertProfile, uploadProfileImage, deleteProfileImage, deleteProfile
+    │   └── projectService.ts            ✅ Done — project CRUD, uploadProjectImage, deleteProjectImage
     ├── types/
     │   ├── api.ts
     │   ├── auth.ts
@@ -401,20 +403,20 @@ frontend/
 
 ### Phase 5: Image Deletion & Profile Deletion UI
 
-- [ ] **Profile Image Deletion:**
-  - [ ] Add `deleteProfileImage()` to `services/profileService.ts` — calls `DELETE /api/profile/image`
-  - [ ] In `pages/admin/ProfileFormPage.tsx`, implement image deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })`, clear preview, and display a success toast
-  - [ ] Add "Remove Image" button (trash icon) to `pages/admin/ProfileFormPage.tsx`
-- [ ] **Project Image Deletion:**
-  - [ ] Add `deleteProjectImage(id: number)` to `services/projectService.ts` — calls `DELETE /api/projects/{id}/image`
-  - [ ] In `pages/admin/ProjectFormPage.tsx`, implement project image deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects })`, clear preview, and display a success toast
-  - [ ] Add "Remove Image" button (trash icon) to `pages/admin/ProjectFormPage.tsx`
-- [ ] **Profile Soft Delete:**
-  - [ ] Add `deleteProfile()` to `services/profileService.ts` — calls `DELETE /api/profile/`
-  - [ ] Create `components/admin/ConfirmDeleteModal.tsx` — reusable danger-zone confirmation modal
-  - [ ] Add danger-zone section to `pages/admin/ProfileFormPage.tsx` with delete button that triggers the confirmation modal
-  - [ ] Implement profile deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })`, redirect to dashboard, and display a success toast
-- [ ] Type-check: `npx tsc -b --noEmit`
+- [x] **Profile Image Deletion:**
+  - [x] Add `deleteProfileImage()` to `services/profileService.ts` — calls `DELETE /api/profile/image`
+  - [x] In `pages/admin/ProfileFormPage.tsx`, implement image deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })`, clear preview, and display a success toast
+  - [x] Add "Remove Image" button (trash icon) to `pages/admin/ProfileFormPage.tsx`
+- [x] **Project Image Deletion:**
+  - [x] Add `deleteProjectImage(id: number)` to `services/projectService.ts` — calls `DELETE /api/projects/{id}/image`
+  - [x] In `pages/admin/ProjectFormPage.tsx`, implement project image deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects })`, clear preview, and display a success toast
+  - [x] Add "Remove Image" button (trash icon) to `pages/admin/ProjectFormPage.tsx`
+- [x] **Profile Soft Delete:**
+  - [x] Add `deleteProfile()` to `services/profileService.ts` — calls `DELETE /api/profile/`
+  - [x] Create `components/admin/ConfirmDeleteModal.tsx` — reusable danger-zone confirmation modal
+  - [x] Add danger-zone section to `pages/admin/ProfileFormPage.tsx` with delete button that triggers the confirmation modal
+  - [x] Implement profile deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })`, redirect to dashboard, and display a success toast
+- [x] Type-check: `npx tsc -b --noEmit`
 
 ### Phase 6: Final Verification & Cleanup
 

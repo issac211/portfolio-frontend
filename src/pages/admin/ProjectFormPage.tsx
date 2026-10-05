@@ -8,13 +8,14 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card, CardBody, CardHeader } from "../../components/ui/Card";
-import { ImageIcon } from "../../components/ui/icons";
+import { ImageIcon, TrashIcon } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
 import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { useToast } from "../../context/ToastContext";
 import {
   useCreateProjectMutation,
+  useDeleteProjectImageMutation,
   useUpdateProjectMutation,
 } from "../../hooks/useProjects";
 import { useSEO } from "../../hooks/useSEO";
@@ -38,6 +39,7 @@ export function ProjectFormPage() {
   const { addToast } = useToast();
   const createMutation = useCreateProjectMutation();
   const updateMutation = useUpdateProjectMutation();
+  const deleteImageMutation = useDeleteProjectImageMutation();
 
   const isEditMode = Boolean(id);
   const projectId = id ? Number(id) : null;
@@ -171,6 +173,31 @@ export function ProjectFormPage() {
 
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
+  }
+
+  async function handleDeleteImage() {
+    if (!isEditMode || !projectId) return;
+
+    if (!window.confirm("Are you sure you want to remove this project image?")) {
+      return;
+    }
+
+    try {
+      await deleteImageMutation.mutateAsync(projectId);
+      setExistingImageUrl(null);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      addToast({
+        message: "Project image removed successfully.",
+        variant: "success",
+      });
+    } catch (err) {
+      const apiErr = err as ApiError;
+      addToast({
+        message: apiErr.message || "Failed to remove project image.",
+        variant: "error",
+      });
+    }
   }
 
   async function handleSubmit(e: SubmitEvent) {
@@ -351,6 +378,25 @@ export function ProjectFormPage() {
                     <p className="mt-2 truncate text-center text-xs text-gray-500">
                       Selected: {selectedFile.name}
                     </p>
+                  )}
+
+                  {/* Remove Existing Project Image */}
+                  {isEditMode && existingImageUrl && !selectedFile && (
+                    <div className="mt-3 w-full">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        fullWidth
+                        disabled={deleteImageMutation.isPending}
+                        isLoading={deleteImageMutation.isPending}
+                        onClick={handleDeleteImage}
+                        className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <TrashIcon className="h-4 w-4 text-red-500" />
+                        <span>Remove Image</span>
+                      </Button>
+                    </div>
                   )}
                 </CardBody>
               </Card>
