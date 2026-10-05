@@ -1,3 +1,11 @@
+/** Allowed status indicator values matching backend Literal enum. */
+export type StatusIndicator =
+  | "success"
+  | "warning"
+  | "error"
+  | "neutral"
+  | null;
+
 /** Profile data returned by `GET /profile/`. `image_url` is a relative path — prepend `IMAGE_BASE_URL` to render. */
 export interface PersonalInfoResponse {
   id: number;
@@ -5,7 +13,15 @@ export interface PersonalInfoResponse {
   last_name: string;
   birth_date: string | null;
   bio: string | null;
+  hero_title: string | null;
+  availability_status: string | null;
+  short_bio: string | null;
+  github_url: string | null;
+  linkedin_url: string | null;
+  email: string | null;
+  status_indicator: StatusIndicator;
   image_url: string | null;
+  is_active: boolean;
 }
 
 /** Payload for creating a profile (`PUT /profile/`). */
@@ -14,6 +30,13 @@ export interface PersonalInfoCreate {
   last_name: string;
   birth_date?: string | null;
   bio?: string | null;
+  hero_title?: string | null;
+  availability_status?: string | null;
+  short_bio?: string | null;
+  github_url?: string | null;
+  linkedin_url?: string | null;
+  email?: string | null;
+  status_indicator?: StatusIndicator;
 }
 
 /** Partial update payload for the profile (`PUT /profile/`). All fields optional. */
@@ -22,4 +45,12 @@ export interface PersonalInfoUpdate {
   last_name?: string | null;
   birth_date?: string | null;
   bio?: string | null;
+  hero_title?: string | null;
+  availability_status?: string | null;
+  short_bio?: string | null;
+  github_url?: string | null;
+  linkedin_url?: string | null;
+  email?: string | null;
+  status_indicator?: StatusIndicator;
 }
+

@@ -125,18 +125,29 @@ frontend/
         └── scroll.ts
 ```
 
-### Current `PersonalInfoResponse` Type (v1.0)
+### Current `PersonalInfoResponse` Type (v1.1)
 
 ```typescript
+export type StatusIndicator = "success" | "warning" | "error" | "neutral" | null;
+
 interface PersonalInfoResponse {
   id: number;
   first_name: string;
   last_name: string;
   birth_date: string | null;
   bio: string | null;
+  hero_title: string | null;
+  availability_status: string | null;
+  short_bio: string | null;
+  github_url: string | null;
+  linkedin_url: string | null;
+  email: string | null;
+  status_indicator: StatusIndicator;
   image_url: string | null;
+  is_active: boolean;
 }
 ```
+
 
 ### Current `ProjectResponse` Type (v1.0)
 
@@ -186,19 +197,22 @@ interface ProjectResponse {
 
 > [!IMPORTANT]
 > **Type Changes — `PersonalInfoResponse`:**
-> New fields:
+> Schema synchronized with backend `api-contract.json`:
 >
 > ```typescript
 > hero_title: string | null;
 > availability_status: string | null;
-> short_bio: string | null;
-> long_bio: string | null;
+> short_bio: string | null; // Tagline for Hero & Footer
+> bio: string | null; // Canonical full professional bio
 > github_url: string | null;
 > linkedin_url: string | null;
 > email: string | null;
+> status_indicator: StatusIndicator;
+> is_active: boolean;
 > ```
 >
-> Components that currently hardcode these values (`Navbar`, `Footer`, `ProfileHero`) must be refactored to consume them from the global profile state.
+> Components that previously hardcoded these values (`Navbar`, `Footer`, `ProfileHero`) have been refactored to consume them dynamically from the global profile state.
+
 
 > [!IMPORTANT]
 > **`status_indicator` → Tailwind Dot Mapping (ProfileHero):**
@@ -272,11 +286,11 @@ frontend/
     │   │   ├── AdminSidebar.tsx
     │   │   └── ConfirmDeleteModal.tsx    [NEW] — reusable confirmation modal for destructive actions
     │   ├── layout/
-    │   │   ├── Footer.tsx               [UPDATE] — consume profile data from global state
-    │   │   ├── Navbar.tsx               [UPDATE] — consume profile data from global state
+    │   │   ├── Footer.tsx               ✅ Done — consumed profile data from global state
+    │   │   ├── Navbar.tsx               ✅ Done — consumed profile data from global state
     │   │   └── PublicLayout.tsx
     │   ├── shared/
-    │   │   ├── ProfileHero.tsx          [UPDATE] — consume hero_title, availability_status, short_bio + status_indicator dot mapping
+    │   │   ├── ProfileHero.tsx          ✅ Done — consumed hero_title, availability_status, short_bio + status_indicator dot mapping
     │   │   └── ProjectCard.tsx          [UPDATE] — use `summary` instead of `description`
     │   └── ui/
     │       ├── Badge.tsx
@@ -307,7 +321,7 @@ frontend/
     │   ├── ProjectDetailPage.tsx        [UPDATE] — render `content` instead of `description`
     │   └── admin/
     │       ├── DashboardPage.tsx
-    │       ├── ProfileFormPage.tsx       [UPDATE] — new fields + image delete button + profile delete
+    │       ├── ProfileFormPage.tsx       [UPDATE] — new fields form inputs + useUpsertProfileMutation done; image/profile delete in Phase 5
     │       └── ProjectFormPage.tsx       [UPDATE] — summary + content textareas + image delete button
     ├── router/
     │   ├── AppRouter.tsx
@@ -320,7 +334,7 @@ frontend/
     ├── types/
     │   ├── api.ts
     │   ├── auth.ts
-    │   ├── profile.ts                   [UPDATE] — new fields in all interfaces + status_indicator type
+    │   ├── profile.ts                   ✅ Done — new fields in all interfaces + status_indicator type
     │   └── project.ts                   [UPDATE] — summary + content, remove description; tech_stack → tags
     └── utils/
         └── scroll.ts
@@ -344,19 +358,19 @@ frontend/
 ### Phase 2: PersonalInfo Type Expansion & Hardcoding Elimination
 
 - [x] **Pre-check:** Verify `api-contract.json` has been updated by the backend (Phase 2 contract sync) before proceeding
-- [ ] Update `types/profile.ts` — add new fields to `PersonalInfoResponse`: `hero_title`, `availability_status`, `short_bio`, `long_bio`, `github_url`, `linkedin_url`, `email`, `status_indicator`
-- [ ] Update `types/profile.ts` — add `status_indicator` type as `"success" | "warning" | "error" | "neutral" | null` (match backend `Literal` values)
-- [ ] Update `types/profile.ts` — add new fields to `PersonalInfoCreate` and `PersonalInfoUpdate`
-- [ ] Audit `components/layout/Navbar.tsx` for hardcoded data → refactor to consume global profile state
-- [ ] Audit `components/layout/Footer.tsx` for hardcoded data → refactor to consume global profile state (social links, email, short_bio)
-- [ ] Audit `components/shared/ProfileHero.tsx` for hardcoded data → refactor to consume `hero_title`, `availability_status`, `short_bio`
-- [ ] Implement `status_indicator` → Tailwind dot mapping in `ProfileHero.tsx` — use a `Record<string, string>` lookup object (e.g., `success` → `"bg-green-500 animate-pulse"`, `error` → `"bg-red-500"`); fallback to `neutral` for `null`/unknown
-- [ ] Update `pages/admin/ProfileFormPage.tsx` — add form inputs for all new fields
-- [ ] In `ProfileFormPage.tsx`, ensure state initialization coalesces all nullable fields from `null` to empty strings (e.g., `hero_title: data.hero_title ?? ""`, `availability_status: data.availability_status ?? ""`, etc.) to prevent React "uncontrolled to controlled" component warnings
-- [ ] Add a `<select>` dropdown for `status_indicator` in `ProfileFormPage.tsx` — options: `success`, `warning`, `error`, `neutral` (do NOT use a free-text input)
-- [ ] In `ProfileFormPage.tsx` / `hooks/useProfile.ts`, wrap profile update in `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })` and display a success toast
-- [ ] Update `services/profileService.ts` — ensure create/update payloads include new fields
-- [ ] Type-check: `npx tsc -b --noEmit`
+- [x] Update `types/profile.ts` — add new fields to `PersonalInfoResponse`: `hero_title`, `availability_status`, `short_bio`, `github_url`, `linkedin_url`, `email`, `status_indicator`, `is_active` (Note: canonical full bio remains `bio`)
+- [x] Update `types/profile.ts` — add `status_indicator` type as `"success" | "warning" | "error" | "neutral" | null` (match backend `Literal` values)
+- [x] Update `types/profile.ts` — add new fields to `PersonalInfoCreate` and `PersonalInfoUpdate`
+- [x] Audit `components/layout/Navbar.tsx` for hardcoded data → refactor to consume global profile state
+- [x] Audit `components/layout/Footer.tsx` for hardcoded data → refactor to consume global profile state (social links, email, short_bio)
+- [x] Audit `components/shared/ProfileHero.tsx` for hardcoded data → refactor to consume `hero_title`, `availability_status`, `short_bio`
+- [x] Implement `status_indicator` → Tailwind dot mapping in `ProfileHero.tsx` — use a `Record<string, string>` lookup object (e.g., `success` → `"bg-green-500 animate-pulse"`, `error` → `"bg-red-500"`); fallback to `neutral` for `null`/unknown
+- [x] Update `pages/admin/ProfileFormPage.tsx` — add form inputs for all new fields
+- [x] In `ProfileFormPage.tsx`, ensure state initialization coalesces all nullable fields from `null` to empty strings (e.g., `hero_title: data.hero_title ?? ""`, `availability_status: data.availability_status ?? ""`, etc.) to prevent React "uncontrolled to controlled" component warnings
+- [x] Add a `<select>` dropdown for `status_indicator` in `ProfileFormPage.tsx` — options: `success`, `warning`, `error`, `neutral` (do NOT use a free-text input)
+- [x] In `ProfileFormPage.tsx` / `hooks/useProfile.ts`, wrap profile update in `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })` and display a success toast
+- [x] Update `services/profileService.ts` — ensure create/update payloads include new fields (verified typed interfaces)
+- [x] Type-check: `npx tsc -b --noEmit`
 
 ### Phase 3: Project Description Split (Summary vs. Content)
 

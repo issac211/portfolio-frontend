@@ -7,23 +7,22 @@ import { Input } from "../../components/ui/Input";
 import { ProfileFormSkeleton } from "../../components/ui/Skeleton";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { useToast } from "../../context/ToastContext";
-import { useProfile } from "../../hooks/useProfile";
+import { useProfile, useUpsertProfileMutation } from "../../hooks/useProfile";
 import { useSEO } from "../../hooks/useSEO";
-import {
-  uploadProfileImage,
-  upsertProfile,
-} from "../../services/profileService";
+import { uploadProfileImage } from "../../services/profileService";
 import type { ApiError } from "../../types/api";
+import type { StatusIndicator } from "../../types/profile";
 
 /**
  * Administrative profile management page.
  *
  * Provides a dual-panel workflow allowing administrators to update core
- * personal details (name, birth date, bio) via upsert API semantics,
- * and upload high-resolution profile imagery via multipart FormData.
+ * personal details, hero headlines, availability status, social links, and bio
+ * via upsert API semantics, and upload high-resolution profile imagery via multipart FormData.
  */
 export function ProfileFormPage() {
   const { profile, isLoading: isProfileLoading, refetch } = useProfile();
+  const upsertMutation = useUpsertProfileMutation();
   const { addToast } = useToast();
 
   useSEO({
@@ -37,9 +36,15 @@ export function ProfileFormPage() {
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [bio, setBio] = useState("");
+  const [heroTitle, setHeroTitle] = useState("");
+  const [availabilityStatus, setAvailabilityStatus] = useState("");
+  const [statusIndicator, setStatusIndicator] = useState<StatusIndicator>("neutral");
+  const [shortBio, setShortBio] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [email, setEmail] = useState("");
 
   // Submission & feedback state
-  const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -49,15 +54,22 @@ export function ProfileFormPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
 
-  // Synchronize controlled form inputs once profile data arrives
+  // Synchronize controlled form inputs once profile data arrives (with null coalescing)
   useEffect(() => {
     if (profile) {
       // Architectural decision: Accept cascading render for initial client-side fetching
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFirstName(profile.first_name || "");
-      setLastName(profile.last_name || "");
+      setFirstName(profile.first_name ?? "");
+      setLastName(profile.last_name ?? "");
       setBirthDate(profile.birth_date ? profile.birth_date.split("T")[0] : "");
-      setBio(profile.bio || "");
+      setBio(profile.bio ?? "");
+      setHeroTitle(profile.hero_title ?? "");
+      setAvailabilityStatus(profile.availability_status ?? "");
+      setStatusIndicator(profile.status_indicator ?? "neutral");
+      setShortBio(profile.short_bio ?? "");
+      setGithubUrl(profile.github_url ?? "");
+      setLinkedinUrl(profile.linkedin_url ?? "");
+      setEmail(profile.email ?? "");
     }
   }, [profile]);
 
@@ -143,21 +155,25 @@ export function ProfileFormPage() {
       return;
     }
 
-    setIsSaving(true);
-
     try {
-      await upsertProfile({
+      await upsertMutation.mutateAsync({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         birth_date: birthDate || null,
         bio: bio.trim() || null,
+        hero_title: heroTitle.trim() || null,
+        availability_status: availabilityStatus.trim() || null,
+        status_indicator: statusIndicator,
+        short_bio: shortBio.trim() || null,
+        github_url: githubUrl.trim() || null,
+        linkedin_url: linkedinUrl.trim() || null,
+        email: email.trim() || null,
       });
 
       addToast({
         message: "Profile details saved successfully!",
         variant: "success",
       });
-      await refetch();
     } catch (err) {
       const apiErr = err as ApiError;
 
@@ -178,8 +194,6 @@ export function ProfileFormPage() {
           variant: "error",
         });
       }
-    } finally {
-      setIsSaving(false);
     }
   }
 
@@ -323,25 +337,124 @@ export function ProfileFormPage() {
                     />
                   </div>
 
+                  {/* Hero Title */}
+                  <Input
+                    label="Hero Headline Title"
+                    value={heroTitle}
+                    onChange={(e) => setHeroTitle(e.target.value)}
+                    error={fieldErrors.hero_title}
+                    placeholder="e.g., Building scalable, modern web applications"
+                    helperText="Headline displayed prominently in the public Hero section."
+                  />
+
+                  {/* Availability Status & Status Indicator (2 Columns) */}
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Input
+                      label="Availability Status"
+                      value={availabilityStatus}
+                      onChange={(e) => setAvailabilityStatus(e.target.value)}
+                      error={fieldErrors.availability_status}
+                      placeholder="e.g., Available for new projects"
+                      helperText="Text badge displayed in Hero and Footer."
+                    />
+
+                    <div className="flex flex-col">
+                      <label
+                        htmlFor="status_indicator"
+                        className="mb-1.5 text-sm font-medium text-gray-700"
+                      >
+                        Status Indicator
+                      </label>
+                      <select
+                        id="status_indicator"
+                        value={statusIndicator ?? "neutral"}
+                        onChange={(e) =>
+                          setStatusIndicator(
+                            (e.target.value as StatusIndicator) || null
+                          )
+                        }
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                      >
+                        <option value="success">Success (Green / Active)</option>
+                        <option value="warning">Warning (Amber / Busy)</option>
+                        <option value="error">Error (Red / Unavailable)</option>
+                        <option value="neutral">Neutral (Gray)</option>
+                      </select>
+                      <p className="mt-1.5 text-xs text-gray-500">
+                        Color dot displayed next to your availability badge.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Short Bio / Tagline */}
+                  <Input
+                    as="textarea"
+                    label="Short Bio / Tagline"
+                    rows={2}
+                    value={shortBio}
+                    onChange={(e) => setShortBio(e.target.value)}
+                    error={fieldErrors.short_bio}
+                    placeholder="Brief tagline for the Hero and Footer..."
+                    helperText="A concise 1-2 sentence introduction."
+                  />
+
+                  {/* Professional Biography */}
+                  <Input
+                    as="textarea"
+                    label="Full Professional Bio"
+                    rows={5}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    error={fieldErrors.bio}
+                    placeholder="Describe your engineering focus, experience, and core technologies..."
+                    helperText="Markdown or paragraph text describing your detailed background."
+                  />
+
                   {/* Birth Date */}
                   <Input
                     type="date"
                     label="Birth Date"
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
+                    error={fieldErrors.birth_date}
                     helperText="Optional. Used to calculate years of experience or age if desired."
                   />
 
-                  {/* Professional Biography */}
-                  <Input
-                    as="textarea"
-                    label="Professional Bio"
-                    rows={5}
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Describe your engineering focus, experience, and core technologies..."
-                    helperText="Markdown or clean paragraph text describing your background."
-                  />
+                  {/* Contact & Social Links Section */}
+                  <div className="border-t border-gray-100 pt-6">
+                    <h3 className="mb-4 text-sm font-semibold text-gray-900">
+                      Contact &amp; Social Links
+                    </h3>
+                    <div className="space-y-4">
+                      <Input
+                        type="email"
+                        label="Public Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        error={fieldErrors.email}
+                        placeholder="e.g., contact@example.com"
+                        helperText="Public contact email used for inquiries in the footer."
+                      />
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <Input
+                          type="url"
+                          label="GitHub URL"
+                          value={githubUrl}
+                          onChange={(e) => setGithubUrl(e.target.value)}
+                          error={fieldErrors.github_url}
+                          placeholder="https://github.com/your-username"
+                        />
+                        <Input
+                          type="url"
+                          label="LinkedIn URL"
+                          value={linkedinUrl}
+                          onChange={(e) => setLinkedinUrl(e.target.value)}
+                          error={fieldErrors.linkedin_url}
+                          placeholder="https://linkedin.com/in/your-username"
+                        />
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Submit Action */}
                   <div className="flex items-center justify-end gap-3 pt-2">
@@ -354,7 +467,7 @@ export function ProfileFormPage() {
                     <Button
                       type="submit"
                       variant="primary"
-                      isLoading={isSaving}
+                      isLoading={upsertMutation.isPending}
                     >
                       Save Profile Changes
                     </Button>

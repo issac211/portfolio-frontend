@@ -1,11 +1,41 @@
 import { IMAGE_BASE_URL } from "../../config/constants";
-import { ArrowDownIcon, UserIcon } from "../ui/icons";
-import { handleSmoothScroll } from "../../utils/scroll";
 import type { PersonalInfoResponse } from "../../types/profile";
+import { handleSmoothScroll } from "../../utils/scroll";
+import { ArrowDownIcon, UserIcon } from "../ui/icons";
 
 interface ProfileHeroProps {
   profile: PersonalInfoResponse | null;
 }
+
+/** Status pill style mapping keyed by status indicator. */
+interface StatusStyle {
+  badge: string;
+  dot: string;
+  hasPing: boolean;
+}
+
+const STATUS_STYLES: Record<string, StatusStyle> = {
+  success: {
+    badge: "border-emerald-500/20 bg-emerald-50/70 text-emerald-700",
+    dot: "bg-emerald-500",
+    hasPing: true,
+  },
+  warning: {
+    badge: "border-amber-500/20 bg-amber-50/70 text-amber-700",
+    dot: "bg-amber-500",
+    hasPing: true,
+  },
+  error: {
+    badge: "border-red-500/20 bg-red-50/70 text-red-700",
+    dot: "bg-red-500",
+    hasPing: false,
+  },
+  neutral: {
+    badge: "border-gray-500/20 bg-gray-50/70 text-gray-700",
+    dot: "bg-gray-400",
+    hasPing: false,
+  },
+};
 
 /**
  * Top-of-page Hero section displaying developer introduction and portrait.
@@ -20,7 +50,18 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
     ? `${profile.first_name} ${profile.last_name}`.trim()
     : "";
 
-  const bio = profile?.bio?.trim() || "";
+  const shortBio = profile?.short_bio?.trim() || "";
+  const fullBio = profile?.bio?.trim() || "";
+  const leadBio = shortBio || fullBio;
+  const extendedBio =
+    shortBio && fullBio && shortBio !== fullBio ? fullBio : null;
+
+  const availabilityText =
+    profile?.availability_status || "Available for new opportunities";
+
+  const statusConfig =
+    STATUS_STYLES[profile?.status_indicator ?? "neutral"] ??
+    STATUS_STYLES.neutral;
 
   // Prepend IMAGE_BASE_URL to relative backend image path
   const avatarUrl = profile?.image_url
@@ -42,20 +83,34 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
           {/* Left Column: Text & CTAs */}
           <div className="flex flex-col items-center text-center lg:col-span-7 lg:items-start lg:text-left animate-fade-in-up">
             {/* Status Pill */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-50/70 px-3.5 py-1 text-xs font-medium text-emerald-700">
+            <div
+              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-medium ${statusConfig.badge}`}
+            >
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                {statusConfig.hasPing && (
+                  <span
+                    className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusConfig.dot} opacity-75`}
+                  />
+                )}
+                <span
+                  className={`relative inline-flex h-2 w-2 rounded-full ${statusConfig.dot}`}
+                />
               </span>
-              Available for new projects
+              {availabilityText}
             </div>
 
             {/* Primary SEO Heading (Single H1 rule) */}
             <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-              Building scalable, modern{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                web applications
-              </span>
+              {profile?.hero_title ? (
+                profile.hero_title
+              ) : (
+                <>
+                  Building scalable, modern{" "}
+                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    web applications
+                  </span>
+                </>
+              )}
             </h1>
 
             {/* Render developer name only when present in database */}
@@ -66,10 +121,17 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
               </p>
             )}
 
-            {/* Render bio only when present in database */}
-            {bio && (
+            {/* Render primary bio / tagline */}
+            {leadBio && (
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
-                {bio}
+                {leadBio}
+              </p>
+            )}
+
+            {/* Render extended bio if both short and full bios exist */}
+            {extendedBio && (
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-500 sm:text-base">
+                {extendedBio}
               </p>
             )}
 

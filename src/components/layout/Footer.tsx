@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { GithubIcon, LinkedInIcon, MailIcon } from "../ui/icons";
+import { useProfile } from "../../hooks/useProfile";
 import { handleSmoothScroll } from "../../utils/scroll";
+import { GithubIcon, LinkedInIcon, MailIcon } from "../ui/icons";
 
 /** Social and contact link definition. */
 interface SocialLink {
@@ -21,23 +22,24 @@ const QUICK_LINKS: NavLinkItem[] = [
   { label: "Contact", href: "/#contact" },
 ];
 
-const SOCIAL_LINKS: SocialLink[] = [
-  {
-    label: "GitHub",
-    href: "https://github.com",
-    icon: GithubIcon,
+/** Status dot color mapping for the footer availability badge. */
+const STATUS_DOT_COLORS: Record<
+  string,
+  { dot: string; ping?: string; text: string }
+> = {
+  success: {
+    dot: "bg-emerald-500",
+    ping: "bg-emerald-400",
+    text: "text-emerald-600",
   },
-  {
-    label: "LinkedIn",
-    href: "https://linkedin.com",
-    icon: LinkedInIcon,
+  warning: {
+    dot: "bg-amber-500",
+    ping: "bg-amber-400",
+    text: "text-amber-600",
   },
-  {
-    label: "Email",
-    href: "mailto:contact@example.com",
-    icon: MailIcon,
-  },
-];
+  error: { dot: "bg-red-500", text: "text-red-600" },
+  neutral: { dot: "bg-gray-400", text: "text-gray-600" },
+};
 
 /**
  * Public website footer containing social links, quick navigation,
@@ -45,6 +47,41 @@ const SOCIAL_LINKS: SocialLink[] = [
  */
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { profile } = useProfile();
+
+  const brandName = profile?.first_name || "Portfolio";
+  const fullName = profile
+    ? `${profile.first_name} ${profile.last_name}`.trim()
+    : "";
+
+  const shortBio = profile?.short_bio || "";
+
+  const availabilityText =
+    profile?.availability_status || "Available for new opportunities";
+
+  const statusConfig =
+    STATUS_DOT_COLORS[profile?.status_indicator ?? "neutral"] ??
+    STATUS_DOT_COLORS.neutral;
+
+  const socialLinks: SocialLink[] = [
+    {
+      label: "GitHub",
+      href: profile?.github_url || "https://github.com",
+      icon: GithubIcon,
+    },
+    {
+      label: "LinkedIn",
+      href: profile?.linkedin_url || "https://linkedin.com",
+      icon: LinkedInIcon,
+    },
+    {
+      label: "Email",
+      href: profile?.email
+        ? `mailto:${profile.email}`
+        : "mailto:contact@example.com",
+      icon: MailIcon,
+    },
+  ];
 
   return (
     // id="contact" serves as the anchor target for the Navbar "Contact" link
@@ -60,18 +97,26 @@ export function Footer() {
               to="/"
               className="text-xl font-bold tracking-tight text-gray-900 transition-colors hover:text-blue-600"
             >
-              Itzik<span className="text-blue-600">.</span>
+              {brandName}
+              <span className="text-blue-600">.</span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-gray-500">
-              Full Stack Developer building clean, responsive, and robust web
-              applications.
+              {shortBio}
             </p>
-            <div className="flex items-center gap-2 text-xs font-medium text-emerald-600">
+            <div
+              className={`flex items-center gap-2 text-xs font-medium ${statusConfig.text}`}
+            >
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                {statusConfig.ping && (
+                  <span
+                    className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusConfig.ping} opacity-75`}
+                  />
+                )}
+                <span
+                  className={`relative inline-flex h-2 w-2 rounded-full ${statusConfig.dot}`}
+                />
               </span>
-              Available for new opportunities
+              {availabilityText}
             </div>
           </div>
 
@@ -104,7 +149,7 @@ export function Footer() {
               Feel free to reach out for collaborations or project inquiries.
             </p>
             <div className="flex items-center gap-4 pt-1">
-              {SOCIAL_LINKS.map((social) => {
+              {socialLinks.map((social) => {
                 const Icon = social.icon;
                 return (
                   <a
@@ -127,7 +172,7 @@ export function Footer() {
         {/* Bottom copyright divider */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-gray-200 pt-8 sm:flex-row">
           <p className="text-xs text-gray-500">
-            &copy; {currentYear} Itzik Hen. All rights reserved.
+            &copy; {currentYear} {fullName}. All rights reserved.
           </p>
           <p className="text-xs text-gray-400">
             Built with React, TypeScript &amp; Tailwind CSS

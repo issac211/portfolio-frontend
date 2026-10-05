@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useProfile } from "../../hooks/useProfile";
 import { Button } from "../ui/Button";
 import { MenuIcon, XIcon } from "../ui/icons";
 import { handleSmoothScroll } from "../../utils/scroll";
@@ -23,7 +24,10 @@ const NAV_LINKS: NavLinkItem[] = [
  */
 export function Navbar() {
   const { isAuthenticated, handleLogout } = useAuth();
+  const { profile } = useProfile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const brandName = profile?.first_name || "Portfolio";
 
   function closeMenu() {
     setIsMenuOpen(false);
@@ -38,7 +42,7 @@ export function Navbar() {
           onClick={closeMenu}
           className="text-xl font-bold tracking-tight text-gray-900 transition-colors hover:text-blue-600"
         >
-          Itzik<span className="text-blue-600">.</span>
+          {brandName}<span className="text-blue-600">.</span>
         </Link>
 
         {/* Desktop Navigation Links */}
