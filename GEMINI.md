@@ -43,7 +43,7 @@ The user is an experienced engineer mastering modern React, TypeScript, and Web 
 ## 5. Architectural Non-Negotiables
 
 - **Strict Structure:** Code must strictly reside in `components/`, `hooks/`, `services/`, `pages/`, `types/`, or `context/`.
-- **Native Fetch Only:** Do NOT use `axios` or `react-query`. Use native `fetch` via `services/apiClient.ts`.
+- **Native Fetch + React Query Caching:** Do NOT use `axios`. All HTTP network requests MUST strictly go through native `fetch` via `services/apiClient.ts`. React Query (`@tanstack/react-query`) is permitted and required as the server-state caching and mutation layer wrapping `apiClient.ts` calls (`useQuery`, `useMutation`).
 - **The FormData Rule:** When sending `FormData` (e.g., uploads), `apiClient` MUST NOT manually set `Content-Type: application/json`.
 - **Keep It Simple (KISS):** No Redux/Zustand. Use React Context strictly for global state (like Auth).
 

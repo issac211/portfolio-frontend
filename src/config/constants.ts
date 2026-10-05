@@ -24,3 +24,12 @@ export const IMAGE_BASE_URL = getRequiredEnvVar("VITE_IMAGE_BASE_URL");
 
 /** localStorage key for the JWT token */
 export const TOKEN_KEY = "portfolio_auth_token";
+
+/**
+ * Centralized React Query cache keys.
+ * All queries and mutations must consume this object to prevent typo drift.
+ */
+export const QUERY_KEYS = {
+  profile: ["profile"] as const,
+  projects: ["projects"] as const,
+} as const;

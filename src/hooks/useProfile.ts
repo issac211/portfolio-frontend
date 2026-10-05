@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { useToast } from "../context/ToastContext";
-import { getProfile } from "../services/profileService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEYS } from "../config/constants";
+import { getProfile, upsertProfile } from "../services/profileService";
 import type { ApiError } from "../types/api";
-import type { PersonalInfoResponse } from "../types/profile";
+import type {
+  PersonalInfoCreate,
+  PersonalInfoResponse,
+  PersonalInfoUpdate,
+} from "../types/profile";
 
 /** Values exposed by the `useProfile` hook. */
-interface UseProfileReturn {
+export interface UseProfileReturn {
   profile: PersonalInfoResponse | null;
   isLoading: boolean;
   error: string | null;
@@ -13,44 +17,49 @@ interface UseProfileReturn {
 }
 
 /**
- * Custom hook to fetch and manage public developer profile data.
+ * Custom hook to fetch and manage public developer profile data via React Query.
  *
- * Automatically fetches profile information upon component mounting,
- * tracks loading and error states, and provides a stable `refetch`
- * callback for on-demand synchronization after mutations.
+ * Automatically deduplicates requests, caches the profile across all consumers
+ * (Navbar, Footer, Hero, Dashboard), and provides automatic background revalidation.
  */
 export function useProfile(): UseProfileReturn {
-  const { addToast } = useToast();
-  const [profile, setProfile] = useState<PersonalInfoResponse | null>(null);
-  // Initialized to true to avoid flash of empty content prior to initial fetch
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error, refetch } = useQuery<
+    PersonalInfoResponse | null,
+    ApiError
+  >({
+    queryKey: QUERY_KEYS.profile,
+    queryFn: getProfile,
+  });
 
-  const fetchProfile =
-    useCallback(async (): Promise<PersonalInfoResponse | null> => {
-      setIsLoading(true);
-      setError(null);
+  const handleRefetch = async (): Promise<PersonalInfoResponse | null> => {
+    const result = await refetch();
+    return result.data ?? null;
+  };
 
-      try {
-        const data = await getProfile();
-        setProfile(data);
-        return data;
-      } catch (err) {
-        const apiError = err as ApiError;
-        const message = apiError.message || "Failed to load profile";
-        setError(message);
-        addToast({ message, variant: "error" });
-        return null;
-      } finally {
-        setIsLoading(false);
-      }
-    }, [addToast]);
+  const errorMessage = error ? error.message || "Failed to load profile" : null;
 
-  useEffect(() => {
-    // Architectural decision: Accept cascading render for initial client-side fetching
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchProfile();
-  }, [fetchProfile]);
+  return {
+    profile: data ?? null,
+    isLoading,
+    error: errorMessage,
+    refetch: handleRefetch,
+  };
+}
 
-  return { profile, isLoading, error, refetch: fetchProfile };
+/**
+ * Mutation hook for creating/updating the profile, invalidating QUERY_KEYS.profile on success.
+ */
+export function useUpsertProfileMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    PersonalInfoResponse,
+    ApiError,
+    PersonalInfoCreate | PersonalInfoUpdate
+  >({
+    mutationFn: (data: PersonalInfoCreate | PersonalInfoUpdate) =>
+      upsertProfile(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile });
+    },
+  });
 }

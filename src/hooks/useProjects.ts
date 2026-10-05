@@ -1,11 +1,20 @@
-import { useCallback, useEffect, useState } from "react";
-import { useToast } from "../context/ToastContext";
-import { getAllProjects } from "../services/projectService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEYS } from "../config/constants";
+import {
+  createProject,
+  deleteProject,
+  getAllProjects,
+  updateProject,
+} from "../services/projectService";
 import type { ApiError } from "../types/api";
-import type { ProjectResponse } from "../types/project";
+import type {
+  ProjectCreate,
+  ProjectResponse,
+  ProjectUpdate,
+} from "../types/project";
 
 /** Return value contract for the `useProjects` hook. */
-interface UseProjectsReturn {
+export interface UseProjectsReturn {
   projects: ProjectResponse[];
   isLoading: boolean;
   error: string | null;
@@ -13,42 +22,74 @@ interface UseProjectsReturn {
 }
 
 /**
- * Custom hook for fetching and managing public portfolio projects.
+ * Custom hook for fetching and managing public portfolio projects via React Query.
  *
- * Automatically fetches all projects upon component mounting (ordered by the server),
- * tracks loading and error states, and exposes a stable `refetch` callback for data synchronization.
+ * Automatically caches the projects collection, eliminates redundant network calls across
+ * pages, and exposes a refetch callback backed by the centralized query client.
  */
 export function useProjects(): UseProjectsReturn {
-  const { addToast } = useToast();
-  const [projects, setProjects] = useState<ProjectResponse[]>([]);
-  // Initialized to true to prevent flash of empty list before initial fetch completes
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error, refetch } = useQuery<
+    ProjectResponse[],
+    ApiError
+  >({
+    queryKey: QUERY_KEYS.projects,
+    queryFn: getAllProjects,
+  });
 
-  const fetchProjects = useCallback(async (): Promise<ProjectResponse[]> => {
-    setIsLoading(true);
-    setError(null);
+  const handleRefetch = async (): Promise<ProjectResponse[]> => {
+    const result = await refetch();
+    return result.data ?? [];
+  };
 
-    try {
-      const data = await getAllProjects();
-      setProjects(data);
-      return data;
-    } catch (err) {
-      const apiError = err as ApiError;
-      const message = apiError.message || "Failed to load projects";
-      setError(message);
-      addToast({ message, variant: "error" });
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  }, [addToast]);
+  const errorMessage = error ? error.message || "Failed to load projects" : null;
 
-  useEffect(() => {
-    // Architectural decision: Accept cascading render for initial client-side fetching
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchProjects();
-  }, [fetchProjects]);
+  return {
+    projects: data ?? [],
+    isLoading,
+    error: errorMessage,
+    refetch: handleRefetch,
+  };
+}
 
-  return { projects, isLoading, error, refetch: fetchProjects };
+/**
+ * Mutation hook for creating a project, invalidating QUERY_KEYS.projects on success.
+ */
+export function useCreateProjectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<ProjectResponse, ApiError, ProjectCreate>({
+    mutationFn: (data: ProjectCreate) => createProject(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects });
+    },
+  });
+}
+
+/**
+ * Mutation hook for updating a project, invalidating QUERY_KEYS.projects on success.
+ */
+export function useUpdateProjectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    ProjectResponse,
+    ApiError,
+    { id: number; data: ProjectUpdate }
+  >({
+    mutationFn: ({ id, data }) => updateProject(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects });
+    },
+  });
+}
+
+/**
+ * Mutation hook for deleting a project, invalidating QUERY_KEYS.projects on success.
+ */
+export function useDeleteProjectMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<void, ApiError, number>({
+    mutationFn: (id: number) => deleteProject(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects });
+    },
+  });
 }

@@ -42,7 +42,7 @@ frontend/
 │   ├── favicon.svg
 │   └── og-image.jpg
 └── src/
-    ├── App.tsx
+    ├── App.tsx                     # Root — QueryClientProvider + AuthProvider + AppRouter (Phase 1)
     ├── index.css
     ├── main.tsx
     ├── components/
@@ -90,14 +90,14 @@ frontend/
     │           ├── UserIcon.tsx
     │           └── XIcon.tsx
     ├── config/
-    │   └── constants.ts
+    │   └── constants.ts            # API/IMAGE URLs, TOKEN_KEY + QUERY_KEYS (Phase 1)
     ├── context/
     │   ├── AuthContext.tsx
     │   └── ToastContext.tsx
     ├── hooks/
     │   ├── useAuth.ts
-    │   ├── useProfile.ts
-    │   ├── useProjects.ts
+    │   ├── useProfile.ts           # React Query useQuery + useUpsertProfileMutation (Phase 1)
+    │   ├── useProjects.ts          # React Query useQuery + project CRUD mutations (Phase 1)
     │   ├── useScrollToHash.ts
     │   └── useSEO.ts
     ├── pages/
@@ -247,10 +247,10 @@ frontend/
 ├── .env.example
 ├── api-contract.json                     [UPDATE] — refreshed by backend after each schema phase (source of truth for TS interfaces)
 ├── eslint.config.js
-├── GEMINI.md                             [UPDATE] — SOP Section 7 file reference
+├── GEMINI.md                             ✅ Done — SOP Section 5 React Query & Section 7 reference
 ├── index.html
-├── package.json                          [UPDATE] — add @tanstack/react-query
-├── package-lock.json                     [UPDATE] — lockfile refresh
+├── package.json                          ✅ Done — added @tanstack/react-query
+├── package-lock.json                     ✅ Done — lockfile refreshed
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json
@@ -263,7 +263,7 @@ frontend/
 │   ├── favicon.svg
 │   └── og-image.jpg
 └── src/
-    ├── App.tsx                           [UPDATE] — wrap with QueryClientProvider
+    ├── App.tsx                           ✅ Done — wrapped with QueryClientProvider
     ├── index.css
     ├── main.tsx
     ├── components/
@@ -291,14 +291,14 @@ frontend/
     │       └── icons/
     │           └── ... (no changes)
     ├── config/
-    │   └── constants.ts                 [UPDATE] — define centralized QUERY_KEYS object
+    │   └── constants.ts                 ✅ Done — defined centralized QUERY_KEYS object
     ├── context/
     │   ├── AuthContext.tsx
     │   └── ToastContext.tsx
     ├── hooks/
     │   ├── useAuth.ts
-    │   ├── useProfile.ts               [UPDATE] — refactor to React Query (useQuery + useMutation with QUERY_KEYS.profile invalidation)
-    │   ├── useProjects.ts              [UPDATE] — refactor to React Query (mandatory: useQuery + useMutation with QUERY_KEYS.projects invalidation)
+    │   ├── useProfile.ts               ✅ Done — refactored to React Query (useQuery + useUpsertProfileMutation)
+    │   ├── useProjects.ts              ✅ Done — refactored to React Query (useQuery + project CRUD mutations)
     │   ├── useScrollToHash.ts
     │   └── useSEO.ts
     ├── pages/
@@ -332,14 +332,14 @@ frontend/
 
 ### Phase 1: React Query Setup & Global State Foundation
 
-- [ ] Install `@tanstack/react-query`: `npm install @tanstack/react-query`
-- [ ] Update SOP in `GEMINI.md` Section 5 — clarify that React Query is permitted as a caching/mutation layer over `apiClient.ts`
-- [ ] Define centralized `QUERY_KEYS` constant in `src/config/constants.ts` (`profile: ["profile"]`, `projects: ["projects"]` as `const`) — all hooks and mutations MUST consume this object instead of hardcoded strings
-- [ ] Create `QueryClient` instance and wrap `<App />` with `<QueryClientProvider>` in `App.tsx` (or `main.tsx`)
-- [ ] Refactor `hooks/useProfile.ts` to use `useQuery` with `QUERY_KEYS.profile` — fetch profile data once at the app root level
-- [ ] Refactor `hooks/useProjects.ts` to use React Query (mandatory) — replace manual `useEffect` fetch/loading/error state with `useQuery` (`QUERY_KEYS.projects`) and `useMutation` for project CRUD, invalidating `QUERY_KEYS.projects` on success
-- [ ] Verify existing profile- and project-dependent components still render correctly with cached state
-- [ ] Type-check: `npx tsc -b --noEmit`
+- [x] Install `@tanstack/react-query`: `npm install @tanstack/react-query`
+- [x] Update SOP in `GEMINI.md` Section 5 — clarify that React Query is permitted as a caching/mutation layer over `apiClient.ts`
+- [x] Define centralized `QUERY_KEYS` constant in `src/config/constants.ts` (`profile: ["profile"]`, `projects: ["projects"]` as `const`) — all hooks and mutations MUST consume this object instead of hardcoded strings
+- [x] Create `QueryClient` instance and wrap `<App />` with `<QueryClientProvider>` in `App.tsx` (or `main.tsx`)
+- [x] Refactor `hooks/useProfile.ts` to use `useQuery` with `QUERY_KEYS.profile` — fetch profile data once at the app root level
+- [x] Refactor `hooks/useProjects.ts` to use React Query (mandatory) — replace manual `useEffect` fetch/loading/error state with `useQuery` (`QUERY_KEYS.projects`) and `useMutation` for project CRUD, invalidating `QUERY_KEYS.projects` on success
+- [x] Verify existing profile- and project-dependent components still render correctly with cached state
+- [x] Type-check: `npx tsc -b --noEmit`
 
 ### Phase 2: PersonalInfo Type Expansion & Hardcoding Elimination
 
