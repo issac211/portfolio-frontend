@@ -219,19 +219,15 @@ interface ProjectResponse {
 
 
 > [!IMPORTANT]
-> **`status_indicator` → Tailwind Dot Mapping (ProfileHero):**
-> The backend provides `status_indicator: "success" | "warning" | "error" | "neutral" | null`. The `ProfileHero` component must map this value to a visual availability dot using a **lookup object** (not a chain of `if/else`):
+> **`status_indicator` → Tailwind Dot & Default Text Mapping (`ProfileHero` & `Footer`):**
+> The backend provides `status_indicator: "success" | "warning" | "error" | "neutral" | null`. Both `ProfileHero` and `Footer` map this value to visual styling and dynamic fallback copy via lookup objects (`STATUS_STYLES` / `STATUS_DOT_COLORS`):
 >
-> ```typescript
-> const STATUS_DOT_CLASSES: Record<string, string> = {
->   success: "bg-green-500 animate-pulse", // Available — pulsing green
->   warning: "bg-yellow-500 animate-pulse", // Limited — pulsing yellow
->   error: "bg-red-500", // Unavailable — solid red
->   neutral: "bg-gray-400", // No status — solid gray
-> };
-> ```
+> - `success`: pulsing green dot + fallback `"Available for new opportunities"`
+> - `warning`: pulsing amber dot + fallback `"Limited availability"`
+> - `error`: solid red dot + fallback `"Currently unavailable"`
+> - `neutral`: solid gray dot + fallback `"Open to inquiries"`
 >
-> Fallback to `neutral` if the value is `null` or unrecognized. The Admin `ProfileFormPage` must render a `<select>` dropdown (not a text input) with these four options. Do NOT use a boolean flag.
+> If the developer sets a custom `availability_status`, that string takes precedence; otherwise, the indicator's `defaultText` renders automatically.
 
 > [!NOTE]
 > **API Contract-Driven Development (Frontend Side):**

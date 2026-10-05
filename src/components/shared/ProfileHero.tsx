@@ -12,6 +12,7 @@ interface StatusStyle {
   badge: string;
   dot: string;
   hasPing: boolean;
+  defaultText: string;
 }
 
 const STATUS_STYLES: Record<string, StatusStyle> = {
@@ -19,21 +20,25 @@ const STATUS_STYLES: Record<string, StatusStyle> = {
     badge: "border-emerald-500/20 bg-emerald-50/70 text-emerald-700",
     dot: "bg-emerald-500",
     hasPing: true,
+    defaultText: "Available for new opportunities",
   },
   warning: {
     badge: "border-amber-500/20 bg-amber-50/70 text-amber-700",
     dot: "bg-amber-500",
     hasPing: true,
+    defaultText: "Limited availability",
   },
   error: {
     badge: "border-red-500/20 bg-red-50/70 text-red-700",
     dot: "bg-red-500",
     hasPing: false,
+    defaultText: "Currently unavailable",
   },
   neutral: {
     badge: "border-gray-500/20 bg-gray-50/70 text-gray-700",
     dot: "bg-gray-400",
     hasPing: false,
+    defaultText: "Open to inquiries",
   },
 };
 
@@ -56,12 +61,12 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
   const extendedBio =
     shortBio && fullBio && shortBio !== fullBio ? fullBio : null;
 
-  const availabilityText =
-    profile?.availability_status || "Available for new opportunities";
-
   const statusConfig =
     STATUS_STYLES[profile?.status_indicator ?? "neutral"] ??
     STATUS_STYLES.neutral;
+
+  const availabilityText =
+    profile?.availability_status?.trim() || statusConfig.defaultText;
 
   // Prepend IMAGE_BASE_URL to relative backend image path
   const avatarUrl = profile?.image_url

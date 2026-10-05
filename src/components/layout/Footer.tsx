@@ -25,20 +25,30 @@ const QUICK_LINKS: NavLinkItem[] = [
 /** Status dot color mapping for the footer availability badge. */
 const STATUS_DOT_COLORS: Record<
   string,
-  { dot: string; ping?: string; text: string }
+  { dot: string; ping?: string; text: string; defaultText: string }
 > = {
   success: {
     dot: "bg-emerald-500",
     ping: "bg-emerald-400",
     text: "text-emerald-600",
+    defaultText: "Available for new opportunities",
   },
   warning: {
     dot: "bg-amber-500",
     ping: "bg-amber-400",
     text: "text-amber-600",
+    defaultText: "Limited availability",
   },
-  error: { dot: "bg-red-500", text: "text-red-600" },
-  neutral: { dot: "bg-gray-400", text: "text-gray-600" },
+  error: {
+    dot: "bg-red-500",
+    text: "text-red-600",
+    defaultText: "Currently unavailable",
+  },
+  neutral: {
+    dot: "bg-gray-400",
+    text: "text-gray-600",
+    defaultText: "Open to inquiries",
+  },
 };
 
 /**
@@ -56,12 +66,12 @@ export function Footer() {
 
   const shortBio = profile?.short_bio || "";
 
-  const availabilityText =
-    profile?.availability_status || "Available for new opportunities";
-
   const statusConfig =
     STATUS_DOT_COLORS[profile?.status_indicator ?? "neutral"] ??
     STATUS_DOT_COLORS.neutral;
+
+  const availabilityText =
+    profile?.availability_status?.trim() || statusConfig.defaultText;
 
   const socialLinks: SocialLink[] = [
     {
