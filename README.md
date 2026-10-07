@@ -1,6 +1,6 @@
-# Itzik's Developer Portfolio — Frontend
+# Itzik's Developer Portfolio — Frontend (v1.1.0)
 
-The client-side web application and Content Management System (CMS) for my personal software engineering portfolio. Built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite 8**, consuming a custom **FastAPI** REST backend.
+The client-side web application and Content Management System (CMS) for my personal software engineering portfolio. Built with **React 19**, **TypeScript**, **Tailwind CSS v4**, **Vite 8**, and **TanStack React Query v5**, consuming a custom **FastAPI** REST backend.
 
 ---
 
@@ -12,6 +12,7 @@ The goal was not just to display projects, but to demonstrate hands-on mastery i
 
 - **Full-Stack Integration:** Consuming custom REST APIs, managing stateless JWT authentication lifecycles, and handling binary/multipart media streams.
 - **Enterprise Frontend Architecture:** Strict separation of concerns across service layers, domain hooks, global contexts, and atomic design primitives.
+- **Modern Server-State Caching:** Unified React Query caching layer over native fetch, eliminating redundant network calls, providing stale-while-revalidate UX, and coordinating automated cache invalidations.
 - **Production-Grade UX & Resilience:** Fail-fast startup configuration, contextual skeleton loaders, zero Cumulative Layout Shift (CLS), and dynamic SEO metadata.
 - **Web Security:** Defensive token handling, automatic 401 unauthorized cleanup, and boundary-safe multipart form handling.
 
@@ -21,12 +22,15 @@ The goal was not just to display projects, but to demonstrate hands-on mastery i
 
 This frontend is designed with a strong focus on clean architecture, performance, security, and developer ergonomics:
 
-- **Layered Architecture & Separation of Concerns:** Strict isolation between API Clients (`services/`), Business Logic (`hooks/`), Global State (`context/`), Route Guards (`router/`), and Atomic UI Primitives (`components/ui/`).
-- **Contract-Driven API Integration:** Complete end-to-end type safety synchronized with [`api-contract.json`](./api-contract.json), guaranteeing TypeScript interfaces directly match the backend's Pydantic schemas.
-- **Native, Zero-Dependency HTTP Pipeline:** Custom `fetch` wrapper (`apiClient.ts`) avoiding heavyweight dependencies (no Axios, no React Query). Features automatic Bearer token injection, automated 401 token eviction, and intelligent `FormData` boundary preservation.
+- **Layered Architecture & Separation of Concerns:** Strict isolation between API Clients (`services/`), Domain Hooks (`hooks/`), Global Contexts (`context/`), Route Guards (`router/`), and Atomic UI Primitives (`components/ui/`).
+- **Contract-Driven API Integration:** Complete end-to-end type safety synchronized with [`api-contract.json`](./api-contract.json), guaranteeing TypeScript interfaces directly match the backend's OpenAPI schemas.
+- **Server-State Management (TanStack React Query v5):** All API read queries and write mutations are orchestrated by React Query wrapping native `fetch` (`apiClient.ts`). Centralized query key architecture (`QUERY_KEYS.profile`, `QUERY_KEYS.projects`, `QUERY_KEYS.project(id)`) ensures hierarchical cache invalidation on mutations (create, update, image upload, delete).
+- **Native Fetch Pipeline with Boundary Preservation:** HTTP calls strictly flow through `services/apiClient.ts`. Automatic Bearer token injection, automatic 401 token eviction, and intelligent `FormData` boundary preservation (never overriding browser-generated boundary headers during file uploads).
+- **Client-Side SPA Navigation & Smooth Anchor Scrolling:** React Router `<Link>` integration with conditional smooth-scroll checks (`/#projects`, `/#contact`) that prevent disruptive full-page document reloads when navigating from sub-routes, maintaining in-memory React Query cache and preserving fast navigation.
 - **Zero-CLS Mobile UX & Anchor Navigation:** Floating overlay mobile navigation eliminating layout shifts, combined with cross-browser `scroll-margin` offsets that overcome mobile WebKit/Safari `scrollIntoView` bugs.
 - **Contextual Skeletons & Micro-Interactions:** Custom shimmering skeletons tailored to each layout replacing generic spinners, paired with GPU-accelerated cubic-bezier transitions and strict `prefers-reduced-motion` accessibility guards.
 - **Dynamic SEO & Social Graph Previews:** `useSEO` custom hook managing per-route `document.title`, `<meta name="description">`, Open Graph, and Twitter Card tags with absolute URL construction for rich crawler previews (WhatsApp, LinkedIn, X).
+- **Resilient Email Contact UX:** Smart contact link in `Footer` that initiates `mailto:` protocols while simultaneously copying the address to clipboard via `navigator.clipboard.writeText` with an instant toast notification, ensuring seamless interaction even when the OS lacks a configured desktop email client.
 
 ---
 
@@ -34,35 +38,37 @@ This frontend is designed with a strong focus on clean architecture, performance
 
 ### Public Showcase
 
+- **Dynamic Hero Presentation:** Profile presentation driven by API metadata with a two-tone gradient headline (smart auto-split with manual pipe `|` delimiter support), live availability badge (`status_indicator` mapped to semantic Tailwind dot styles: `success`, `warning`, `error`, `neutral`), short bio tagline, and dynamic portrait with multi-tier initials fallback.
+- **Featured Projects Grid:** Interactive project cards with 16:9 media previews, concise project `summary`, categorized `tags` badges (technologies, categories, status tags), external demo/repository links, and empty states.
+- **Dedicated Project Detail Pages:** Deep-dive view (`/projects/:id`) with React Query caching (`useProject`), rendering architecture write-ups (`content` with fallback to `summary`), tags list, responsive media, and client-side back navigation.
 - **Smooth Anchor Gliding:** Single-page seamless navigation (`#home`, `#projects`, `#contact`) with zero Cumulative Layout Shift (CLS) and cross-browser scroll offsets.
-- **Hero Presentation:** Profile presentation featuring headline, bio, live status indicator, and dynamic avatar resolution.
-- **Featured Projects Grid:** Interactive project cards with 16:9 media previews, categorized tech-stack badges, external demo/repository links, and empty states.
-- **Dedicated Project Detail Pages:** Deep-dive view (`/project/:id`) highlighting architecture, technical stack, full description, and high-resolution screenshots.
 - **Contextual Skeleton Loading:** Shimmer placeholders (`animate-pulse`) across all data-fetching views for a premium perceived performance.
 - **Dynamic SEO & Social Cards:** Custom `useSEO` hook managing per-route metadata with absolute image URLs for rich link previews.
 
 ### Admin CMS & Management
 
 - **Role-Secured Dashboard:** Protected routes (`/admin`) guarded by JWT authentication stored in `localStorage` with automated 401 unauthorized cleanup.
-- **Project CRUD:** Create, edit, and delete projects with confirmation dialogs and optimistic toast feedback.
-- **Multipart Media Uploads:** Direct image file uploads via native `FormData` without breaking `multipart/form-data` boundary headers.
-- **Profile Customizer:** Manage personal bio, title, social links, and profile photos.
+- **Project CRUD & Description Split:** Create, edit, and delete projects. Distinct inputs for concise `summary` (rendered on cards/dashboard) and detailed `content` (rendered on detail pages), plus comma-separated `tags` with live chip previews.
+- **React Query Mutation Lifecycle:** Project and profile create, update, image upload, and deletion operations run through dedicated `useMutation` hooks with automated cache invalidation (`QUERY_KEYS`).
+- **Multipart Media Uploads & Removal:** Direct image uploads using `useUploadProjectImageMutation` and `useUploadProfileImageMutation`, alongside dedicated "Remove Image" actions with inline confirmations and instant cache updates.
+- **Profile Customizer & Danger Zone:** Comprehensive profile editor (hero title, short bio, full bio, availability status, status indicator dropdown, social links) with a reusable, accessible `ConfirmDeleteModal` requiring typed confirmation keyword (`DELETE`) for soft deletion.
 - **Global Toast System:** Context-driven notification queue (`ToastContext`) rendered via React Portals with automatic timer dismissal.
 
 ---
 
 ## Tech Stack & Architecture
 
-| Layer                   | Technology                   | Details                                                          |
-| ----------------------- | ---------------------------- | ---------------------------------------------------------------- |
-| **Runtime & Framework** | React 19                     | Latest React paradigms with strict type-safety                   |
-| **Language**            | TypeScript (Strict)          | Exhaustive typing synchronized with `api-contract.json`          |
-| **Styling**             | Tailwind CSS v4              | Native `@tailwindcss/vite` integration, CSS variables            |
-| **Routing**             | React Router v7              | Nested layouts, outer `ProtectedRoute` auth gating               |
-| **Build & Tooling**     | Vite 8                       | Instant Hot Module Replacement (HMR) and optimized rollup bundle |
-| **HTTP Client**         | Native `fetch`               | Lightweight wrapper (`apiClient.ts`) for JSON & multipart data   |
-| **State Management**    | React Context                | KISS/YAGNI — AuthContext & ToastContext only (no Redux/Zustand)  |
-| **Code Quality**        | ESLint 9 + TypeScript-ESLint | Zero-tolerance lint policy with custom architecture rules        |
+| Layer                   | Technology                   | Details                                                                                  |
+| ----------------------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
+| **Runtime & Framework** | React 19                     | Latest React paradigms with strict type-safety                                           |
+| **Language**            | TypeScript (Strict)          | Exhaustive typing synchronized with `api-contract.json`                                  |
+| **Server State / Cache**| TanStack React Query v5      | Centralized `QUERY_KEYS`, background revalidation, optimistic invalidation               |
+| **Styling**             | Tailwind CSS v4              | Native `@tailwindcss/vite` integration, CSS variables                                    |
+| **Routing**             | React Router v7              | Nested layouts, SPA anchor navigation, outer `ProtectedRoute` auth gating                |
+| **Build & Tooling**     | Vite 8                       | Instant Hot Module Replacement (HMR) and optimized rollup bundle                         |
+| **HTTP Client**         | Native `fetch`               | Lightweight wrapper (`apiClient.ts`) for JSON & multipart data                           |
+| **Client Global State** | React Context                | KISS/YAGNI — AuthContext & ToastContext only (no Redux/Zustand)                          |
+| **Code Quality**        | ESLint 9 + TypeScript-ESLint | Zero-tolerance lint policy with custom architecture rules                                |
 
 ---
 
@@ -72,14 +78,14 @@ This frontend is designed with a strong focus on clean architecture, performance
 src/
 ├── assets/          # Static media and icons
 ├── components/      # Modular UI components
-│   ├── admin/       # Admin-specific navigation and layouts
-│   ├── layout/      # Public shells (Navbar, Footer, PublicLayout)
+│   ├── admin/       # Admin navigation, layout & ConfirmDeleteModal (Phase 5)
+│   ├── layout/      # Public shells (Navbar, Footer, PublicLayout) with SPA navigation
 │   ├── shared/      # Domain components (ProfileHero, ProjectCard)
-│   └── ui/          # Atomic primitives (Button, Input, Card, Badge, Skeleton, Icons)
-├── config/          # Startup-validated environment constants
+│   └── ui/          # Atomic primitives (Button, Input, Card, Badge, Skeleton, Toast, Icons)
+├── config/          # Startup-validated environment constants & QUERY_KEYS
 ├── context/         # React Contexts (AuthContext, ToastContext)
 ├── hooks/           # Custom React hooks (useAuth, useProfile, useProjects, useSEO, useScrollToHash)
-├── pages/           # Routed page views (public & protected admin views)
+├── pages/           # Routed page views (HomePage, ProjectDetailPage, admin views)
 ├── router/          # AppRouter and ProtectedRoute auth gate
 ├── services/        # Backend API service layers (auth, profile, projects)
 ├── types/           # Strongly-typed TypeScript interfaces (Auth, Profile, Project, API)
@@ -179,4 +185,4 @@ We welcome contributions! To maintain code excellence and consistency, please fo
 
 ## AI-Assisted Architecture
 
-This repository follows a strict pairing standard defined in [`GEMINI.md`](./GEMINI.md). Development follows a **Micro-Commits** methodology, rigorous type validation, zero-secrets security, and continuous implementation plan tracking documented in [`docs/implementation_plan.md`](./docs/implementation_plan.md).
+This repository follows a strict pairing standard defined in [`GEMINI.md`](./GEMINI.md). Development follows a **Micro-Commits** methodology, rigorous type validation, zero-secrets security, and continuous implementation plan tracking documented in [`docs/implementation_plan_v1.1.md`](./docs/implementation_plan_v1.1.md).
