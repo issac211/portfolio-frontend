@@ -56,7 +56,7 @@ frontend/
     │   │   ├── Navbar.tsx              # Public navbar with profile branding & SPA smooth-scroll links (Phase 2, Phase 6)
     │   │   └── PublicLayout.tsx
     │   ├── shared/
-    │   │   ├── ProfileHero.tsx
+    │   │   ├── ProfileHero.tsx         # Hero presentation with age calculation, narrative paragraphs & timeline markers
     │   │   └── ProjectCard.tsx
     │   └── ui/
     │       ├── Badge.tsx
@@ -239,6 +239,14 @@ interface ProjectResponse {
 > If the developer sets a custom `availability_status`, that string takes precedence; otherwise, the indicator's `defaultText` renders automatically.
 
 > [!NOTE]
+> **ProfileHero Typography, Age Calculation, Narrative Paragraphs & Sticky Avatar (✅ Done):**
+> - **Scaled Headline:** The H1 hero heading was scaled from `text-4xl...6xl` to `text-3xl sm:text-4xl lg:text-5xl` for a more balanced visual hierarchy.
+> - **Dynamic Age Calculation:** `calculateAge(birth_date)` calculates age dynamically from ISO date strings with leap-year-safe calendar difference, rendering inline only when `birth_date` is configured.
+> - **Narrative Paragraphs & Timeline Nodes:** Extended bio parses raw newline text into distinct paragraphs (`split(/\n+/)`), styled with vertical rhythm (`space-y-3.5 sm:space-y-4`) and precision timeline dot markers (`ring-[3px] ring-white bg-blue-500`) along a continuous accent border, rendering long prose with editorial clarity.
+> - **Smooth Collapsible Bio:** The extended bio features an accessible toggle (`isBioExpanded`, defaulting to `true` / expanded), animating smoothly via CSS `grid-template-rows` (`grid-rows-[1fr]` to `grid-rows-[0fr]`) and opacity transitions for pure auto-height interpolation.
+> - **Sticky Avatar Tracking:** The portrait column uses a stretch-height grid parent (`lg:items-stretch`) with an inner sticky container (`lg:sticky lg:top-24`), tracking smoothly through Hero scrolling and anchoring cleanly at the section boundary.
+
+> [!NOTE]
 > **API Contract-Driven Development (Frontend Side):**
 > Each frontend phase that depends on backend schema changes (Phases 2, 3, 4) must **not begin** until the backend has exported an updated `api-contract.json` to the `frontend/` root. Before updating TS interfaces, cross-reference the OpenAPI spec to verify field names, types, and nullability. This prevents type drift and catches mismatches early.
 
@@ -329,7 +337,7 @@ frontend/
     │   │   ├── Navbar.tsx               ✅ Done — consumed profile data & SPA navigation
     │   │   └── PublicLayout.tsx
     │   ├── shared/
-    │   │   ├── ProfileHero.tsx          ✅ Done — consumed hero_title, availability_status, short_bio + status_indicator dot mapping
+    │   │   ├── ProfileHero.tsx          ✅ Done — age calculation, formatted collapsible bio, scaled heading & status indicator
     │   │   └── ProjectCard.tsx          ✅ Done — uses `summary` instead of `description`; renders `tags`
     │   └── ui/
     │       ├── Badge.tsx                ✅ Done — audited, JSDoc generalized for tags

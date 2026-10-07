@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import type { PersonalInfoResponse } from "../../types/profile";
 import { handleSmoothScroll } from "../../utils/scroll";
@@ -41,6 +42,27 @@ const STATUS_STYLES: Record<string, StatusStyle> = {
     defaultText: "Open to inquiries",
   },
 };
+
+/**
+ * Calculates current full age in years from an ISO birth date string.
+ * Returns null if the birth date is absent, invalid, or in the future.
+ */
+function calculateAge(birthDateString: string | null | undefined): number | null {
+  if (!birthDateString) return null;
+  const birthDate = new Date(birthDateString);
+  if (Number.isNaN(birthDate.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age >= 0 ? age : null;
+}
 
 /**
  * Splits the hero headline into a primary text segment and a stylized gradient highlight.
@@ -92,15 +114,26 @@ function splitHeroTitle(title: string | null | undefined): {
  * profile data only when provided by the backend.
  */
 export function ProfileHero({ profile }: ProfileHeroProps) {
+  const [isBioExpanded, setIsBioExpanded] = useState(true);
+
   const fullName = profile
     ? `${profile.first_name} ${profile.last_name}`.trim()
     : "";
 
+  const age = calculateAge(profile?.birth_date);
   const shortBio = profile?.short_bio?.trim() || "";
   const fullBio = profile?.bio?.trim() || "";
   const leadBio = shortBio || fullBio;
   const extendedBio =
     shortBio && fullBio && shortBio !== fullBio ? fullBio : null;
+
+  const bioParagraphs = useMemo(() => {
+    if (!extendedBio) return [];
+    return extendedBio
+      .split(/\n+/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+  }, [extendedBio]);
 
   const statusConfig =
     STATUS_STYLES[profile?.status_indicator ?? "neutral"] ??
@@ -124,12 +157,12 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
     <section
       id="home"
       aria-label="Introduction"
-      className="relative overflow-hidden pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-16 lg:pb-24"
+      className="relative pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-16 lg:pb-24"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
           {/* Left Column: Text & CTAs */}
-          <div className="flex flex-col items-center text-center lg:col-span-7 lg:items-start lg:text-left animate-fade-in-up">
+          <div className="flex flex-col items-center text-center lg:col-span-8 lg:items-start lg:text-left animate-fade-in-up">
             {/* Status Pill */}
             <div
               className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-medium ${statusConfig.badge}`}
@@ -147,34 +180,79 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
               {availabilityText}
             </div>
 
-            {/* Primary SEO Heading (Single H1 rule) */}
-            <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+            {/* Primary SEO Heading (Single H1 rule) - reduced size for better visual hierarchy */}
+            <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
               {heroHeading.primary ? `${heroHeading.primary} ` : ""}
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 {heroHeading.highlight}
               </span>
             </h1>
 
-            {/* Render developer name only when present in database */}
+            {/* Render developer name and calculated age */}
             {fullName && (
               <p className="mt-4 text-lg font-medium text-gray-800 sm:text-xl">
                 Hi, I'm{" "}
-                <span className="font-semibold text-gray-900">{fullName}</span>.
+                <span className="font-semibold text-gray-900">{fullName}</span>
+                {age !== null && (
+                  <span className="text-gray-500 font-normal text-base">
+                    {" "}
+                    ({age} years old)
+                  </span>
+                )}
+                .
               </p>
             )}
 
-            {/* Render primary bio / tagline */}
+            {/* Render primary bio / tagline with prominent contrast */}
             {leadBio && (
-              <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
+              <p className="mt-3 max-w-3xl text-base font-medium leading-relaxed text-gray-800 sm:text-lg whitespace-pre-line">
                 {leadBio}
               </p>
             )}
 
-            {/* Render extended bio if both short and full bios exist */}
+            {/* Render collapsible extended bio with subtle border-l accent and narrative styling */}
             {extendedBio && (
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-500 sm:text-base">
-                {extendedBio}
-              </p>
+              <div className="mt-3 max-w-3xl w-full text-left">
+                <div
+                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                    isBioExpanded
+                      ? "grid-rows-[1fr] opacity-100"
+                      : "grid-rows-[0fr] opacity-0"
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="pl-2 py-1">
+                      <div className="relative border-l-2 border-blue-500/30 pl-4 sm:pl-5 py-0.5 space-y-3.5 sm:space-y-4">
+                        {bioParagraphs.map((paragraph, index) => (
+                          <div key={index} className="relative group">
+                            {/* Subtle timeline node marker for each distinct paragraph */}
+                            <span
+                              className="absolute -left-5 sm:-left-6 top-2 sm:top-2.5 h-1.5 w-1.5 rounded-full bg-blue-500 ring-[3px] ring-white transition-all duration-200 group-hover:scale-125 group-hover:bg-blue-600"
+                              aria-hidden="true"
+                            />
+                            <p className="text-sm font-normal leading-relaxed text-gray-600 transition-colors duration-200 group-hover:text-gray-900 sm:text-base">
+                              {paragraph}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsBioExpanded((prev) => !prev)}
+                  className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                  aria-expanded={isBioExpanded}
+                >
+                  <span>{isBioExpanded ? "Show less" : "Read full bio"}</span>
+                  <ArrowDownIcon
+                    className={`h-3 w-3 transition-transform duration-300 ${
+                      isBioExpanded ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              </div>
             )}
 
             {/* Profile not yet configured — visible only to site visitors before setup */}
@@ -206,31 +284,33 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
             </div>
           </div>
 
-          {/* Right Column: Avatar Portrait */}
-          <div className="flex justify-center lg:col-span-5 animate-fade-in">
-            <div className="relative">
-              {/* Radial gradient glow background */}
-              <div
-                className="absolute -inset-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 opacity-20 blur-xl transition-opacity duration-300"
-                aria-hidden="true"
-              />
+          {/* Right Column: Avatar Portrait that follows scroll within Hero */}
+          <div className="lg:col-span-4 relative">
+            <div className="lg:sticky lg:top-24 flex justify-center lg:justify-end">
+              <div className="relative">
+                {/* Radial gradient glow background */}
+                <div
+                  className="absolute -inset-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 opacity-20 blur-xl transition-opacity duration-300"
+                  aria-hidden="true"
+                />
 
-              {/* Portrait Container with 3-tier fallback */}
-              <div className="relative flex h-60 w-60 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-gray-100 shadow-xl transition-transform duration-300 ease-out hover:scale-[1.02] sm:h-72 sm:w-72 lg:h-80 lg:w-80">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt={fullName || "Developer portrait"}
-                    className="h-full w-full object-cover"
-                    loading="eager"
-                  />
-                ) : initials ? (
-                  <span className="text-5xl font-bold tracking-wider text-gray-400">
-                    {initials}
-                  </span>
-                ) : (
-                  <UserIcon className="h-28 w-28 text-gray-300" />
-                )}
+                {/* Portrait Container with 3-tier fallback */}
+                <div className="relative flex h-60 w-60 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-gray-100 shadow-xl transition-transform duration-300 ease-out hover:scale-[1.02] sm:h-72 sm:w-72 lg:h-80 lg:w-80">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={fullName || "Developer portrait"}
+                      className="h-full w-full object-cover"
+                      loading="eager"
+                    />
+                  ) : initials ? (
+                    <span className="text-5xl font-bold tracking-wider text-gray-400">
+                      {initials}
+                    </span>
+                  ) : (
+                    <UserIcon className="h-28 w-28 text-gray-300" />
+                  )}
+                </div>
               </div>
             </div>
           </div>
