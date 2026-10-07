@@ -79,18 +79,32 @@ export function ProjectDetailSkeleton() {
       <div className="mx-auto max-w-4xl space-y-8 px-4 sm:px-6 lg:px-8">
         {/* Back link */}
         <Skeleton className="h-4 w-28" />
-        {/* Hero image */}
-        <Skeleton className="aspect-video w-full rounded-2xl" />
-        {/* Title */}
-        <Skeleton className="h-9 w-2/3" />
-        {/* Tags */}
-        <div className="flex gap-2">
-          <Skeleton className="h-6 w-20 rounded-full" />
-          <Skeleton className="h-6 w-16 rounded-full" />
-          <Skeleton className="h-6 w-24 rounded-full" />
+
+        {/* Header: Title, Actions & Tags */}
+        <div className="border-b border-gray-200 pb-8 space-y-5">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <Skeleton className="h-10 w-2/3 sm:w-1/2" />
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-28 rounded-lg" />
+              <Skeleton className="h-10 w-28 rounded-lg" />
+            </div>
+          </div>
+          {/* Tags */}
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-20 rounded-md" />
+            <Skeleton className="h-6 w-16 rounded-md" />
+            <Skeleton className="h-6 w-24 rounded-md" />
+          </div>
+          {/* Summary */}
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-4/5" />
         </div>
+
+        {/* Media Banner placeholder */}
+        <Skeleton className="h-48 sm:h-60 md:h-72 w-full rounded-xl" />
+
         {/* Body text lines */}
-        <div className="space-y-3">
+        <div className="space-y-3 pt-4">
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-4/5" />

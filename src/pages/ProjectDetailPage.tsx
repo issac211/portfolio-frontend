@@ -6,7 +6,6 @@ import {
   ExclamationCircleIcon,
   ExternalLinkIcon,
   GithubIcon,
-  ImageIcon,
 } from "../components/ui/icons";
 import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
 import { IMAGE_BASE_URL } from "../config/constants";
@@ -17,8 +16,10 @@ import { useSEO } from "../hooks/useSEO";
  * Deep-dive detail page for an individual project.
  *
  * Fetches and caches project metadata by ID via React Query, renders an accessible
- * back-navigation breadcrumb using client-side routing, displays high-resolution media,
- * lists project tags, and provides secure external links.
+ * back-navigation breadcrumb using client-side routing, starts immediately with
+ * project title, actions, and tags (omitting empty media boxes for text-only projects),
+ * displays a contained compact media preview only when an image exists, and renders
+ * the full architectural write-up.
  */
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -98,45 +99,29 @@ export function ProjectDetailPage() {
         <nav aria-label="Breadcrumb" className="mb-8">
           <Link
             to="/#projects"
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-blue-600"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition-colors hover:text-blue-600"
           >
             <ArrowLeftIcon className="h-4 w-4" />
             <span>Back to Projects</span>
           </Link>
         </nav>
 
-        {/* Media Preview Slot */}
-        <div className="relative mb-10 aspect-video w-full overflow-hidden rounded-2xl border border-gray-200/80 bg-gray-100 shadow-sm">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={project.title}
-              className="h-full w-full object-cover"
-              loading="eager"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gray-50 text-gray-400">
-              <ImageIcon className="h-16 w-16 text-gray-300" />
-            </div>
-          )}
-        </div>
-
-        {/* Header: Title & Action Links */}
+        {/* Header: Title, Action Links, Tags & Summary */}
         <header className="border-b border-gray-200 pb-8">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             {/* Sole H1 for this page view */}
             <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
               {project.title}
             </h1>
 
             {/* External Links: Live Demo & GitHub */}
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
               {project.live_url && (
                 <a
                   href={project.live_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-blue-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <span>Live Demo</span>
                   <ExternalLinkIcon className="h-4 w-4" />
@@ -148,7 +133,7 @@ export function ProjectDetailPage() {
                   href={project.github_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                 >
                   <GithubIcon className="h-4 w-4" />
                   <span>Repository</span>
@@ -157,9 +142,9 @@ export function ProjectDetailPage() {
             </div>
           </div>
 
-          {/* Tag Badges */}
+          {/* Tag Badges — primary styling for high contrast */}
           {project.tags && project.tags.length > 0 && (
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-wrap gap-2">
               {project.tags.map((tag) => (
                 <Badge key={tag} variant="primary">
                   {tag}
@@ -167,15 +152,38 @@ export function ProjectDetailPage() {
               ))}
             </div>
           )}
+
+          {/* Project Summary — prominent lead overview */}
+          {project.summary && (
+            <p className="mt-5 text-base font-medium leading-relaxed text-gray-700 sm:text-lg">
+              {project.summary}
+            </p>
+          )}
         </header>
 
-        {/* Project Content / Full Write-up */}
-        <div className="py-8">
-          <h2 className="text-lg font-bold text-gray-900">About the Project</h2>
-          <div className="mt-4 whitespace-pre-line text-base leading-relaxed text-gray-700 sm:text-lg">
-            {project.content || project.summary}
+        {/* Compact Media Preview Slot — rendered ONLY when image exists */}
+        {imageUrl && (
+          <div className="relative my-6 sm:my-8 h-48 sm:h-60 md:h-72 w-full overflow-hidden rounded-xl border border-gray-200/80 bg-gray-100 shadow-sm">
+            <img
+              src={imageUrl}
+              alt={project.title}
+              className="h-full w-full object-cover"
+              loading="eager"
+            />
           </div>
-        </div>
+        )}
+
+        {/* Project Content / Full Write-up */}
+        {project.content && (
+          <div className="py-8">
+            <h2 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+              About the Project
+            </h2>
+            <div className="mt-4 whitespace-pre-line text-base leading-relaxed text-gray-600 sm:text-lg">
+              {project.content}
+            </div>
+          </div>
+        )}
       </div>
     </article>
   );

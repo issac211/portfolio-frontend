@@ -105,7 +105,7 @@ frontend/
     ├── pages/
     │   ├── HomePage.tsx            # Public landing with Hero, 2-column project showcase & hash navigation
     │   ├── LoginPage.tsx
-    │   ├── ProjectDetailPage.tsx   # React Query useProject(id) caching + client-side back navigation (Phase 6)
+    │   ├── ProjectDetailPage.tsx   # Deep-dive with header-first layout, conditional compact media & React Query cache
     │   └── admin/
     │       ├── DashboardPage.tsx
     │       ├── ProfileFormPage.tsx     # Full profile CRUD, upload/delete image & danger zone soft delete (Phase 5, Phase 6)
