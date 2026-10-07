@@ -66,7 +66,7 @@ frontend/
     │       ├── Input.tsx
     │       ├── Loader.tsx
     │       ├── SectionTitle.tsx
-    │       ├── Skeleton.tsx
+    │       ├── Skeleton.tsx            # Shimmer loading placeholders matching 2-column project cards & detail layouts
     │       ├── Toast.tsx
     │       └── icons/
     │           ├── index.ts
@@ -103,7 +103,7 @@ frontend/
     │   ├── useScrollToHash.ts
     │   └── useSEO.ts
     ├── pages/
-    │   ├── HomePage.tsx
+    │   ├── HomePage.tsx            # Public landing with Hero, 2-column project showcase & hash navigation
     │   ├── LoginPage.tsx
     │   ├── ProjectDetailPage.tsx   # React Query useProject(id) caching + client-side back navigation (Phase 6)
     │   └── admin/

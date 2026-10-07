@@ -86,9 +86,9 @@ export function HomePage() {
             />
           )}
 
-          {/* Projects Grid */}
+          {/* Projects Grid — 1 or 2 columns for optimal content balance */}
           {!isProjectsLoading && !projectsError && projects.length > 0 && (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 animate-fade-in-up">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 animate-fade-in-up">
               {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
               ))}
