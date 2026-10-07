@@ -57,7 +57,7 @@ frontend/
     │   │   └── PublicLayout.tsx
     │   ├── shared/
     │   │   ├── ProfileHero.tsx         # Hero presentation with age calculation, narrative paragraphs & timeline markers
-    │   │   └── ProjectCard.tsx
+    │   │   └── ProjectCard.tsx         # Showcase card with conditional compact media, elevated typography & primary tag badges
     │   └── ui/
     │       ├── Badge.tsx
     │       ├── Button.tsx
@@ -240,6 +240,7 @@ interface ProjectResponse {
 
 > [!NOTE]
 > **ProfileHero Typography, Age Calculation, Narrative Paragraphs & Sticky Avatar (✅ Done):**
+>
 > - **Scaled Headline:** The H1 hero heading was scaled from `text-4xl...6xl` to `text-3xl sm:text-4xl lg:text-5xl` for a more balanced visual hierarchy.
 > - **Dynamic Age Calculation:** `calculateAge(birth_date)` calculates age dynamically from ISO date strings with leap-year-safe calendar difference, rendering inline only when `birth_date` is configured.
 > - **Narrative Paragraphs & Timeline Nodes:** Extended bio parses raw newline text into distinct paragraphs (`split(/\n+/)`), styled with vertical rhythm (`space-y-3.5 sm:space-y-4`) and precision timeline dot markers (`ring-[3px] ring-white bg-blue-500`) along a continuous accent border, rendering long prose with editorial clarity.
