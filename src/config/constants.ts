@@ -32,4 +32,5 @@ export const TOKEN_KEY = "portfolio_auth_token";
 export const QUERY_KEYS = {
   profile: ["profile"] as const,
   projects: ["projects"] as const,
+  project: (id: number) => ["projects", id] as const,
 } as const;

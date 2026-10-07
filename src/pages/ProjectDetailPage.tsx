@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 import { Badge } from "../components/ui/Badge";
 import {
   ArrowLeftIcon,
@@ -10,25 +10,32 @@ import {
 } from "../components/ui/icons";
 import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
 import { IMAGE_BASE_URL } from "../config/constants";
+import { useProject } from "../hooks/useProjects";
 import { useSEO } from "../hooks/useSEO";
-import { getProject } from "../services/projectService";
-import type { ApiError } from "../types/api";
-import type { ProjectResponse } from "../types/project";
-import { handleSmoothScroll } from "../utils/scroll";
 
 /**
  * Deep-dive detail page for an individual project.
  *
- * Fetches project metadata by ID from the URL parameters, renders an accessible
- * back-navigation breadcrumb, displays high-resolution media with responsive aspect ratios,
- * lists project tags, and provides secure external links to live deployments
- * and source code repositories.
+ * Fetches and caches project metadata by ID via React Query, renders an accessible
+ * back-navigation breadcrumb using client-side routing, displays high-resolution media,
+ * lists project tags, and provides secure external links.
  */
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [project, setProject] = useState<ProjectResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const projectId = id ? Number(id) : null;
+  const isInvalidId = !id || Number.isNaN(projectId);
+
+  const {
+    data: project,
+    isLoading,
+    error: queryError,
+  } = useProject(isInvalidId ? null : projectId);
+
+  const errorMessage = isInvalidId
+    ? "Invalid project identifier."
+    : queryError
+      ? queryError.message || "Failed to load project details."
+      : null;
 
   useSEO({
     title: project
@@ -44,43 +51,9 @@ export function ProjectDetailPage() {
       : undefined,
   });
 
+  // Ensure scroll is reset to top on navigating to a project detail view
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-
-    // Guard clause: validate parameter presence and integer format
-    const projectId = Number(id);
-    if (!id || Number.isNaN(projectId)) {
-      // Architectural decision: Accept cascading render for initial client-side fetching
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError("Invalid project identifier.");
-      setIsLoading(false);
-      return;
-    }
-
-    let isMounted = true;
-    setIsLoading(true);
-    setError(null);
-
-    getProject(projectId)
-      .then((data) => {
-        if (isMounted) {
-          setProject(data);
-        }
-      })
-      .catch((err: ApiError | Error) => {
-        if (isMounted) {
-          setError(err.message || "Failed to load project details.");
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
   }, [id]);
 
   // Loading State
@@ -89,7 +62,7 @@ export function ProjectDetailPage() {
   }
 
   // Error State / Not Found
-  if (error || !project) {
+  if (errorMessage || !project) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-red-200 bg-red-50/70 p-8 text-center sm:p-12">
@@ -98,17 +71,16 @@ export function ProjectDetailPage() {
             Project Not Found
           </h2>
           <p className="mt-2 text-sm text-red-700">
-            {error || "The requested project could not be found."}
+            {errorMessage || "The requested project could not be found."}
           </p>
           <div className="mt-6">
-            <a
-              href="/#projects"
-              onClick={(e) => handleSmoothScroll(e, "/#projects")}
+            <Link
+              to="/#projects"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-xs ring-1 ring-gray-300 ring-inset transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <ArrowLeftIcon className="h-4 w-4" />
               <span>Back to Projects</span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -124,14 +96,13 @@ export function ProjectDetailPage() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Back Navigation Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-8">
-          <a
-            href="/#projects"
-            onClick={(e) => handleSmoothScroll(e, "/#projects")}
+          <Link
+            to="/#projects"
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-blue-600"
           >
             <ArrowLeftIcon className="h-4 w-4" />
             <span>Back to Projects</span>
-          </a>
+          </Link>
         </nav>
 
         {/* Media Preview Slot */}

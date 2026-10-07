@@ -13,9 +13,9 @@ import {
   useDeleteProfileMutation,
   useProfile,
   useUpsertProfileMutation,
+  useUploadProfileImageMutation,
 } from "../../hooks/useProfile";
 import { useSEO } from "../../hooks/useSEO";
-import { uploadProfileImage } from "../../services/profileService";
 import type { ApiError } from "../../types/api";
 import type { StatusIndicator } from "../../types/profile";
 
@@ -28,8 +28,9 @@ import type { StatusIndicator } from "../../types/profile";
  */
 export function ProfileFormPage() {
   const navigate = useNavigate();
-  const { profile, isLoading: isProfileLoading, refetch } = useProfile();
+  const { profile, isLoading: isProfileLoading } = useProfile();
   const upsertMutation = useUpsertProfileMutation();
+  const uploadImageMutation = useUploadProfileImageMutation();
   const deleteImageMutation = useDeleteProfileImageMutation();
   const deleteProfileMutation = useDeleteProfileMutation();
   const { addToast } = useToast();
@@ -60,7 +61,6 @@ export function ProfileFormPage() {
   // Image upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
 
   // Danger zone deletion state
@@ -127,25 +127,22 @@ export function ProfileFormPage() {
   async function handleImageUpload() {
     if (!selectedFile) return;
 
-    setIsUploadingImage(true);
     setImageError(null);
 
     try {
-      await uploadProfileImage(selectedFile);
+      await uploadImageMutation.mutateAsync(selectedFile);
       addToast({
         message: "Profile photo uploaded successfully!",
         variant: "success",
       });
       setSelectedFile(null);
       setPreviewUrl(null);
-      await refetch();
     } catch (err) {
       const apiErr = err as ApiError;
       setImageError(apiErr.message || "Failed to upload profile photo.");
-    } finally {
-      setIsUploadingImage(false);
     }
   }
+
 
   async function handleDeleteImage() {
     if (!window.confirm("Are you sure you want to remove your profile photo?")) {
@@ -335,7 +332,7 @@ export function ProfileFormPage() {
                       variant="primary"
                       size="sm"
                       fullWidth
-                      isLoading={isUploadingImage}
+                      isLoading={uploadImageMutation.isPending}
                       onClick={handleImageUpload}
                     >
                       Upload Selected Photo

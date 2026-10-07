@@ -5,7 +5,9 @@ import {
   deleteProject,
   deleteProjectImage,
   getAllProjects,
+  getProject,
   updateProject,
+  uploadProjectImage,
 } from "../services/projectService";
 import type { ApiError } from "../types/api";
 import type {
@@ -53,6 +55,17 @@ export function useProjects(): UseProjectsReturn {
 }
 
 /**
+ * Custom hook for fetching and caching an individual project by ID via React Query.
+ */
+export function useProject(id: number | null | undefined) {
+  return useQuery<ProjectResponse, ApiError>({
+    queryKey: id ? QUERY_KEYS.project(id) : ["projects", "invalid"],
+    queryFn: () => getProject(id!),
+    enabled: id !== null && id !== undefined && !Number.isNaN(id),
+  });
+}
+
+/**
  * Mutation hook for creating a project, invalidating QUERY_KEYS.projects on success.
  */
 export function useCreateProjectMutation() {
@@ -76,6 +89,23 @@ export function useUpdateProjectMutation() {
     { id: number; data: ProjectUpdate }
   >({
     mutationFn: ({ id, data }) => updateProject(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects });
+    },
+  });
+}
+
+/**
+ * Mutation hook for uploading a project image, invalidating QUERY_KEYS.projects on success.
+ */
+export function useUploadProjectImageMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    ProjectResponse,
+    ApiError,
+    { id: number; file: File }
+  >({
+    mutationFn: ({ id, file }) => uploadProjectImage(id, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects });
     },
@@ -107,4 +137,5 @@ export function useDeleteProjectImageMutation() {
     },
   });
 }
+
 

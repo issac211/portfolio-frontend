@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useProfile } from "../../hooks/useProfile";
 import { Button } from "../ui/Button";
@@ -26,11 +26,23 @@ export function Navbar() {
   const { isAuthenticated, handleLogout } = useAuth();
   const { profile } = useProfile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const brandName = profile?.first_name || "Portfolio";
 
   function closeMenu() {
     setIsMenuOpen(false);
+  }
+
+  function handleNavClick(
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) {
+    closeMenu();
+    // If already on root page, smooth scroll in place; otherwise let React Router navigate
+    if (location.pathname === "/") {
+      handleSmoothScroll(e, href);
+    }
   }
 
   return (
@@ -51,14 +63,14 @@ export function Navbar() {
           aria-label="Main navigation"
         >
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.href}
-              href={link.href}
-              onClick={(e) => { closeMenu(); handleSmoothScroll(e, link.href); }}
+              to={link.href}
+              onClick={(e) => handleNavClick(e, link.href)}
               className="text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -110,14 +122,14 @@ export function Navbar() {
             aria-label="Mobile navigation"
           >
             {NAV_LINKS.map((link) => (
-              <a
+              <Link
                 key={link.href}
-                href={link.href}
-                onClick={(e) => { closeMenu(); handleSmoothScroll(e, link.href); }}
+                to={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
                 className="py-1 text-base font-medium text-gray-700 transition-colors hover:text-blue-600"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
 
             <div className="flex items-center justify-between border-t border-gray-100 pt-3">

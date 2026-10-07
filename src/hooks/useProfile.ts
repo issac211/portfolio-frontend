@@ -4,6 +4,7 @@ import {
   deleteProfile,
   deleteProfileImage,
   getProfile,
+  uploadProfileImage,
   upsertProfile,
 } from "../services/profileService";
 import type { ApiError } from "../types/api";
@@ -70,6 +71,19 @@ export function useUpsertProfileMutation() {
 }
 
 /**
+ * Mutation hook for uploading a profile image, invalidating QUERY_KEYS.profile on success.
+ */
+export function useUploadProfileImageMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<PersonalInfoResponse, ApiError, File>({
+    mutationFn: (file: File) => uploadProfileImage(file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile });
+    },
+  });
+}
+
+/**
  * Mutation hook for deleting the profile image, invalidating QUERY_KEYS.profile on success.
  */
 export function useDeleteProfileImageMutation() {
@@ -94,4 +108,5 @@ export function useDeleteProfileMutation() {
     },
   });
 }
+
 

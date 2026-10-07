@@ -16,13 +16,11 @@ import { useToast } from "../../context/ToastContext";
 import {
   useCreateProjectMutation,
   useDeleteProjectImageMutation,
+  useProject,
   useUpdateProjectMutation,
+  useUploadProjectImageMutation,
 } from "../../hooks/useProjects";
 import { useSEO } from "../../hooks/useSEO";
-import {
-  getProject,
-  uploadProjectImage,
-} from "../../services/projectService";
 import type { ApiError } from "../../types/api";
 
 /**
@@ -40,9 +38,11 @@ export function ProjectFormPage() {
   const createMutation = useCreateProjectMutation();
   const updateMutation = useUpdateProjectMutation();
   const deleteImageMutation = useDeleteProjectImageMutation();
+  const uploadImageMutation = useUploadProjectImageMutation();
 
   const isEditMode = Boolean(id);
   const projectId = id ? Number(id) : null;
+  const isInvalidId = isEditMode && (!projectId || Number.isNaN(projectId));
 
   useSEO({
     title: isEditMode ? "Edit Project" : "New Project",
@@ -66,65 +66,55 @@ export function ProjectFormPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Status & loading state
-  const [isLoadingProject, setIsLoadingProject] = useState(isEditMode);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Only used for 422 inline validation summary — system errors surface as toasts
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // Fetch initial project data in edit mode
-  useEffect(() => {
-    if (!isEditMode || !projectId) return;
+  // Query project via React Query in edit mode
+  const {
+    data: project,
+    isLoading: isQueryLoading,
+    error: queryError,
+  } = useProject(isEditMode && !isInvalidId ? projectId : null);
 
-    if (Number.isNaN(projectId)) {
-      // Architectural decision: Accept cascading render for initial client-side fetching
+  const isLoadingProject = isEditMode && isQueryLoading;
+
+  useEffect(() => {
+    if (isInvalidId) {
+      // Architectural decision: Accept cascading render for initial client-side validation
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setErrorMessage("Invalid project ID provided in URL.");
-      setIsLoadingProject(false);
-      return;
     }
+  }, [isInvalidId]);
 
-    let isMounted = true;
-    setIsLoadingProject(true);
-    setErrorMessage(null);
-
-    getProject(projectId)
-      .then((project) => {
-        if (isMounted) {
-          setTitle(project.title || "");
-          setSummary(project.summary || "");
-          setContent(project.content || "");
-          setGithubUrl(project.github_url || "");
-          setLiveUrl(project.live_url || "");
-          setTagsInput(project.tags ? project.tags.join(", ") : "");
-          setDisplayOrder(
-            project.display_order !== null &&
-              project.display_order !== undefined
-              ? String(project.display_order)
-              : "",
-          );
-          setExistingImageUrl(project.image_url || null);
-        }
-      })
-      .catch((err: ApiError | Error) => {
-        if (isMounted) {
-          // Load failure is unexpected — no inline surface exists for it
-          addToast({
-            message: err.message || "Failed to load project details.",
-            variant: "error",
-          });
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoadingProject(false);
-        }
+  useEffect(() => {
+    if (queryError) {
+      addToast({
+        message: queryError.message || "Failed to load project details.",
+        variant: "error",
       });
+    }
+  }, [queryError, addToast]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [isEditMode, projectId, addToast]);
+  useEffect(() => {
+    if (project) {
+      // Architectural decision: Accept cascading render for initial client-side fetching
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTitle(project.title || "");
+      setSummary(project.summary || "");
+      setContent(project.content || "");
+      setGithubUrl(project.github_url || "");
+      setLiveUrl(project.live_url || "");
+      setTagsInput(project.tags ? project.tags.join(", ") : "");
+      setDisplayOrder(
+        project.display_order !== null && project.display_order !== undefined
+          ? String(project.display_order)
+          : ""
+      );
+      setExistingImageUrl(project.image_url || null);
+    }
+  }, [project]);
 
   // Clean up Blob preview URLs to prevent memory leaks
   useEffect(() => {
@@ -240,7 +230,10 @@ export function ProjectFormPage() {
       if (isEditMode && projectId) {
         await updateMutation.mutateAsync({ id: projectId, data: payload });
         if (selectedFile) {
-          await uploadProjectImage(projectId, selectedFile);
+          await uploadImageMutation.mutateAsync({
+            id: projectId,
+            file: selectedFile,
+          });
         }
         addToast({
           message: "Project updated successfully.",
@@ -249,7 +242,10 @@ export function ProjectFormPage() {
       } else {
         const created = await createMutation.mutateAsync(payload);
         if (selectedFile) {
-          await uploadProjectImage(created.id, selectedFile);
+          await uploadImageMutation.mutateAsync({
+            id: created.id,
+            file: selectedFile,
+          });
         }
         addToast({
           message: "Project created successfully.",
@@ -523,7 +519,8 @@ export function ProjectFormPage() {
                   isLoading={
                     isSubmitting ||
                     createMutation.isPending ||
-                    updateMutation.isPending
+                    updateMutation.isPending ||
+                    uploadImageMutation.isPending
                   }
                 >
                   {isEditMode ? "Save Changes" : "Create Project"}

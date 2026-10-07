@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useToast } from "../../context/ToastContext";
 import { useProfile } from "../../hooks/useProfile";
 import { handleSmoothScroll } from "../../utils/scroll";
 import { GithubIcon, LinkedInIcon, MailIcon } from "../ui/icons";
@@ -58,6 +59,18 @@ const STATUS_DOT_COLORS: Record<
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const { profile } = useProfile();
+  const { addToast } = useToast();
+  const location = useLocation();
+
+  function handleNavClick(
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) {
+    // If already on root page, smooth scroll in place; otherwise let React Router navigate
+    if (location.pathname === "/") {
+      handleSmoothScroll(e, href);
+    }
+  }
 
   const brandName = profile?.first_name || "Portfolio";
   const fullName = profile
@@ -73,6 +86,30 @@ export function Footer() {
   const availabilityText =
     profile?.availability_status?.trim() || statusConfig.defaultText;
 
+  const contactEmail = profile?.email || "contact@example.com";
+
+  async function handleSocialClick(
+    _e: React.MouseEvent<HTMLAnchorElement>,
+    social: SocialLink
+  ) {
+    if (social.label === "Email") {
+      try {
+        await navigator.clipboard.writeText(contactEmail);
+        addToast({
+          message: `Email copied to clipboard (${contactEmail})`,
+          variant: "success",
+        });
+      } catch {
+        addToast({
+          message: `Contact email: ${contactEmail}`,
+          variant: "info",
+        });
+      }
+      // Note: We deliberately do not call preventDefault(), allowing browsers with
+      // a registered mail handler to attempt opening the mail client concurrently.
+    }
+  }
+
   const socialLinks: SocialLink[] = [
     {
       label: "GitHub",
@@ -86,9 +123,7 @@ export function Footer() {
     },
     {
       label: "Email",
-      href: profile?.email
-        ? `mailto:${profile.email}`
-        : "mailto:contact@example.com",
+      href: `mailto:${contactEmail}`,
       icon: MailIcon,
     },
   ];
@@ -138,13 +173,13 @@ export function Footer() {
             <ul className="space-y-2">
               {QUICK_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a
-                    href={link.href}
-                    onClick={(e) => handleSmoothScroll(e, link.href)}
+                  <Link
+                    to={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
                     className="text-sm text-gray-600 transition-colors hover:text-blue-600"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -161,15 +196,22 @@ export function Footer() {
             <div className="flex items-center gap-4 pt-1">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
+                const isMailto = social.href.startsWith("mailto:");
                 return (
                   <a
                     key={social.label}
                     href={social.href}
+                    onClick={(e) => handleSocialClick(e, social)}
                     // noopener noreferrer protects against tabnabbing when opening external links
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={isMailto ? undefined : "_blank"}
+                    rel={isMailto ? undefined : "noopener noreferrer"}
                     aria-label={social.label}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600 hover:shadow-xs active:scale-95"
+                    title={
+                      isMailto
+                        ? `Send email or copy: ${contactEmail}`
+                        : social.label
+                    }
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600 hover:shadow-xs active:scale-95 cursor-pointer"
                   >
                     <Icon className="h-5 w-5" />
                   </a>

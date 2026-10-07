@@ -5,8 +5,8 @@
 | Decision                        | Choice                                                                                                                        | Rationale                                                                                                                                    |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Server state management         | React Query (`@tanstack/react-query`) for Profile & Projects                                                                  | Mandatory across all server state — fetch-once/caching, automatic deduplication, stale-while-revalidate, and unified mutation lifecycle      |
-| Query key architecture          | Centralized `QUERY_KEYS` constant in `config/constants.ts`                                                                    | Single Source of Truth for cache keys (`profile`, `projects`); prevents typo drift and fragmented invalidations across hooks and components  |
-| Mutation & cache invalidation   | `useMutation` with `queryClient.invalidateQueries` on write ops                                                               | All PUT/POST/DELETE operations trigger automated targeted query invalidation to ensure UI state instantly mirrors the database               |
+| Query key architecture          | Centralized `QUERY_KEYS` constant in `config/constants.ts`                                                                    | Single Source of Truth for cache keys (`profile`, `projects`, `project(id)`); hierarchical invalidation prevents typo drift                  |
+| Mutation & cache invalidation   | `useMutation` with `queryClient.invalidateQueries` on write ops                                                               | All PUT/POST/DELETE and image upload operations trigger automated targeted query invalidation to ensure UI state mirrors the database        |
 | Controlled form state safety    | Null-coalescing (`?? ""`) on all nullable fields in form state                                                                | Coalesces database `null` values to empty strings during form initialization, preventing React uncontrolled-to-controlled component warnings |
 | Hardcoding elimination strategy | Replace all static strings with data from `GET /api/profile/`                                                                 | Single Source of Truth from the backend; zero hardcoded marketing copy                                                                       |
 | Project description split (UI)  | Two separate `<textarea>` inputs in Admin form; `ProjectCard` uses `summary`, `ProjectDetailPage` uses `content`              | Matches the new backend schema; clear separation of concerns                                                                                 |
@@ -16,10 +16,11 @@
 | Domain vocabulary refactoring   | Rename `tech_stack` → `tags` in all TypeScript interfaces, UI labels, and form fields                                         | Mirrors backend rename; generalizes concept to include status labels ("WIP", "Open Source") and categories beyond technologies               |
 | Availability indicator (UI)     | Map `status_indicator` string to Tailwind dot classes in `ProfileHero` (`success` → pulsing green, `error` → solid red, etc.) | Dynamic, backend-driven visual state; avoids boolean flags; uses a semantic string→class lookup instead of conditional chains                |
 | API contract-driven development | Validate TS interfaces against `api-contract.json` (OpenAPI) exported by the backend after each schema phase                  | Frontend work begins only after the contract is updated; prevents type drift and integration surprises                                       |
+| Client-side SPA navigation      | React Router `<Link>` with conditional smooth scrolling on `/`                                                                | Eliminates full-page browser reloads when navigating across pages or back from detail views, maintaining hot client cache                    |
 
 ---
 
-## Current Project State (Baseline v1.0)
+## Current Project State (Baseline v1.1)
 
 ```
 frontend/
@@ -51,8 +52,8 @@ frontend/
     │   │   ├── AdminSidebar.tsx
     │   │   └── ConfirmDeleteModal.tsx  # Accessible danger-zone confirmation modal with typed keyword check (Phase 5)
     │   ├── layout/
-    │   │   ├── Footer.tsx
-    │   │   ├── Navbar.tsx
+    │   │   ├── Footer.tsx              # Public footer with mailto safety & SPA smooth-scroll links (Phase 2, Phase 6)
+    │   │   ├── Navbar.tsx              # Public navbar with profile branding & SPA smooth-scroll links (Phase 2, Phase 6)
     │   │   └── PublicLayout.tsx
     │   ├── shared/
     │   │   ├── ProfileHero.tsx
@@ -91,24 +92,24 @@ frontend/
     │           ├── UserIcon.tsx
     │           └── XIcon.tsx
     ├── config/
-    │   └── constants.ts            # API/IMAGE URLs, TOKEN_KEY + QUERY_KEYS (Phase 1)
+    │   └── constants.ts            # API/IMAGE URLs, TOKEN_KEY + QUERY_KEYS with project(id) factory (Phase 1, Phase 6)
     ├── context/
     │   ├── AuthContext.tsx
     │   └── ToastContext.tsx
     ├── hooks/
     │   ├── useAuth.ts
-    │   ├── useProfile.ts           # React Query useQuery + upsert & delete image/profile mutations (Phase 5)
-    │   ├── useProjects.ts          # React Query useQuery + project CRUD & delete image mutations (Phase 5)
+    │   ├── useProfile.ts           # React Query useQuery + upsert, upload & delete image/profile mutations (Phase 5, Phase 6)
+    │   ├── useProjects.ts          # React Query useQuery, useProject(id) + project CRUD, upload & delete mutations (Phase 5, Phase 6)
     │   ├── useScrollToHash.ts
     │   └── useSEO.ts
     ├── pages/
     │   ├── HomePage.tsx
     │   ├── LoginPage.tsx
-    │   ├── ProjectDetailPage.tsx
+    │   ├── ProjectDetailPage.tsx   # React Query useProject(id) caching + client-side back navigation (Phase 6)
     │   └── admin/
     │       ├── DashboardPage.tsx
-    │       ├── ProfileFormPage.tsx     # Full profile CRUD + image deletion + danger zone soft delete (Phase 5)
-    │       └── ProjectFormPage.tsx     # Full project CRUD + image deletion (Phase 5)
+    │       ├── ProfileFormPage.tsx     # Full profile CRUD, upload/delete image & danger zone soft delete (Phase 5, Phase 6)
+    │       └── ProjectFormPage.tsx     # Full project CRUD, upload/delete image with React Query (Phase 5, Phase 6)
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
@@ -129,7 +130,12 @@ frontend/
 ### Current `PersonalInfoResponse` Type (v1.1)
 
 ```typescript
-export type StatusIndicator = "success" | "warning" | "error" | "neutral" | null;
+export type StatusIndicator =
+  | "success"
+  | "warning"
+  | "error"
+  | "neutral"
+  | null;
 
 interface PersonalInfoResponse {
   id: number;
@@ -149,7 +155,6 @@ interface PersonalInfoResponse {
 }
 ```
 
-
 ### Current `ProjectResponse` Type (v1.1)
 
 ```typescript
@@ -165,7 +170,6 @@ interface ProjectResponse {
   image_url: string | null;
 }
 ```
-
 
 ---
 
@@ -198,7 +202,6 @@ interface ProjectResponse {
 >
 > All components consuming `ProjectResponse` have been updated: `ProjectCard`, `ProjectDetailPage`, `ProjectFormPage`, `DashboardPage`, `useProjects`, and `projectService`.
 
-
 > [!IMPORTANT]
 > **Type Changes — `PersonalInfoResponse`:**
 > Schema synchronized with backend `api-contract.json`:
@@ -220,9 +223,9 @@ interface ProjectResponse {
 > [!NOTE]
 > **Hero Title Two-Tone Gradient Styling (`ProfileHero`):**
 > `ProfileHero` splits `hero_title` into a primary dark text block and a vibrant gradient highlight (`bg-gradient-to-r from-blue-600 to-indigo-600`).
+>
 > - **Smart Auto-Split:** Phrases with 4+ words automatically highlight the final 2 words (e.g. `"Building scalable, modern | web applications"`). Shorter phrases highlight the final word.
 > - **Manual Delimiter Support:** Developers can supply an explicit pipe delimiter `|` in `ProfileFormPage` (e.g. `"Cloud-Native Engineer | AI & Systems"`) to manually curate the exact split boundary.
-
 
 > [!IMPORTANT]
 > **`status_indicator` → Tailwind Dot & Default Text Mapping (`ProfileHero` & `Footer`):**
@@ -244,6 +247,7 @@ interface ProjectResponse {
 
 > [!NOTE]
 > **Image Deletion & Profile Danger-Zone Deletion (✅ Done):**
+>
 > - **Service Calls:** `deleteProfileImage()`, `deleteProfile()`, and `deleteProjectImage(id)` implemented in `profileService.ts` and `projectService.ts` calling `DELETE` endpoints and returning `void` (204 No Content).
 > - **React Query Mutations:** Dedicated mutation hooks (`useDeleteProfileImageMutation`, `useDeleteProfileMutation`, `useDeleteProjectImageMutation`) trigger automatic cache invalidation (`QUERY_KEYS.profile`, `QUERY_KEYS.projects`).
 > - **Lightweight Image Removal UX:** "Remove Photo" / "Remove Image" buttons with `TrashIcon` provide inline browser confirmation and optimistic preview state clearing upon success.
@@ -257,6 +261,34 @@ interface ProjectResponse {
 > - **Badge Mapping:** `Badge` contained no tech-specific logic — only its JSDoc wording was generalized.
 > - **Admin Form:** The tags input remains a comma-separated text field with live chip preview; helper text now explains tags may represent technologies, categories, or status labels (e.g. "WIP", "Open Source").
 > - `projectService.ts` and `useProjects.ts` required no changes: they are typed against `ProjectCreate`/`ProjectUpdate`, so the rename propagates through the interfaces.
+
+> [!IMPORTANT]
+> **Single-Project Caching & Hierarchical Invalidation (`QUERY_KEYS.project(id)` — ✅ Done):**
+>
+> - Single project fetching in `ProjectDetailPage` and `ProjectFormPage` is encapsulated in `useProject(id)`.
+> - The query key factory `QUERY_KEYS.project(id)` evaluates to `["projects", id] as const`.
+> - Because React Query invalidates queries by prefix matching, mutating the collection via `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects })` automatically invalidates the project list query as well as all individual cached project queries (`["projects", 1]`, etc.), keeping cache state synchronized without manual ID tracking.
+
+> [!IMPORTANT]
+> **Client-Side SPA Anchor Routing vs. Full Page Refresh (✅ Done):**
+>
+> - Standard `<a href="/#section">` links without SPA routing trigger full browser document reloads when activated from sub-routes (such as `/projects/:id` or `/admin`), discarding in-memory React Query cache and re-fetching assets.
+> - `Navbar.tsx`, `Footer.tsx`, and `ProjectDetailPage.tsx` now employ React Router `<Link to={href}>` with `handleNavClick`:
+>   - On the root page (`/`), smooth in-page scrolling (`handleSmoothScroll`) is preserved.
+>   - On sub-routes, React Router executes a client-side route transition without reloading the document, after which `useScrollToHash` scrolls directly to the targeted section.
+
+> [!NOTE]
+> **Image Upload Mutations & Form State Simplification (✅ Done):**
+>
+> - Profile and project image uploads are migrated to `useUploadProfileImageMutation` and `useUploadProjectImageMutation`.
+> - Successful uploads trigger automated cache invalidation (`QUERY_KEYS.profile`, `QUERY_KEYS.projects`), eliminating manual `refetch()` invocations and local `isUploadingImage` state flags from `ProfileFormPage` and `ProjectFormPage`.
+
+> [!NOTE]
+> **Native Mailto Protocol & Clipboard Fallback UX (✅ Done):**
+>
+> - External social links utilize `target="_blank" rel="noopener noreferrer"` to protect against reverse tabnabbing.
+> - For `mailto:` URIs, browsers open an unwanted `about:blank` tab if `target="_blank"` is present; `Footer.tsx` conditionally omits `target` and `rel` attributes whenever `href.startsWith("mailto:")`.
+> - On client machines lacking a registered desktop email client (or when the browser swallows `mailto:` due to unconfigured protocol handlers), clicking the email link automatically copies the address (`contactEmail`) to the clipboard via `navigator.clipboard.writeText` and renders an instant toast notification (`useToast`), providing a seamless fallback.
 
 ---
 
@@ -293,8 +325,8 @@ frontend/
     │   │   ├── AdminSidebar.tsx
     │   │   └── ConfirmDeleteModal.tsx    ✅ Done — reusable accessible confirmation modal with typed keyword verification
     │   ├── layout/
-    │   │   ├── Footer.tsx               ✅ Done — consumed profile data from global state
-    │   │   ├── Navbar.tsx               ✅ Done — consumed profile data from global state
+    │   │   ├── Footer.tsx               ✅ Done — consumed profile data, mailto safety & SPA navigation
+    │   │   ├── Navbar.tsx               ✅ Done — consumed profile data & SPA navigation
     │   │   └── PublicLayout.tsx
     │   ├── shared/
     │   │   ├── ProfileHero.tsx          ✅ Done — consumed hero_title, availability_status, short_bio + status_indicator dot mapping
@@ -312,24 +344,24 @@ frontend/
     │       └── icons/
     │           └── ... (no changes)
     ├── config/
-    │   └── constants.ts                 ✅ Done — defined centralized QUERY_KEYS object
+    │   └── constants.ts                 ✅ Done — defined centralized QUERY_KEYS object with project(id) factory
     ├── context/
     │   ├── AuthContext.tsx
     │   └── ToastContext.tsx
     ├── hooks/
     │   ├── useAuth.ts
-    │   ├── useProfile.ts               ✅ Done — refactored to React Query (useQuery + upsert & delete mutations)
-    │   ├── useProjects.ts              ✅ Done — refactored to React Query (useQuery + project CRUD & delete image mutations)
+    │   ├── useProfile.ts               ✅ Done — refactored to React Query (useQuery + upsert, upload & delete mutations)
+    │   ├── useProjects.ts              ✅ Done — refactored to React Query (useQuery, useProject(id) + project CRUD, upload & delete mutations)
     │   ├── useScrollToHash.ts
     │   └── useSEO.ts
     ├── pages/
     │   ├── HomePage.tsx
     │   ├── LoginPage.tsx
-    │   ├── ProjectDetailPage.tsx        ✅ Done — renders `content` (full write-up) with fallback to `summary`; renders `tags`
+    │   ├── ProjectDetailPage.tsx        ✅ Done — cached via useProject(id), client-side navigation breadcrumbs, full write-up & tags
     │   └── admin/
     │       ├── DashboardPage.tsx         ✅ Done — delete mutation + `tags` column/metric
-    │       ├── ProfileFormPage.tsx       ✅ Done — profile inputs, upsert mutation, image remove button & soft-delete danger zone
-    │       └── ProjectFormPage.tsx       ✅ Done — summary + content + tags inputs, CRUD mutations & project image remove button
+    │       ├── ProfileFormPage.tsx       ✅ Done — profile inputs, upsert & upload mutations, image remove button & soft-delete danger zone
+    │       └── ProjectFormPage.tsx       ✅ Done — summary + content + tags inputs, CRUD & upload mutations & project image remove button
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
@@ -420,11 +452,17 @@ frontend/
   - [x] Implement profile deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })`, redirect to dashboard, and display a success toast
 - [x] Type-check: `npx tsc -b --noEmit`
 
-### Phase 6: Final Verification & Cleanup
+### Phase 6: Final Verification & Network/Navigation Hardening
 
-- [ ] Full type-check pass: `npx tsc -b --noEmit`
-- [ ] Manual smoke test: all public pages render profile data from API (no hardcoded strings)
-- [ ] Manual smoke test: admin forms handle all new fields correctly
-- [ ] Manual smoke test: image deletion and profile deletion flows work end-to-end
-- [ ] Manual smoke test: tags render correctly on ProjectCard and ProjectDetailPage (no residual "Tech Stack" labels)
-- [ ] Verify React Query caching: profile data fetched once, shared across Navbar/Footer/Hero without duplicate requests
+- [x] **Single-Project React Query Caching:** Wrap single-project fetch in `useProject(id)` hook with `QUERY_KEYS.project(id)` in `ProjectDetailPage` and `ProjectFormPage`, eliminating redundant requests and establishing fast client caching.
+- [x] **SPA Navigation Integrity:** Convert anchor navigation in `Navbar.tsx`, `Footer.tsx`, and `ProjectDetailPage.tsx` to React Router `<Link>` with conditional in-page smooth scrolling on `/`, preventing hard browser reloads and memory cache flushing when navigating from sub-routes.
+- [x] **Image Upload Mutations:** Wrap `uploadProfileImage` and `uploadProjectImage` in `useUploadProfileImageMutation` and `useUploadProjectImageMutation` with automated invalidation of `QUERY_KEYS.profile` and `QUERY_KEYS.projects`.
+- [x] **Mailto Protocol Fix & Clipboard Fallback:** Omit `target="_blank"` on `mailto:` links in `Footer.tsx` and copy email to clipboard with instant toast notification on click.
+- [x] Full type-check pass: `npx tsc -b --noEmit` (0 errors)
+- [x] Static analysis & linting pass: `npm run lint` (0 errors, 0 warnings)
+- [x] Codebase audit: zero residual `tech_stack` or `.description` references; all queries/mutations wired through centralized `QUERY_KEYS`
+- [x] Verify React Query caching: profile and projects fetched once and cached, invalidations trigger seamlessly upon mutations
+- [x] Manual smoke test: all public pages render profile data from API (no hardcoded strings)
+- [x] Manual smoke test: admin forms handle all new fields correctly
+- [x] Manual smoke test: image upload, deletion, and profile soft-delete flows work end-to-end
+- [x] Manual smoke test: tags render correctly on ProjectCard and ProjectDetailPage (no residual "Tech Stack" labels)
