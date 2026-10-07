@@ -61,7 +61,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </Link>
         </h3>
 
-        <p className="mt-3 text-sm sm:text-base font-normal leading-relaxed text-gray-600 line-clamp-3">
+        <p className="mt-3 text-sm sm:text-base font-normal leading-relaxed text-gray-600">
           {project.summary}
         </p>
 
