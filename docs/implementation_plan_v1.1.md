@@ -218,6 +218,10 @@ interface ProjectResponse {
 - `AdminSidebar` consumes `useProjects()` to render a collapsible sub-navigation list directly under "New Project", allowing instant one-click editing without returning to the dashboard table.
 - Employs an internal scroll container (`max-h-52 overflow-y-auto` with slim scrollbar) so sidebars remain compact and footer session actions (Back to Site / Logout) stay anchored and reachable even with dozens of projects.
 
+### 10. Keyed Component Pattern for Form State Isolation
+- Navigating between `/admin/projects/:id/edit` and `/admin/projects/new` (or across different project IDs) reuses the same component instance in React Router, which would leak previous form state into the new creation form.
+- `ProjectFormPage` implements the Keyed Component pattern (`<ProjectFormContent key={id ?? "new"} />`), forcing React to fully unmount the previous instance and remount a pristine, freshly initialized state tree on every route transition without manual effect boilerplate.
+
 ---
 
 ## Target Folder Structure (v1.1)

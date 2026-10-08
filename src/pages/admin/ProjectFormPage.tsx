@@ -33,12 +33,16 @@ import type { ApiError } from "../../types/api";
 /**
  * Administrative project creation and editing page.
  *
- * Automatically detects edit vs. create mode via route params, manages
- * controlled form fields, parses comma-separated tags, handles media file
- * selection with preview, and coordinates multipart image uploads
- * following entity persistence.
+ * Utilizes the Keyed Component pattern (`key={id ?? "new"}`) to guarantee that navigating
+ * between edit mode and creation mode (or between different projects) unmounts the previous
+ * instance and completely resets all form state, media previews, and validation errors.
  */
 export function ProjectFormPage() {
+  const { id } = useParams<{ id: string }>();
+  return <ProjectFormContent key={id ?? "new"} />;
+}
+
+function ProjectFormContent() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToast } = useToast();
