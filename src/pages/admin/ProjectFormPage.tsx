@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { Card, CardBody, CardHeader } from "../../components/ui/Card";
 import { ImageIcon, TrashIcon } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
+import MDEditor from "@uiw/react-md-editor";
 import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { useToast } from "../../context/ToastContext";
@@ -434,17 +435,36 @@ export function ProjectFormPage() {
                     helperText="Brief summary displayed on project cards in the public grid."
                   />
 
-                  {/* Content / Full Write-up */}
-                  <Input
-                    as="textarea"
-                    label="Detailed Content (Full Write-up)"
-                    rows={8}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    error={fieldErrors.content}
-                    placeholder="Provide a comprehensive deep-dive into the system architecture, business challenges, and technical solutions..."
-                    helperText="Optional full project case study displayed on the detail page."
-                  />
+                  {/* Content / Full Write-up (Rich Markdown Editor) */}
+                  <div className="space-y-1.5" data-color-mode="light">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Detailed Content (Full Write-up — Markdown)
+                      </label>
+                      <span className="text-xs text-gray-400">
+                        Supports GFM (tables, code blocks, lists, links)
+                      </span>
+                    </div>
+
+                    <div className="overflow-hidden rounded-lg border border-gray-300 shadow-2xs transition-all focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20">
+                      <MDEditor
+                        value={content}
+                        onChange={(val) => setContent(val || "")}
+                        height={350}
+                        preview="live"
+                      />
+                    </div>
+
+                    {fieldErrors.content ? (
+                      <p className="text-xs font-medium text-red-600">
+                        {fieldErrors.content}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-500">
+                        Full project case study displayed on the detail page with rich Markdown formatting.
+                      </p>
+                    )}
+                  </div>
 
                   {/* Tags Input & Live Preview */}
                   <div>

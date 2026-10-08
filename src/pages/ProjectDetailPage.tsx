@@ -8,6 +8,7 @@ import {
   GithubIcon,
 } from "../components/ui/icons";
 import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
+import { MarkdownContent } from "../components/ui/MarkdownContent";
 import { IMAGE_BASE_URL } from "../config/constants";
 import { useProject } from "../hooks/useProjects";
 import { useSEO } from "../hooks/useSEO";
@@ -173,14 +174,14 @@ export function ProjectDetailPage() {
           </div>
         )}
 
-        {/* Project Content / Full Write-up */}
+        {/* Project Content / Full Write-up rendered via Markdown */}
         {project.content && (
           <div className="py-8">
             <h2 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
               About the Project
             </h2>
-            <div className="mt-4 whitespace-pre-line text-base leading-relaxed text-gray-600 sm:text-lg">
-              {project.content}
+            <div className="mt-4">
+              <MarkdownContent content={project.content} />
             </div>
           </div>
         )}

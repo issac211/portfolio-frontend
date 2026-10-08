@@ -65,6 +65,7 @@ frontend/
     │       ├── EmptyState.tsx
     │       ├── Input.tsx
     │       ├── Loader.tsx
+│       ├── MarkdownContent.tsx     # Secure, styled Markdown renderer (react-markdown + remark-gfm)
     │       ├── SectionTitle.tsx
     │       ├── Skeleton.tsx            # Shimmer loading placeholders matching 2-column project cards & detail layouts
     │       ├── Toast.tsx
@@ -109,7 +110,7 @@ frontend/
     │   └── admin/
     │       ├── DashboardPage.tsx
     │       ├── ProfileFormPage.tsx     # Full profile CRUD, upload/delete image & danger zone soft delete (Phase 5, Phase 6)
-    │       └── ProjectFormPage.tsx     # Full project CRUD, upload/delete image with React Query (Phase 5, Phase 6)
+    │       └── ProjectFormPage.tsx     # Full project CRUD, upload/delete image & rich Markdown editor (MDEditor)
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
@@ -246,6 +247,11 @@ interface ProjectResponse {
 > - **Narrative Paragraphs & Timeline Nodes:** Extended bio parses raw newline text into distinct paragraphs (`split(/\n+/)`), styled with vertical rhythm (`space-y-3.5 sm:space-y-4`) and precision timeline dot markers (`ring-[3px] ring-white bg-blue-500`) along a continuous accent border, rendering long prose with editorial clarity.
 > - **Smooth Collapsible Bio:** The extended bio features an accessible toggle (`isBioExpanded`, defaulting to `true` / expanded), animating smoothly via CSS `grid-template-rows` (`grid-rows-[1fr]` to `grid-rows-[0fr]`) and opacity transitions for pure auto-height interpolation.
 > - **Sticky Avatar Tracking:** The portrait column uses a stretch-height grid parent (`lg:items-stretch`) with an inner sticky container (`lg:sticky lg:top-24`), tracking smoothly through Hero scrolling and anchoring cleanly at the section boundary.
+
+> [!NOTE]
+> **Detailed Content Markdown Support (✅ Done):**
+> - **Public Rendering (`ProjectDetailPage`):** `MarkdownContent.tsx` securely renders the project `content` write-up via `react-markdown` and `remark-gfm` (GFM tables, task lists, code blocks, autolinks, blockquotes). Semantic tags are customized with accessible Tailwind styles, sanitized against XSS, and external links automatically apply `target="_blank"` and `rel="noopener noreferrer"`.
+> - **Admin Authoring (`ProjectFormPage`):** Integrated `@uiw/react-md-editor` with live dual-pane preview (`preview="live"`, height 350px, `data-color-mode="light"`), providing engineers with full WYSIWYG toolbars and markdown shortcuts for case-study write-ups.
 
 > [!NOTE]
 > **API Contract-Driven Development (Frontend Side):**
