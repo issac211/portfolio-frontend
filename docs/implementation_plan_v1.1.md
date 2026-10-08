@@ -109,9 +109,9 @@ frontend/
     │   ├── LoginPage.tsx
     │   ├── ProjectDetailPage.tsx   # Deep-dive with header-first layout, conditional compact media & React Query cache
     │   └── admin/
-    │       ├── DashboardPage.tsx       # Metrics hub with dynamic status indicator, profile summary & project admin table
+    │       ├── DashboardPage.tsx       # Metrics hub, dynamic status indicator, profile summary & project admin table with accessible deletion modal
     │       ├── ProfileFormPage.tsx     # Full profile CRUD, upload/delete image & danger zone soft delete (Phase 5, Phase 6)
-    │       └── ProjectFormPage.tsx     # Full project CRUD, upload/delete image & rich Markdown editor (MDEditor)
+    │       └── ProjectFormPage.tsx     # Full project CRUD, upload/delete image, Markdown editor & project deletion danger zone
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
@@ -210,8 +210,9 @@ interface ProjectResponse {
 - `Footer` conditionally omits `target="_blank"` on `mailto:` links to prevent browsers from opening unwanted blank tabs.
 - If no desktop mail client is registered, clicking the email button copies the address to clipboard via `navigator.clipboard.writeText` and displays a toast notification.
 
-### 8. Danger-Zone Modal Mount Lifecycle
-- `ConfirmDeleteModal` uses a mount-based lifecycle with typed keyword verification (`confirmKeyword="DELETE"`). State resets upon mount rather than synchronously inside a `useEffect` to prevent React 19 cascading render warnings.
+### 8. Danger-Zone Modals & Project Deletion
+- `ConfirmDeleteModal` provides accessible confirmation with a mount-based lifecycle (preventing React 19 cascading render warnings).
+- Used for Profile deactivation (with typed `"DELETE"` verification), Project edit deletion on `ProjectFormPage`, and table row deletion on `DashboardPage` (with instant deletion confirmation), automatically invalidating `QUERY_KEYS.projects` upon completion.
 
 ### 9. Admin Sidebar Fast Project Navigation
 - `AdminSidebar` consumes `useProjects()` to render a collapsible sub-navigation list directly under "New Project", allowing instant one-click editing without returning to the dashboard table.
@@ -288,9 +289,9 @@ frontend/
     │   ├── LoginPage.tsx
     │   ├── ProjectDetailPage.tsx        ✅ Done — cached via useProject(id), client-side navigation breadcrumbs, full write-up & tags
     │   └── admin/
-    │       ├── DashboardPage.tsx         ✅ Done — delete mutation + `tags` column/metric
+    │       ├── DashboardPage.tsx         ✅ Done — delete mutation with accessible ConfirmDeleteModal + `tags` column/metric
     │       ├── ProfileFormPage.tsx       ✅ Done — profile inputs, upsert & upload mutations, image remove button & soft-delete danger zone
-    │       └── ProjectFormPage.tsx       ✅ Done — summary + content + tags inputs, CRUD & upload mutations & project image remove button
+    │       └── ProjectFormPage.tsx       ✅ Done — summary + content + tags inputs, CRUD, upload/delete image & project deletion modal
     ├── router/
     │   ├── AppRouter.tsx
     │   └── ProtectedRoute.tsx
@@ -375,6 +376,7 @@ frontend/
   - [x] Add `deleteProjectImage(id: number)` to `services/projectService.ts` — calls `DELETE /api/projects/{id}/image`
   - [x] In `pages/admin/ProjectFormPage.tsx`, implement project image deletion via `useMutation`: on `onSuccess`, call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects })`, clear preview, and display a success toast
   - [x] Add "Remove Image" button (trash icon) to `pages/admin/ProjectFormPage.tsx`
+  - [x] In `pages/admin/ProjectFormPage.tsx`, implement project deletion in edit mode via `useDeleteProjectMutation`: with header action, bottom danger-zone section, `ConfirmDeleteModal`, cache invalidation, and toast feedback
 - [x] **Profile Soft Delete:**
   - [x] Add `deleteProfile()` to `services/profileService.ts` — calls `DELETE /api/profile/`
   - [x] Create `components/admin/ConfirmDeleteModal.tsx` — reusable danger-zone confirmation modal

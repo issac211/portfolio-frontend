@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { ConfirmDeleteModal } from "../../components/admin/ConfirmDeleteModal";
 import { useProjects, useDeleteProjectMutation } from "../../hooks/useProjects";
 import { useProfile } from "../../hooks/useProfile";
 import { useSEO } from "../../hooks/useSEO";
@@ -53,6 +54,10 @@ export function DashboardPage() {
   } = useProfile();
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<{
+    id: number;
+    title: string;
+  } | null>(null);
   const deleteProjectMutation = useDeleteProjectMutation();
 
   const statusConfig = getStatusConfig(profile?.status_indicator ?? null);
@@ -74,23 +79,25 @@ export function DashboardPage() {
     ? `${profile.first_name} ${profile.last_name}`.trim()
     : "";
 
-  async function handleDelete(id: number, title: string) {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete "${title}"? This action cannot be undone.`
-      )
-    ) {
-      return;
-    }
+  async function handleConfirmDelete() {
+    if (!projectToDelete) return;
 
+    const { id, title } = projectToDelete;
     setDeletingId(id);
 
     try {
       await deleteProjectMutation.mutateAsync(id);
-      addToast({ message: `"${title}" deleted successfully.`, variant: "success" });
+      addToast({
+        message: `"${title}" deleted successfully.`,
+        variant: "success",
+      });
+      setProjectToDelete(null);
     } catch (err) {
       const apiErr = err as ApiError;
-      addToast({ message: apiErr.message || "Failed to delete project.", variant: "error" });
+      addToast({
+        message: apiErr.message || "Failed to delete project.",
+        variant: "error",
+      });
     } finally {
       setDeletingId(null);
     }
@@ -442,9 +449,12 @@ export function DashboardPage() {
                             type="button"
                             disabled={isDeleting}
                             onClick={() =>
-                              handleDelete(project.id, project.title)
+                              setProjectToDelete({
+                                id: project.id,
+                                title: project.title,
+                              })
                             }
-                            className="rounded-md p-1.5 text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                            className="rounded-md p-1.5 text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50 cursor-pointer"
                             title="Delete project"
                           >
                             {isDeleting ? (
@@ -464,6 +474,24 @@ export function DashboardPage() {
           </div>
         )}
       </Card>
+
+      {/* ── Confirm Delete Modal ── */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(projectToDelete)}
+        title={`Delete "${projectToDelete?.title || "Project"}"`}
+        description={
+          <>
+            Are you sure you want to delete{" "}
+            <strong>{projectToDelete?.title || "this project"}</strong>? This
+            will permanently remove the showcase and all associated media from
+            your portfolio. This action cannot be undone.
+          </>
+        }
+        confirmButtonText="Delete Project"
+        isLoading={deleteProjectMutation.isPending}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setProjectToDelete(null)}
+      />
     </div>
   );
 }

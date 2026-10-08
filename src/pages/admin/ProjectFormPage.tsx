@@ -1,3 +1,4 @@
+import MDEditor from "@uiw/react-md-editor";
 import {
   useEffect,
   useMemo,
@@ -6,17 +7,22 @@ import {
   type SubmitEvent,
 } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { ConfirmDeleteModal } from "../../components/admin/ConfirmDeleteModal";
 import { Button } from "../../components/ui/Button";
 import { Card, CardBody, CardHeader } from "../../components/ui/Card";
-import { ExternalLinkIcon, ImageIcon, TrashIcon } from "../../components/ui/icons";
+import {
+  ExternalLinkIcon,
+  ImageIcon,
+  TrashIcon,
+} from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
-import MDEditor from "@uiw/react-md-editor";
 import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
 import { IMAGE_BASE_URL } from "../../config/constants";
 import { useToast } from "../../context/ToastContext";
 import {
   useCreateProjectMutation,
   useDeleteProjectImageMutation,
+  useDeleteProjectMutation,
   useProject,
   useUpdateProjectMutation,
   useUploadProjectImageMutation,
@@ -38,12 +44,15 @@ export function ProjectFormPage() {
   const { addToast } = useToast();
   const createMutation = useCreateProjectMutation();
   const updateMutation = useUpdateProjectMutation();
+  const deleteProjectMutation = useDeleteProjectMutation();
   const deleteImageMutation = useDeleteProjectImageMutation();
   const uploadImageMutation = useUploadProjectImageMutation();
 
   const isEditMode = Boolean(id);
   const projectId = id ? Number(id) : null;
   const isInvalidId = isEditMode && (!projectId || Number.isNaN(projectId));
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useSEO({
     title: isEditMode ? "Edit Project" : "New Project",
@@ -111,7 +120,7 @@ export function ProjectFormPage() {
       setDisplayOrder(
         project.display_order !== null && project.display_order !== undefined
           ? String(project.display_order)
-          : ""
+          : "",
       );
       setExistingImageUrl(project.image_url || null);
     }
@@ -169,7 +178,9 @@ export function ProjectFormPage() {
   async function handleDeleteImage() {
     if (!isEditMode || !projectId) return;
 
-    if (!window.confirm("Are you sure you want to remove this project image?")) {
+    if (
+      !window.confirm("Are you sure you want to remove this project image?")
+    ) {
       return;
     }
 
@@ -188,6 +199,27 @@ export function ProjectFormPage() {
         message: apiErr.message || "Failed to remove project image.",
         variant: "error",
       });
+    }
+  }
+
+  async function handleDeleteProject() {
+    if (!projectId) return;
+
+    try {
+      await deleteProjectMutation.mutateAsync(projectId);
+      addToast({
+        message: `Project "${title || "Project"}" deleted successfully.`,
+        variant: "success",
+      });
+      navigate("/admin");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      addToast({
+        message: apiErr.message || "Failed to delete project.",
+        variant: "error",
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
     }
   }
 
@@ -315,16 +347,18 @@ export function ProjectFormPage() {
         </div>
 
         {isEditMode && projectId && (
-          <Link
-            to={`/projects/${projectId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shrink-0 self-start"
-            title="View public project page in a new tab"
-          >
-            <span>View Public Page</span>
-            <ExternalLinkIcon className="h-3.5 w-3.5 text-gray-500" />
-          </Link>
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start">
+            <Link
+              to={`/projects/${projectId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              title="View public project page in a new tab"
+            >
+              <span>View Public Page</span>
+              <ExternalLinkIcon className="h-3.5 w-3.5 text-gray-500" />
+            </Link>
+          </div>
         )}
       </div>
 
@@ -476,7 +510,8 @@ export function ProjectFormPage() {
                       </p>
                     ) : (
                       <p className="text-xs text-gray-500">
-                        Full project case study displayed on the detail page with rich Markdown formatting.
+                        Full project case study displayed on the detail page
+                        with rich Markdown formatting.
                       </p>
                     )}
                   </div>
@@ -582,7 +617,49 @@ export function ProjectFormPage() {
           </div>
         </form>
       )}
+
+      {/* ── Danger Zone: Delete Project ── */}
+      {isEditMode && projectId && (
+        <div className="rounded-xl border border-red-200 bg-red-50/40 p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-red-900">
+                Danger Zone: Delete Project
+              </h3>
+              <p className="mt-1 text-sm text-red-700">
+                Permanently delete this project from your portfolio. This action
+                cannot be undone.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={() => setIsDeleteModalOpen(true)}
+            >
+              <TrashIcon className="h-4 w-4" />
+              <span>Delete Project</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirm Delete Modal ── */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        title={`Delete "${title || "Project"}"`}
+        description={
+          <>
+            Are you sure you want to delete{" "}
+            <strong>{title || "this project"}</strong>? This will permanently
+            remove the showcase and all associated media from your portfolio.
+            This action cannot be undone.
+          </>
+        }
+        confirmButtonText="Delete Project"
+        isLoading={deleteProjectMutation.isPending}
+        onConfirm={handleDeleteProject}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
     </div>
   );
 }
-
