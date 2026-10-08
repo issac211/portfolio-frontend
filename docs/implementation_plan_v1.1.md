@@ -49,7 +49,7 @@ frontend/
     ├── components/
     │   ├── admin/
     │   │   ├── AdminLayout.tsx
-    │   │   ├── AdminSidebar.tsx
+    │   │   ├── AdminSidebar.tsx        # Persistent & drawer navigation with collapsible, scrollable project edit list
     │   │   └── ConfirmDeleteModal.tsx  # Accessible danger-zone confirmation modal with typed keyword check (Phase 5)
     │   ├── layout/
     │   │   ├── Footer.tsx              # Public footer with mailto safety & SPA smooth-scroll links (Phase 2, Phase 6)
@@ -213,6 +213,10 @@ interface ProjectResponse {
 ### 8. Danger-Zone Modal Mount Lifecycle
 - `ConfirmDeleteModal` uses a mount-based lifecycle with typed keyword verification (`confirmKeyword="DELETE"`). State resets upon mount rather than synchronously inside a `useEffect` to prevent React 19 cascading render warnings.
 
+### 9. Admin Sidebar Fast Project Navigation
+- `AdminSidebar` consumes `useProjects()` to render a collapsible sub-navigation list directly under "New Project", allowing instant one-click editing without returning to the dashboard table.
+- Employs an internal scroll container (`max-h-52 overflow-y-auto` with slim scrollbar) so sidebars remain compact and footer session actions (Back to Site / Logout) stay anchored and reachable even with dozens of projects.
+
 ---
 
 ## Target Folder Structure (v1.1)
@@ -245,7 +249,7 @@ frontend/
     ├── components/
     │   ├── admin/
     │   │   ├── AdminLayout.tsx
-    │   │   ├── AdminSidebar.tsx
+    │   │   ├── AdminSidebar.tsx         ✅ Done — collapsible, scrollable project edit list with mobile drawer support
     │   │   └── ConfirmDeleteModal.tsx    ✅ Done — reusable accessible confirmation modal with typed keyword verification
     │   ├── layout/
     │   │   ├── Footer.tsx               ✅ Done — consumed profile data, mailto safety & SPA navigation
