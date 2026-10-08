@@ -8,7 +8,7 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card, CardBody, CardHeader } from "../../components/ui/Card";
-import { ImageIcon, TrashIcon } from "../../components/ui/icons";
+import { ExternalLinkIcon, ImageIcon, TrashIcon } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
 import MDEditor from "@uiw/react-md-editor";
 import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
@@ -294,23 +294,38 @@ export function ProjectFormPage() {
   return (
     <div className="space-y-8 pb-12">
       {/* ── Header & Breadcrumb ── */}
-      <div>
-        <nav aria-label="Breadcrumb" className="mb-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <nav aria-label="Breadcrumb" className="mb-2">
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-blue-600"
+            >
+              ← Back to Dashboard
+            </Link>
+          </nav>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+            {isEditMode ? "Edit Project" : "Create New Project"}
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            {isEditMode
+              ? "Modify project metadata, external links, and preview imagery."
+              : "Add a new engineering showcase project to your portfolio."}
+          </p>
+        </div>
+
+        {isEditMode && projectId && (
           <Link
-            to="/admin"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-blue-600"
+            to={`/projects/${projectId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shrink-0 self-start"
+            title="View public project page in a new tab"
           >
-            ← Back to Dashboard
+            <span>View Public Page</span>
+            <ExternalLinkIcon className="h-3.5 w-3.5 text-gray-500" />
           </Link>
-        </nav>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-          {isEditMode ? "Edit Project" : "Create New Project"}
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          {isEditMode
-            ? "Modify project metadata, external links, and preview imagery."
-            : "Add a new engineering showcase project to your portfolio."}
-        </p>
+        )}
       </div>
 
       {isLoadingProject ? (
@@ -526,25 +541,42 @@ export function ProjectFormPage() {
               </Card>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-3">
-                <Link
-                  to="/admin"
-                  className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-xs hover:bg-gray-50"
-                >
-                  Cancel
-                </Link>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  isLoading={
-                    isSubmitting ||
-                    createMutation.isPending ||
-                    updateMutation.isPending ||
-                    uploadImageMutation.isPending
-                  }
-                >
-                  {isEditMode ? "Save Changes" : "Create Project"}
-                </Button>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                {isEditMode && projectId ? (
+                  <Link
+                    to={`/projects/${projectId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-xs font-semibold text-gray-700 shadow-xs transition-colors hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    title="View public project page in a new tab"
+                  >
+                    <span>View Public Page</span>
+                    <ExternalLinkIcon className="h-3.5 w-3.5 text-gray-500" />
+                  </Link>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-3">
+                  <Link
+                    to="/admin"
+                    className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-xs hover:bg-gray-50"
+                  >
+                    Cancel
+                  </Link>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    isLoading={
+                      isSubmitting ||
+                      createMutation.isPending ||
+                      updateMutation.isPending ||
+                      uploadImageMutation.isPending
+                    }
+                  >
+                    {isEditMode ? "Save Changes" : "Create Project"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
