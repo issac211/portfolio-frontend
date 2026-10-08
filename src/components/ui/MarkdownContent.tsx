@@ -22,20 +22,29 @@ export function MarkdownContent({
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
+          // Map markdown `#` (H1) to semantic `<h3>` to preserve page H1/H2 heading hierarchy
           h1: ({ children }) => (
-            <h1 className="mt-8 mb-4 border-b border-gray-200 pb-2 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
-              {children}
-            </h1>
-          ),
-          h2: ({ children }) => (
-            <h2 className="mt-7 mb-3 text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
-              {children}
-            </h2>
-          ),
-          h3: ({ children }) => (
-            <h3 className="mt-6 mb-2 text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">
+            <h3 className="mt-6 mb-3 border-b border-gray-100 pb-1.5 text-lg font-bold tracking-tight text-gray-900 sm:text-xl">
               {children}
             </h3>
+          ),
+          // Map markdown `##` (H2) to semantic `<h4>`
+          h2: ({ children }) => (
+            <h4 className="mt-5 mb-2.5 text-base font-semibold tracking-tight text-gray-900 sm:text-lg">
+              {children}
+            </h4>
+          ),
+          // Map markdown `###` (H3) to semantic `<h5>`
+          h3: ({ children }) => (
+            <h5 className="mt-4 mb-2 text-sm font-semibold tracking-tight text-gray-900 sm:text-base">
+              {children}
+            </h5>
+          ),
+          // Map markdown `####` (H4) to semantic `<h6>`
+          h4: ({ children }) => (
+            <h6 className="mt-3.5 mb-1.5 text-xs font-semibold tracking-wider text-gray-600 uppercase sm:text-sm">
+              {children}
+            </h6>
           ),
           p: ({ children }) => (
             <p className="my-3.5 text-base leading-relaxed text-gray-700 sm:text-lg">
