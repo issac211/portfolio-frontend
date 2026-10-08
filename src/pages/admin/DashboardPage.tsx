@@ -23,6 +23,40 @@ import {
 } from "../../components/ui/icons";
 import type { ApiError } from "../../types/api";
 
+interface StatusMetricConfig {
+  label: string;
+  boxClass: string;
+  dotClass: string;
+  hasPing?: boolean;
+}
+
+const STATUS_METRIC_CONFIG: Record<string, StatusMetricConfig> = {
+  success: {
+    label: "Available (Active)",
+    boxClass: "bg-emerald-50 text-emerald-600",
+    dotClass: "bg-emerald-500",
+    hasPing: true,
+  },
+  warning: {
+    label: "Limited Availability",
+    boxClass: "bg-amber-50 text-amber-600",
+    dotClass: "bg-amber-500",
+    hasPing: true,
+  },
+  error: {
+    label: "Currently Unavailable",
+    boxClass: "bg-red-50 text-red-600",
+    dotClass: "bg-red-500",
+    hasPing: false,
+  },
+  neutral: {
+    label: "Open to Inquiries",
+    boxClass: "bg-gray-100 text-gray-600",
+    dotClass: "bg-gray-400",
+    hasPing: false,
+  },
+};
+
 /**
  * Admin dashboard overview page.
  *
@@ -52,6 +86,10 @@ export function DashboardPage() {
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const deleteProjectMutation = useDeleteProjectMutation();
+
+  const statusKey = profile?.status_indicator ?? "neutral";
+  const statusConfig =
+    STATUS_METRIC_CONFIG[statusKey] ?? STATUS_METRIC_CONFIG.neutral;
 
   // Compute total unique tags utilized across all projects
   const uniqueTagCount = useMemo(() => {
@@ -167,20 +205,48 @@ export function DashboardPage() {
         {/* Metric 3: Profile Status */}
         <Card>
           <CardBody className="flex items-center gap-4 p-5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+            <div
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                isProfileLoading || !profile
+                  ? "bg-gray-100 text-gray-400"
+                  : statusConfig.boxClass
+              }`}
+            >
               <UserIcon className="h-6 w-6" />
             </div>
-            <div>
-              <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                Profile Status
-              </p>
-              <p className="mt-1 text-base font-bold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  Profile Status
+                </p>
+                {!isProfileLoading && profile && (
+                  <span className="relative flex h-2 w-2">
+                    {statusConfig.hasPing && (
+                      <span
+                        className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusConfig.dotClass} opacity-75`}
+                      />
+                    )}
+                    <span
+                      className={`relative inline-flex h-2 w-2 rounded-full ${statusConfig.dotClass}`}
+                    />
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-base font-bold text-gray-900 truncate">
                 {isProfileLoading
                   ? "Loading…"
-                  : profile
-                    ? "Active & Published"
-                    : "Not Configured"}
+                  : !profile
+                    ? "Not Configured"
+                    : statusConfig.label}
               </p>
+              {!isProfileLoading && profile?.availability_status && (
+                <p
+                  className="mt-0.5 text-xs text-gray-500 truncate"
+                  title={profile.availability_status}
+                >
+                  {profile.availability_status}
+                </p>
+              )}
             </div>
           </CardBody>
         </Card>

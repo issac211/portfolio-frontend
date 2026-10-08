@@ -108,7 +108,7 @@ frontend/
     │   ├── LoginPage.tsx
     │   ├── ProjectDetailPage.tsx   # Deep-dive with header-first layout, conditional compact media & React Query cache
     │   └── admin/
-    │       ├── DashboardPage.tsx
+    │       ├── DashboardPage.tsx       # Metrics hub with dynamic status indicator, profile summary & project admin table
     │       ├── ProfileFormPage.tsx     # Full profile CRUD, upload/delete image & danger zone soft delete (Phase 5, Phase 6)
     │       └── ProjectFormPage.tsx     # Full project CRUD, upload/delete image & rich Markdown editor (MDEditor)
     ├── router/
@@ -229,15 +229,15 @@ interface ProjectResponse {
 > - **Manual Delimiter Support:** Developers can supply an explicit pipe delimiter `|` in `ProfileFormPage` (e.g. `"Cloud-Native Engineer | AI & Systems"`) to manually curate the exact split boundary.
 
 > [!IMPORTANT]
-> **`status_indicator` → Tailwind Dot & Default Text Mapping (`ProfileHero` & `Footer`):**
-> The backend provides `status_indicator: "success" | "warning" | "error" | "neutral" | null`. Both `ProfileHero` and `Footer` map this value to visual styling and dynamic fallback copy via lookup objects (`STATUS_STYLES` / `STATUS_DOT_COLORS`):
+> **`status_indicator` → Tailwind Dot & Default Text Mapping (`ProfileHero`, `Footer` & `DashboardPage`):**
+> The backend provides `status_indicator: "success" | "warning" | "error" | "neutral" | null`. `ProfileHero`, `Footer`, and `DashboardPage` map this value to visual styling and dynamic copy via lookup objects (`STATUS_STYLES` / `STATUS_DOT_COLORS` / `STATUS_METRIC_CONFIG`):
 >
-> - `success`: pulsing green dot + fallback `"Available for new opportunities"`
-> - `warning`: pulsing amber dot + fallback `"Limited availability"`
-> - `error`: solid red dot + fallback `"Currently unavailable"`
-> - `neutral`: solid gray dot + fallback `"Open to inquiries"`
+> - `success`: pulsing green dot + `"Available (Active)"` / `"Available for new opportunities"`
+> - `warning`: pulsing amber dot + `"Limited Availability"`
+> - `error`: solid red dot + `"Currently Unavailable"`
+> - `neutral`: solid gray dot + `"Open to Inquiries"`
 >
-> If the developer sets a custom `availability_status`, that string takes precedence; otherwise, the indicator's `defaultText` renders automatically.
+> In `DashboardPage`, Metric 3 renders the corresponding colored icon box, pulsing status dot, and dynamic indicator label alongside custom `availability_status` subtext.
 
 > [!NOTE]
 > **ProfileHero Typography, Age Calculation, Narrative Paragraphs & Sticky Avatar (✅ Done):**
