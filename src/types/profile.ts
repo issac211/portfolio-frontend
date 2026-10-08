@@ -6,6 +6,9 @@ export type StatusIndicator =
   | "neutral"
   | null;
 
+/** Non-null status indicator keys used for styling and lookup mappings. */
+export type ActiveStatusIndicator = Exclude<StatusIndicator, null>;
+
 /** Profile data returned by `GET /profile/`. `image_url` is a relative path — prepend `IMAGE_BASE_URL` to render. */
 export interface PersonalInfoResponse {
   id: number;

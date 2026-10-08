@@ -68,6 +68,7 @@ frontend/
 │       ├── MarkdownContent.tsx     # Secure, styled Markdown renderer (react-markdown + remark-gfm)
     │       ├── SectionTitle.tsx
     │       ├── Skeleton.tsx            # Shimmer loading placeholders matching 2-column project cards & detail layouts
+    │       ├── StatusBadge.tsx         # Unified availability status badge & dot (pill & inline variants)
     │       ├── Toast.tsx
     │       └── icons/
     │           ├── index.ts
@@ -122,10 +123,11 @@ frontend/
     ├── types/
     │   ├── api.ts
     │   ├── auth.ts
-    │   ├── profile.ts
+    │   ├── profile.ts              # PersonalInfo schemas & ActiveStatusIndicator helper
     │   └── project.ts
     └── utils/
-        └── scroll.ts
+        ├── scroll.ts
+        └── status.ts               # Single Source of Truth STATUS_CONFIG, helpers & STATUS_OPTIONS
 ```
 
 ### Current `PersonalInfoResponse` Type (v1.1)
@@ -137,6 +139,8 @@ export type StatusIndicator =
   | "error"
   | "neutral"
   | null;
+
+export type ActiveStatusIndicator = Exclude<StatusIndicator, null>;
 
 interface PersonalInfoResponse {
   id: number;
@@ -229,15 +233,12 @@ interface ProjectResponse {
 > - **Manual Delimiter Support:** Developers can supply an explicit pipe delimiter `|` in `ProfileFormPage` (e.g. `"Cloud-Native Engineer | AI & Systems"`) to manually curate the exact split boundary.
 
 > [!IMPORTANT]
-> **`status_indicator` → Tailwind Dot & Default Text Mapping (`ProfileHero`, `Footer` & `DashboardPage`):**
-> The backend provides `status_indicator: "success" | "warning" | "error" | "neutral" | null`. `ProfileHero`, `Footer`, and `DashboardPage` map this value to visual styling and dynamic copy via lookup objects (`STATUS_STYLES` / `STATUS_DOT_COLORS` / `STATUS_METRIC_CONFIG`):
->
-> - `success`: pulsing green dot + `"Available (Active)"` / `"Available for new opportunities"`
-> - `warning`: pulsing amber dot + `"Limited Availability"`
-> - `error`: solid red dot + `"Currently Unavailable"`
-> - `neutral`: solid gray dot + `"Open to Inquiries"`
->
-> In `DashboardPage`, Metric 3 renders the corresponding colored icon box, pulsing status dot, and dynamic indicator label alongside custom `availability_status` subtext.
+> **Centralized Status Architecture (`src/utils/status.ts` & `StatusBadge.tsx` — ✅ Done):**
+> Instead of duplicated lookup dictionaries across multiple components (`STATUS_STYLES` / `STATUS_DOT_COLORS` / `STATUS_METRIC_CONFIG`), status indicators are centralized into a single source of truth in [`status.ts`](../src/utils/status.ts):
+> - **Type-Safe Mapping:** `STATUS_CONFIG` is typed strictly as `Record<ActiveStatusIndicator, StatusConfig>`, guaranteeing exhaustiveness across all backend `Literal` states (`success`, `warning`, `error`, `neutral`).
+> - **Encapsulated Design Tokens:** Centralizes badge classes, box background classes, text colors, animated ping classes, and human-readable default copy.
+> - **Reusable UI Component:** [`StatusBadge.tsx`](../src/components/ui/StatusBadge.tsx) encapsulates `<StatusDot />` (pulse ping + static dot) and `<StatusBadge />` supporting both `pill` (Hero) and `inline` (Footer) variants.
+> - **Admin Integration:** `DashboardPage` consumes `getStatusConfig()` for Metric 3 icon containers and titles, while `ProfileFormPage` maps select options from `STATUS_OPTIONS`.
 
 > [!NOTE]
 > **ProfileHero Typography, Age Calculation, Narrative Paragraphs & Sticky Avatar (✅ Done):**
@@ -353,8 +354,10 @@ frontend/
     │       ├── EmptyState.tsx
     │       ├── Input.tsx
     │       ├── Loader.tsx
+    │       ├── MarkdownContent.tsx      ✅ Done — secure Markdown viewer (react-markdown + remark-gfm)
     │       ├── SectionTitle.tsx
-    │       ├── Skeleton.tsx
+    │       ├── Skeleton.tsx             ✅ Done — updated skeletons for 2-col showcase & detail page
+    │       ├── StatusBadge.tsx          ✅ Done — centralized status badge & dot (pill & inline variants)
     │       ├── Toast.tsx
     │       └── icons/
     │           └── ... (no changes)
@@ -391,7 +394,8 @@ frontend/
     │   ├── profile.ts                   ✅ Done — new fields in all interfaces + status_indicator type
     │   └── project.ts                   ✅ Done — summary + content added, description removed, tech_stack → tags
     └── utils/
-        └── scroll.ts
+        ├── scroll.ts
+        └── status.ts                    ✅ Done — centralized STATUS_CONFIG, helpers & STATUS_OPTIONS
 ```
 
 ---
@@ -418,7 +422,7 @@ frontend/
 - [x] Audit `components/layout/Navbar.tsx` for hardcoded data → refactor to consume global profile state
 - [x] Audit `components/layout/Footer.tsx` for hardcoded data → refactor to consume global profile state (social links, email, short_bio)
 - [x] Audit `components/shared/ProfileHero.tsx` for hardcoded data → refactor to consume `hero_title`, `availability_status`, `short_bio`
-- [x] Implement `status_indicator` → Tailwind dot mapping in `ProfileHero.tsx` — use a `Record<string, string>` lookup object (e.g., `success` → `"bg-green-500 animate-pulse"`, `error` → `"bg-red-500"`); fallback to `neutral` for `null`/unknown
+- [x] Centralize `status_indicator` architecture in `src/utils/status.ts` (`Record<ActiveStatusIndicator, StatusConfig>`) & `src/components/ui/StatusBadge.tsx` (`<StatusBadge />`, `<StatusDot />`) consumed by `ProfileHero`, `Footer`, `DashboardPage`, and `ProfileFormPage`
 - [x] Update `pages/admin/ProfileFormPage.tsx` — add form inputs for all new fields
 - [x] In `ProfileFormPage.tsx`, ensure state initialization coalesces all nullable fields from `null` to empty strings (e.g., `hero_title: data.hero_title ?? ""`, `availability_status: data.availability_status ?? ""`, etc.) to prevent React "uncontrolled to controlled" component warnings
 - [x] Add a `<select>` dropdown for `status_indicator` in `ProfileFormPage.tsx` — options: `success`, `warning`, `error`, `neutral` (do NOT use a free-text input)

@@ -18,6 +18,7 @@ import {
 import { useSEO } from "../../hooks/useSEO";
 import type { ApiError } from "../../types/api";
 import type { StatusIndicator } from "../../types/profile";
+import { STATUS_OPTIONS } from "../../utils/status";
 
 /**
  * Administrative profile management page.
@@ -443,10 +444,11 @@ export function ProfileFormPage() {
                         }
                         className="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 transition-colors focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
                       >
-                        <option value="success">Success (Green / Active)</option>
-                        <option value="warning">Warning (Amber / Busy)</option>
-                        <option value="error">Error (Red / Unavailable)</option>
-                        <option value="neutral">Neutral (Gray)</option>
+                        {STATUS_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
                       </select>
                       <p className="mt-1.5 text-xs text-gray-500">
                         Color dot displayed next to your availability badge.

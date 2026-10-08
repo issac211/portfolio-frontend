@@ -21,41 +21,9 @@ import {
   ImageIcon,
   InboxIcon,
 } from "../../components/ui/icons";
+import { StatusDot } from "../../components/ui/StatusBadge";
 import type { ApiError } from "../../types/api";
-
-interface StatusMetricConfig {
-  label: string;
-  boxClass: string;
-  dotClass: string;
-  hasPing?: boolean;
-}
-
-const STATUS_METRIC_CONFIG: Record<string, StatusMetricConfig> = {
-  success: {
-    label: "Available (Active)",
-    boxClass: "bg-emerald-50 text-emerald-600",
-    dotClass: "bg-emerald-500",
-    hasPing: true,
-  },
-  warning: {
-    label: "Limited Availability",
-    boxClass: "bg-amber-50 text-amber-600",
-    dotClass: "bg-amber-500",
-    hasPing: true,
-  },
-  error: {
-    label: "Currently Unavailable",
-    boxClass: "bg-red-50 text-red-600",
-    dotClass: "bg-red-500",
-    hasPing: false,
-  },
-  neutral: {
-    label: "Open to Inquiries",
-    boxClass: "bg-gray-100 text-gray-600",
-    dotClass: "bg-gray-400",
-    hasPing: false,
-  },
-};
+import { getStatusConfig } from "../../utils/status";
 
 /**
  * Admin dashboard overview page.
@@ -87,9 +55,7 @@ export function DashboardPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const deleteProjectMutation = useDeleteProjectMutation();
 
-  const statusKey = profile?.status_indicator ?? "neutral";
-  const statusConfig =
-    STATUS_METRIC_CONFIG[statusKey] ?? STATUS_METRIC_CONFIG.neutral;
+  const statusConfig = getStatusConfig(profile?.status_indicator ?? null);
 
   // Compute total unique tags utilized across all projects
   const uniqueTagCount = useMemo(() => {
@@ -220,16 +186,7 @@ export function DashboardPage() {
                   Profile Status
                 </p>
                 {!isProfileLoading && profile && (
-                  <span className="relative flex h-2 w-2">
-                    {statusConfig.hasPing && (
-                      <span
-                        className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusConfig.dotClass} opacity-75`}
-                      />
-                    )}
-                    <span
-                      className={`relative inline-flex h-2 w-2 rounded-full ${statusConfig.dotClass}`}
-                    />
-                  </span>
+                  <StatusDot indicator={profile.status_indicator} />
                 )}
               </div>
               <p className="mt-1 text-base font-bold text-gray-900 truncate">

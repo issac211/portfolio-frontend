@@ -23,34 +23,7 @@ const QUICK_LINKS: NavLinkItem[] = [
   { label: "Contact", href: "/#contact" },
 ];
 
-/** Status dot color mapping for the footer availability badge. */
-const STATUS_DOT_COLORS: Record<
-  string,
-  { dot: string; ping?: string; text: string; defaultText: string }
-> = {
-  success: {
-    dot: "bg-emerald-500",
-    ping: "bg-emerald-400",
-    text: "text-emerald-600",
-    defaultText: "Available for new opportunities",
-  },
-  warning: {
-    dot: "bg-amber-500",
-    ping: "bg-amber-400",
-    text: "text-amber-600",
-    defaultText: "Limited availability",
-  },
-  error: {
-    dot: "bg-red-500",
-    text: "text-red-600",
-    defaultText: "Currently unavailable",
-  },
-  neutral: {
-    dot: "bg-gray-400",
-    text: "text-gray-600",
-    defaultText: "Open to inquiries",
-  },
-};
+import { StatusBadge } from "../ui/StatusBadge";
 
 /**
  * Public website footer containing social links, quick navigation,
@@ -78,13 +51,6 @@ export function Footer() {
     : "";
 
   const shortBio = profile?.short_bio || "";
-
-  const statusConfig =
-    STATUS_DOT_COLORS[profile?.status_indicator ?? "neutral"] ??
-    STATUS_DOT_COLORS.neutral;
-
-  const availabilityText =
-    profile?.availability_status?.trim() || statusConfig.defaultText;
 
   const contactEmail = profile?.email || "contact@example.com";
 
@@ -148,21 +114,11 @@ export function Footer() {
             <p className="max-w-xs text-sm leading-relaxed text-gray-500">
               {shortBio}
             </p>
-            <div
-              className={`flex items-center gap-2 text-xs font-medium ${statusConfig.text}`}
-            >
-              <span className="relative flex h-2 w-2">
-                {statusConfig.ping && (
-                  <span
-                    className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusConfig.ping} opacity-75`}
-                  />
-                )}
-                <span
-                  className={`relative inline-flex h-2 w-2 rounded-full ${statusConfig.dot}`}
-                />
-              </span>
-              {availabilityText}
-            </div>
+            <StatusBadge
+              indicator={profile?.status_indicator ?? null}
+              text={profile?.availability_status}
+              variant="inline"
+            />
           </div>
 
           {/* Quick Navigation Links */}

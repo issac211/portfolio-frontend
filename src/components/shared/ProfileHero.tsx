@@ -3,45 +3,11 @@ import { IMAGE_BASE_URL } from "../../config/constants";
 import type { PersonalInfoResponse } from "../../types/profile";
 import { handleSmoothScroll } from "../../utils/scroll";
 import { ArrowDownIcon, UserIcon } from "../ui/icons";
+import { StatusBadge } from "../ui/StatusBadge";
 
 interface ProfileHeroProps {
   profile: PersonalInfoResponse | null;
 }
-
-/** Status pill style mapping keyed by status indicator. */
-interface StatusStyle {
-  badge: string;
-  dot: string;
-  hasPing: boolean;
-  defaultText: string;
-}
-
-const STATUS_STYLES: Record<string, StatusStyle> = {
-  success: {
-    badge: "border-emerald-500/20 bg-emerald-50/70 text-emerald-700",
-    dot: "bg-emerald-500",
-    hasPing: true,
-    defaultText: "Available for new opportunities",
-  },
-  warning: {
-    badge: "border-amber-500/20 bg-amber-50/70 text-amber-700",
-    dot: "bg-amber-500",
-    hasPing: true,
-    defaultText: "Limited availability",
-  },
-  error: {
-    badge: "border-red-500/20 bg-red-50/70 text-red-700",
-    dot: "bg-red-500",
-    hasPing: false,
-    defaultText: "Currently unavailable",
-  },
-  neutral: {
-    badge: "border-gray-500/20 bg-gray-50/70 text-gray-700",
-    dot: "bg-gray-400",
-    hasPing: false,
-    defaultText: "Open to inquiries",
-  },
-};
 
 /**
  * Calculates current full age in years from an ISO birth date string.
@@ -135,13 +101,6 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
       .filter(Boolean);
   }, [extendedBio]);
 
-  const statusConfig =
-    STATUS_STYLES[profile?.status_indicator ?? "neutral"] ??
-    STATUS_STYLES.neutral;
-
-  const availabilityText =
-    profile?.availability_status?.trim() || statusConfig.defaultText;
-
   const heroHeading = splitHeroTitle(profile?.hero_title);
 
   // Prepend IMAGE_BASE_URL to relative backend image path
@@ -164,21 +123,12 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
           {/* Left Column: Text & CTAs */}
           <div className="flex flex-col items-center text-center lg:col-span-8 lg:items-start lg:text-left animate-fade-in-up">
             {/* Status Pill */}
-            <div
-              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-medium ${statusConfig.badge}`}
-            >
-              <span className="relative flex h-2 w-2">
-                {statusConfig.hasPing && (
-                  <span
-                    className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusConfig.dot} opacity-75`}
-                  />
-                )}
-                <span
-                  className={`relative inline-flex h-2 w-2 rounded-full ${statusConfig.dot}`}
-                />
-              </span>
-              {availabilityText}
-            </div>
+            <StatusBadge
+              indicator={profile?.status_indicator ?? null}
+              text={profile?.availability_status}
+              variant="pill"
+            />
+
 
             {/* Primary SEO Heading (Single H1 rule) - reduced size for better visual hierarchy */}
             <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
