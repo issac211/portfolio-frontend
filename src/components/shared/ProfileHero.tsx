@@ -13,7 +13,9 @@ interface ProfileHeroProps {
  * Calculates current full age in years from an ISO birth date string.
  * Returns null if the birth date is absent, invalid, or in the future.
  */
-function calculateAge(birthDateString: string | null | undefined): number | null {
+function calculateAge(
+  birthDateString: string | null | undefined,
+): number | null {
   if (!birthDateString) return null;
   const birthDate = new Date(birthDateString);
   if (Number.isNaN(birthDate.getTime())) return null;
@@ -128,7 +130,6 @@ export function ProfileHero({ profile }: ProfileHeroProps) {
               text={profile?.availability_status}
               variant="pill"
             />
-
 
             {/* Primary SEO Heading (Single H1 rule) - reduced size for better visual hierarchy */}
             <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">

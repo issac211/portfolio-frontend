@@ -180,131 +180,38 @@ interface ProjectResponse {
 
 ## Key Implementation Details
 
-> [!IMPORTANT]
-> **React Query Integration — SOP Compliance:**
-> The current SOP (Section 5) states: _"Native Fetch Only. Do NOT use `axios` or `react-query`."_
-> This SOP rule **must be updated** before Phase 2 begins. React Query will be used as a **caching/state layer** on top of the existing `apiClient.ts` fetch calls — it does **not** replace `fetch`. The SOP update should clarify: _"React Query is permitted as a caching layer. All HTTP calls must still go through `services/apiClient.ts`."_
+### 1. Hierarchical Query Invalidation & Single-Project Cache
+- Single project queries use the key factory `QUERY_KEYS.project(id)` (`["projects", id]`).
+- Because React Query invalidates hierarchically by prefix matching, calling `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects })` on collection writes automatically invalidates both the project list and all cached single-project views without manual ID tracking.
 
-> [!IMPORTANT]
-> **React Query Mutations & Cache Invalidation (Strict Requirement):**
-> When using React Query, all API write operations (`PUT`, `POST`, `DELETE`) MUST use `useMutation`.
-> Upon `onSuccess`, you MUST call `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile })` (or `QUERY_KEYS.projects`) to instantly refresh the UI and guarantee client-side cache consistency with the server. Never bypass query invalidation or perform manual out-of-band cache mutations when standard invalidation suffices.
+### 2. Controlled Form State Safety (Null Coalescing)
+- Backend nullable columns initialize as `null`. Form states in `ProfileFormPage` and `ProjectFormPage` coalesce with `?? ""` (e.g. `hero_title: data.hero_title ?? ""`).
+- Passing `null` to `<input value={...}>` causes React to switch from an uncontrolled to a controlled component, triggering console warnings.
 
-> [!IMPORTANT]
-> **Centralized Query Keys (Best Practice):**
-> All React Query hooks and mutation callbacks MUST import and use the centralized `QUERY_KEYS` constant from [`constants.ts`](../src/config/constants.ts) (e.g., `QUERY_KEYS.profile`, `QUERY_KEYS.projects`). Hardcoded string literals for query keys are strictly forbidden to eliminate typo drift and disjoint cache states.
+### 3. SPA Navigation with Preserved Smooth Scroll
+- `Navbar`, `Footer`, and `ProjectDetailPage` use React Router `<Link>` with a custom click handler (`handleNavClick`):
+  - On root (`/`): preserves in-page smooth scrolling (`handleSmoothScroll`).
+  - On sub-routes (`/projects/:id`, `/admin`): executes client-side transition without full-page reloads, preserving hot React Query cache; `useScrollToHash` handles target positioning post-navigation.
 
-> [!IMPORTANT]
-> **Controlled Components & Null Coalescing (`ProfileFormPage`):**
-> Because the backend migration initializes new nullable columns as `null`, the `ProfileFormPage` state initialization MUST coalesce all `null` values to empty strings (e.g., `hero_title: data.hero_title ?? ""`, `availability_status: data.availability_status ?? ""`, `short_bio: data.short_bio ?? ""`, etc.). Passing `null` to `<input value={...}>` or `<textarea value={...}>` causes React to switch from an uncontrolled to a controlled component, triggering console warnings (`component is changing an uncontrolled input to be controlled`).
+### 4. Centralized Status Architecture (`status.ts` & `StatusBadge.tsx`)
+- Status indicators are centralized in `src/utils/status.ts` with `STATUS_CONFIG` typed strictly as `Record<ActiveStatusIndicator, StatusConfig>` (guaranteeing compile-time exhaustiveness across backend enum values).
+- Reusable `<StatusBadge />` supports both `pill` (Hero) and `inline` (Footer) variants. Standalone `<StatusDot />` encapsulates the ping pulse animation for Admin Dashboard metric cards.
+- Admin forms consume `STATUS_OPTIONS` dynamically to populate `<select>` options without duplicate markup.
 
-> [!IMPORTANT]
-> **Type Changes — `ProjectResponse`:**
->
-> - `description: string` → **removed**
-> - `summary: string` → **added** (replaces `description` on cards and dashboard)
-> - `content: string | null` → **added** (rendered on detail page with fallback to `summary`)
->
-> All components consuming `ProjectResponse` have been updated: `ProjectCard`, `ProjectDetailPage`, `ProjectFormPage`, `DashboardPage`, `useProjects`, and `projectService`.
+### 5. Markdown Architecture & Heading Hierarchy
+- **Public (`ProjectDetailPage`):** Rendered via `<MarkdownContent />` (`react-markdown` + `remark-gfm`). Headings map `#` to `<h3>` (`h3`–`h6`) to preserve page `<h1>` (Project Title) and `<h2>` (About) semantic hierarchy and satisfy single-H1 accessibility rules. External links automatically enforce `target="_blank" rel="noopener noreferrer"`.
+- **Admin (`ProjectFormPage`):** Authoring via `@uiw/react-md-editor` with live dual-pane preview (`data-color-mode="light"`).
 
-> [!IMPORTANT]
-> **Type Changes — `PersonalInfoResponse`:**
-> Schema synchronized with backend `api-contract.json`:
->
-> ```typescript
-> hero_title: string | null;
-> availability_status: string | null;
-> short_bio: string | null; // Tagline for Hero & Footer
-> bio: string | null; // Canonical full professional bio
-> github_url: string | null;
-> linkedin_url: string | null;
-> email: string | null;
-> status_indicator: StatusIndicator;
-> is_active: boolean;
-> ```
->
-> Components that previously hardcoded these values (`Navbar`, `Footer`, `ProfileHero`) have been refactored to consume them dynamically from the global profile state.
+### 6. Hero Narrative Formatting & Split Title
+- `ProfileHero` auto-splits `hero_title` (phrases with 4+ words highlight the final 2 in gradient) while supporting explicit `|` delimiter overrides from the admin form.
+- Extended bio splits raw newline text (`split(/\n+/)`) into narrative timeline nodes with CSS `grid-template-rows` smooth auto-height toggle (`grid-rows-[0fr] ↔ [1fr]`).
 
-> [!NOTE]
-> **Hero Title Two-Tone Gradient Styling (`ProfileHero`):**
-> `ProfileHero` splits `hero_title` into a primary dark text block and a vibrant gradient highlight (`bg-gradient-to-r from-blue-600 to-indigo-600`).
->
-> - **Smart Auto-Split:** Phrases with 4+ words automatically highlight the final 2 words (e.g. `"Building scalable, modern | web applications"`). Shorter phrases highlight the final word.
-> - **Manual Delimiter Support:** Developers can supply an explicit pipe delimiter `|` in `ProfileFormPage` (e.g. `"Cloud-Native Engineer | AI & Systems"`) to manually curate the exact split boundary.
+### 7. Native Mailto Safety & Clipboard Fallback
+- `Footer` conditionally omits `target="_blank"` on `mailto:` links to prevent browsers from opening unwanted blank tabs.
+- If no desktop mail client is registered, clicking the email button copies the address to clipboard via `navigator.clipboard.writeText` and displays a toast notification.
 
-> [!IMPORTANT]
-> **Centralized Status Architecture (`src/utils/status.ts` & `StatusBadge.tsx` — ✅ Done):**
-> Instead of duplicated lookup dictionaries across multiple components (`STATUS_STYLES` / `STATUS_DOT_COLORS` / `STATUS_METRIC_CONFIG`), status indicators are centralized into a single source of truth in [`status.ts`](../src/utils/status.ts):
-> - **Type-Safe Mapping:** `STATUS_CONFIG` is typed strictly as `Record<ActiveStatusIndicator, StatusConfig>`, guaranteeing exhaustiveness across all backend `Literal` states (`success`, `warning`, `error`, `neutral`).
-> - **Encapsulated Design Tokens:** Centralizes badge classes, box background classes, text colors, animated ping classes, and human-readable default copy.
-> - **Reusable UI Component:** [`StatusBadge.tsx`](../src/components/ui/StatusBadge.tsx) encapsulates `<StatusDot />` (pulse ping + static dot) and `<StatusBadge />` supporting both `pill` (Hero) and `inline` (Footer) variants.
-> - **Admin Integration:** `DashboardPage` consumes `getStatusConfig()` for Metric 3 icon containers and titles, while `ProfileFormPage` maps select options from `STATUS_OPTIONS`.
-
-> [!NOTE]
-> **ProfileHero Typography, Age Calculation, Narrative Paragraphs & Sticky Avatar (✅ Done):**
->
-> - **Scaled Headline:** The H1 hero heading was scaled from `text-4xl...6xl` to `text-3xl sm:text-4xl lg:text-5xl` for a more balanced visual hierarchy.
-> - **Dynamic Age Calculation:** `calculateAge(birth_date)` calculates age dynamically from ISO date strings with leap-year-safe calendar difference, rendering inline only when `birth_date` is configured.
-> - **Narrative Paragraphs & Timeline Nodes:** Extended bio parses raw newline text into distinct paragraphs (`split(/\n+/)`), styled with vertical rhythm (`space-y-3.5 sm:space-y-4`) and precision timeline dot markers (`ring-[3px] ring-white bg-blue-500`) along a continuous accent border, rendering long prose with editorial clarity.
-> - **Smooth Collapsible Bio:** The extended bio features an accessible toggle (`isBioExpanded`, defaulting to `true` / expanded), animating smoothly via CSS `grid-template-rows` (`grid-rows-[1fr]` to `grid-rows-[0fr]`) and opacity transitions for pure auto-height interpolation.
-> - **Sticky Avatar Tracking:** The portrait column uses a stretch-height grid parent (`lg:items-stretch`) with an inner sticky container (`lg:sticky lg:top-24`), tracking smoothly through Hero scrolling and anchoring cleanly at the section boundary.
-
-> [!NOTE]
-> **Detailed Content Markdown Support (✅ Done):**
-> - **Public Rendering (`ProjectDetailPage`):** `MarkdownContent.tsx` securely renders the project `content` write-up via `react-markdown` and `remark-gfm` (GFM tables, task lists, code blocks, autolinks, blockquotes). Semantic tags are customized with accessible Tailwind styles, sanitized against XSS, and external links automatically apply `target="_blank"` and `rel="noopener noreferrer"`.
-> - **Admin Authoring (`ProjectFormPage`):** Integrated `@uiw/react-md-editor` with live dual-pane preview (`preview="live"`, height 350px, `data-color-mode="light"`), providing engineers with full WYSIWYG toolbars and markdown shortcuts for case-study write-ups.
-
-> [!NOTE]
-> **API Contract-Driven Development (Frontend Side):**
-> Each frontend phase that depends on backend schema changes (Phases 2, 3, 4) must **not begin** until the backend has exported an updated `api-contract.json` to the `frontend/` root. Before updating TS interfaces, cross-reference the OpenAPI spec to verify field names, types, and nullability. This prevents type drift and catches mismatches early.
-
-> [!NOTE]
-> **Hardcoded Data Audit:** Before implementation, audit every component in `components/layout/` and `components/shared/` for hardcoded strings (hero titles, social URLs, availability badges, bios). Document each occurrence so nothing is missed during the refactor.
-
-> [!NOTE]
-> **Image Deletion & Profile Danger-Zone Deletion (✅ Done):**
->
-> - **Service Calls:** `deleteProfileImage()`, `deleteProfile()`, and `deleteProjectImage(id)` implemented in `profileService.ts` and `projectService.ts` calling `DELETE` endpoints and returning `void` (204 No Content).
-> - **React Query Mutations:** Dedicated mutation hooks (`useDeleteProfileImageMutation`, `useDeleteProfileMutation`, `useDeleteProjectImageMutation`) trigger automatic cache invalidation (`QUERY_KEYS.profile`, `QUERY_KEYS.projects`).
-> - **Lightweight Image Removal UX:** "Remove Photo" / "Remove Image" buttons with `TrashIcon` provide inline browser confirmation and optimistic preview state clearing upon success.
-> - **Accessible Danger-Zone Modal:** `ConfirmDeleteModal.tsx` implements strict safety with typed keyword confirmation (`confirmKeyword="DELETE"`). To prevent React 19 cascading render warnings, the modal dialog uses a mount-based component lifecycle rather than resetting state synchronously inside a `useEffect`.
-
-> [!NOTE]
-> **Domain Vocabulary Refactoring — `tech_stack` → `tags` (✅ Done):**
->
-> - **Types:** `tech_stack` was removed outright (not kept as a deprecated alias) and replaced by `tags: string[] | null` in `ProjectResponse`, `ProjectCreate`, and `ProjectUpdate`, mirroring `api-contract.json`. A hard rename lets the compiler surface every stale consumer instead of silently falling back to `undefined`.
-> - **UI Labels:** All user-facing "Tech Stack" / "Technology Stack" / "Technologies" strings are now "Tags" (admin form field, dashboard table column and metric card). Internal identifiers were renamed too (`tagsInput`, `tagChips`, `uniqueTagCount`).
-> - **Badge Mapping:** `Badge` contained no tech-specific logic — only its JSDoc wording was generalized.
-> - **Admin Form:** The tags input remains a comma-separated text field with live chip preview; helper text now explains tags may represent technologies, categories, or status labels (e.g. "WIP", "Open Source").
-> - `projectService.ts` and `useProjects.ts` required no changes: they are typed against `ProjectCreate`/`ProjectUpdate`, so the rename propagates through the interfaces.
-
-> [!IMPORTANT]
-> **Single-Project Caching & Hierarchical Invalidation (`QUERY_KEYS.project(id)` — ✅ Done):**
->
-> - Single project fetching in `ProjectDetailPage` and `ProjectFormPage` is encapsulated in `useProject(id)`.
-> - The query key factory `QUERY_KEYS.project(id)` evaluates to `["projects", id] as const`.
-> - Because React Query invalidates queries by prefix matching, mutating the collection via `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects })` automatically invalidates the project list query as well as all individual cached project queries (`["projects", 1]`, etc.), keeping cache state synchronized without manual ID tracking.
-
-> [!IMPORTANT]
-> **Client-Side SPA Anchor Routing vs. Full Page Refresh (✅ Done):**
->
-> - Standard `<a href="/#section">` links without SPA routing trigger full browser document reloads when activated from sub-routes (such as `/projects/:id` or `/admin`), discarding in-memory React Query cache and re-fetching assets.
-> - `Navbar.tsx`, `Footer.tsx`, and `ProjectDetailPage.tsx` now employ React Router `<Link to={href}>` with `handleNavClick`:
->   - On the root page (`/`), smooth in-page scrolling (`handleSmoothScroll`) is preserved.
->   - On sub-routes, React Router executes a client-side route transition without reloading the document, after which `useScrollToHash` scrolls directly to the targeted section.
-
-> [!NOTE]
-> **Image Upload Mutations & Form State Simplification (✅ Done):**
->
-> - Profile and project image uploads are migrated to `useUploadProfileImageMutation` and `useUploadProjectImageMutation`.
-> - Successful uploads trigger automated cache invalidation (`QUERY_KEYS.profile`, `QUERY_KEYS.projects`), eliminating manual `refetch()` invocations and local `isUploadingImage` state flags from `ProfileFormPage` and `ProjectFormPage`.
-
-> [!NOTE]
-> **Native Mailto Protocol & Clipboard Fallback UX (✅ Done):**
->
-> - External social links utilize `target="_blank" rel="noopener noreferrer"` to protect against reverse tabnabbing.
-> - For `mailto:` URIs, browsers open an unwanted `about:blank` tab if `target="_blank"` is present; `Footer.tsx` conditionally omits `target` and `rel` attributes whenever `href.startsWith("mailto:")`.
-> - On client machines lacking a registered desktop email client (or when the browser swallows `mailto:` due to unconfigured protocol handlers), clicking the email link automatically copies the address (`contactEmail`) to the clipboard via `navigator.clipboard.writeText` and renders an instant toast notification (`useToast`), providing a seamless fallback.
+### 8. Danger-Zone Modal Mount Lifecycle
+- `ConfirmDeleteModal` uses a mount-based lifecycle with typed keyword verification (`confirmKeyword="DELETE"`). State resets upon mount rather than synchronously inside a `useEffect` to prevent React 19 cascading render warnings.
 
 ---
 
