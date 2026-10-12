@@ -3,10 +3,12 @@ import { IMAGE_BASE_URL } from "../../config/constants";
 import type { PersonalInfoResponse } from "../../types/profile";
 import { handleSmoothScroll } from "../../utils/scroll";
 import { ArrowDownIcon, UserIcon } from "../ui/icons";
+import { ProfileHeroSkeleton } from "../ui/Skeleton";
 import { StatusBadge } from "../ui/StatusBadge";
 
 interface ProfileHeroProps {
   profile: PersonalInfoResponse | null;
+  isLoading?: boolean;
 }
 
 /**
@@ -81,7 +83,15 @@ function splitHeroTitle(title: string | null | undefined): {
  * and adheres strictly to Single Source of Truth by conditionally rendering
  * profile data only when provided by the backend.
  */
-export function ProfileHero({ profile }: ProfileHeroProps) {
+export function ProfileHero({ profile, isLoading = false }: ProfileHeroProps) {
+  if (isLoading) {
+    return <ProfileHeroSkeleton />;
+  }
+
+  return <ProfileHeroContent profile={profile} />;
+}
+
+function ProfileHeroContent({ profile }: { profile: PersonalInfoResponse | null }) {
   const [isBioExpanded, setIsBioExpanded] = useState(true);
 
   const fullName = profile

@@ -18,7 +18,7 @@ import { ExclamationCircleIcon, InboxIcon } from "../components/ui/icons";
  * and automatic smooth-scrolling to URL hash anchors.
  */
 export function HomePage() {
-  const { profile } = useProfile();
+  const { profile, isLoading: isProfileLoading } = useProfile();
   const {
     projects,
     isLoading: isProjectsLoading,
@@ -33,12 +33,12 @@ export function HomePage() {
   });
 
   // Scroll to hash anchor once data resolves so the target section exists in the DOM
-  useScrollToHash(isProjectsLoading);
+  useScrollToHash(isProjectsLoading || isProfileLoading);
 
   return (
     <div className="flex flex-col">
       {/* ── Hero Section (#home) ── */}
-      <ProfileHero profile={profile} />
+      <ProfileHero profile={profile} isLoading={isProfileLoading} />
 
       {/* ── Featured Projects Section (#projects) ── */}
       <section

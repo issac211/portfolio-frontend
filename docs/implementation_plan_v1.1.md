@@ -56,7 +56,7 @@ frontend/
     │   │   ├── Navbar.tsx              # Public navbar with profile branding & SPA smooth-scroll links (Phase 2, Phase 6)
     │   │   └── PublicLayout.tsx
     │   ├── shared/
-    │   │   ├── ProfileHero.tsx         # Hero presentation with age calculation, narrative paragraphs & timeline markers
+    │   │   ├── ProfileHero.tsx         # Hero presentation with pulsating loading skeleton, age calculation, narrative paragraphs & timeline markers
     │   │   └── ProjectCard.tsx         # Showcase card with conditional compact media, elevated typography & primary tag badges
     │   └── ui/
     │       ├── Badge.tsx
@@ -67,7 +67,7 @@ frontend/
     │       ├── Loader.tsx
 │       ├── MarkdownContent.tsx     # Secure, styled Markdown renderer (react-markdown + remark-gfm)
     │       ├── SectionTitle.tsx
-    │       ├── Skeleton.tsx            # Shimmer loading placeholders matching 2-column project cards & detail layouts
+    │       ├── Skeleton.tsx            # Shimmer loading placeholders matching public hero, 2-column project cards & detail layouts
     │       ├── StatusBadge.tsx         # Unified availability status badge & dot (pill & inline variants)
     │       ├── Toast.tsx
     │       └── icons/
@@ -181,46 +181,62 @@ interface ProjectResponse {
 ## Key Implementation Details
 
 ### 1. Hierarchical Query Invalidation & Single-Project Cache
+
 - Single project queries use the key factory `QUERY_KEYS.project(id)` (`["projects", id]`).
 - Because React Query invalidates hierarchically by prefix matching, calling `queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects })` on collection writes automatically invalidates both the project list and all cached single-project views without manual ID tracking.
 
 ### 2. Controlled Form State Safety (Null Coalescing)
+
 - Backend nullable columns initialize as `null`. Form states in `ProfileFormPage` and `ProjectFormPage` coalesce with `?? ""` (e.g. `hero_title: data.hero_title ?? ""`).
 - Passing `null` to `<input value={...}>` causes React to switch from an uncontrolled to a controlled component, triggering console warnings.
 
 ### 3. SPA Navigation with Preserved Smooth Scroll
+
 - `Navbar`, `Footer`, and `ProjectDetailPage` use React Router `<Link>` with a custom click handler (`handleNavClick`):
   - On root (`/`): preserves in-page smooth scrolling (`handleSmoothScroll`).
   - On sub-routes (`/projects/:id`, `/admin`): executes client-side transition without full-page reloads, preserving hot React Query cache; `useScrollToHash` handles target positioning post-navigation.
 
 ### 4. Centralized Status Architecture (`status.ts` & `StatusBadge.tsx`)
+
 - Status indicators are centralized in `src/utils/status.ts` with `STATUS_CONFIG` typed strictly as `Record<ActiveStatusIndicator, StatusConfig>` (guaranteeing compile-time exhaustiveness across backend enum values).
 - Reusable `<StatusBadge />` supports both `pill` (Hero) and `inline` (Footer) variants. Standalone `<StatusDot />` encapsulates the ping pulse animation for Admin Dashboard metric cards.
 - Admin forms consume `STATUS_OPTIONS` dynamically to populate `<select>` options without duplicate markup.
 
 ### 5. Markdown Architecture & Heading Hierarchy
+
 - **Public (`ProjectDetailPage`):** Rendered via `<MarkdownContent />` (`react-markdown` + `remark-gfm`). Headings map `#` to `<h3>` (`h3`–`h6`) to preserve page `<h1>` (Project Title) and `<h2>` (About) semantic hierarchy and satisfy single-H1 accessibility rules. External links automatically enforce `target="_blank" rel="noopener noreferrer"`.
 - **Admin (`ProjectFormPage`):** Authoring via `@uiw/react-md-editor` with live dual-pane preview (`data-color-mode="light"`).
 
 ### 6. Hero Narrative Formatting & Split Title
+
 - `ProfileHero` auto-splits `hero_title` (phrases with 4+ words highlight the final 2 in gradient) while supporting explicit `|` delimiter overrides from the admin form.
 - Extended bio splits raw newline text (`split(/\n+/)`) into narrative timeline nodes with CSS `grid-template-rows` smooth auto-height toggle (`grid-rows-[0fr] ↔ [1fr]`).
 
 ### 7. Native Mailto Safety & Clipboard Fallback
+
 - `Footer` conditionally omits `target="_blank"` on `mailto:` links to prevent browsers from opening unwanted blank tabs.
 - If no desktop mail client is registered, clicking the email button copies the address to clipboard via `navigator.clipboard.writeText` and displays a toast notification.
 
 ### 8. Danger-Zone Modals & Project Deletion
+
 - `ConfirmDeleteModal` provides accessible confirmation with a mount-based lifecycle (preventing React 19 cascading render warnings).
 - Used for Profile deactivation (with typed `"DELETE"` verification), Project edit deletion on `ProjectFormPage`, and table row deletion on `DashboardPage` (with instant deletion confirmation), automatically invalidating `QUERY_KEYS.projects` upon completion.
 
 ### 9. Admin Sidebar Fast Project Navigation
+
 - `AdminSidebar` consumes `useProjects()` to render a collapsible sub-navigation list directly under "New Project", allowing instant one-click editing without returning to the dashboard table.
 - Employs an internal scroll container (`max-h-52 overflow-y-auto` with slim scrollbar) so sidebars remain compact and footer session actions (Back to Site / Logout) stay anchored and reachable even with dozens of projects.
 
 ### 10. Keyed Component Pattern for Form State Isolation
+
 - Navigating between `/admin/projects/:id/edit` and `/admin/projects/new` (or across different project IDs) reuses the same component instance in React Router, which would leak previous form state into the new creation form.
 - `ProjectFormPage` implements the Keyed Component pattern (`<ProjectFormContent key={id ?? "new"} />`), forcing React to fully unmount the previous instance and remount a pristine, freshly initialized state tree on every route transition without manual effect boilerplate.
+
+### 11. Hero Skeleton Mirroring & Rules of Hooks Safety
+
+- `ProfileHero` encapsulates its loading state by rendering `ProfileHeroSkeleton` when `isLoading` is true.
+- To strictly adhere to React's Rules of Hooks (preventing mismatched hook counts when transitioning between loading and resolved data), the component delegates resolved rendering to an internal `<ProfileHeroContent />` component rather than placing an early return before `useState`/`useMemo`.
+- `ProfileHeroSkeleton` preserves the semantic `<section id="home">` anchor and responsive avatar dimensions, eliminating Cumulative Layout Shift (CLS) and preventing anchor jumping during parallel client data fetching.
 
 ---
 
@@ -261,7 +277,7 @@ frontend/
     │   │   ├── Navbar.tsx               ✅ Done — consumed profile data & SPA navigation
     │   │   └── PublicLayout.tsx
     │   ├── shared/
-    │   │   ├── ProfileHero.tsx          ✅ Done — age calculation, formatted collapsible bio, scaled heading & status indicator
+    │   │   ├── ProfileHero.tsx          ✅ Done — loading skeleton delegation, age calculation, formatted collapsible bio, scaled heading & status indicator
     │   │   └── ProjectCard.tsx          ✅ Done — uses `summary` instead of `description`; renders `tags`
     │   └── ui/
     │       ├── Badge.tsx                ✅ Done — audited, JSDoc generalized for tags
@@ -272,7 +288,7 @@ frontend/
     │       ├── Loader.tsx
     │       ├── MarkdownContent.tsx      ✅ Done — secure Markdown viewer (react-markdown + remark-gfm)
     │       ├── SectionTitle.tsx
-    │       ├── Skeleton.tsx             ✅ Done — updated skeletons for 2-col showcase & detail page
+    │       ├── Skeleton.tsx             ✅ Done — skeletons for public hero, 2-col showcase, detail page & admin views
     │       ├── StatusBadge.tsx          ✅ Done — centralized status badge & dot (pill & inline variants)
     │       ├── Toast.tsx
     │       └── icons/
@@ -394,6 +410,7 @@ frontend/
 - [x] **SPA Navigation Integrity:** Convert anchor navigation in `Navbar.tsx`, `Footer.tsx`, and `ProjectDetailPage.tsx` to React Router `<Link>` with conditional in-page smooth scrolling on `/`, preventing hard browser reloads and memory cache flushing when navigating from sub-routes.
 - [x] **Image Upload Mutations:** Wrap `uploadProfileImage` and `uploadProjectImage` in `useUploadProfileImageMutation` and `useUploadProjectImageMutation` with automated invalidation of `QUERY_KEYS.profile` and `QUERY_KEYS.projects`.
 - [x] **Mailto Protocol Fix & Clipboard Fallback:** Omit `target="_blank"` on `mailto:` links in `Footer.tsx` and copy email to clipboard with instant toast notification on click.
+- [x] **Hero Loading Skeleton:** Introduce `ProfileHeroSkeleton` in `Skeleton.tsx` mirroring hero grid, heading lines, bio, and portrait avatar; delegate loading state within `ProfileHero` with `ProfileHeroContent` subcomponent isolation to eliminate layout shift and prevent fallback flicker during initial profile query execution.
 - [x] Full type-check pass: `npx tsc -b --noEmit` (0 errors)
 - [x] Static analysis & linting pass: `npm run lint` (0 errors, 0 warnings)
 - [x] Codebase audit: zero residual `tech_stack` or `.description` references; all queries/mutations wired through centralized `QUERY_KEYS`

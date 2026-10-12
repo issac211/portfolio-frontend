@@ -280,3 +280,63 @@ export function ProjectFormSkeleton() {
     </div>
   );
 }
+
+/**
+ * Public hero section skeleton.
+ * Mirrors the grid, status badge, typography hierarchy, and portrait avatar in `ProfileHero`.
+ */
+export function ProfileHeroSkeleton() {
+  return (
+    <section
+      id="home"
+      aria-label="Loading profile…"
+      role="status"
+      className="relative pt-8 pb-16 sm:pt-12 sm:pb-20 lg:pt-16 lg:pb-24"
+    >
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
+          {/* Left Column: Text & CTAs */}
+          <div className="flex flex-col items-center text-center lg:col-span-8 lg:items-start lg:text-left">
+            {/* Status Pill Skeleton */}
+            <Skeleton className="h-6 w-36 rounded-full sm:w-44" />
+
+            {/* Primary Heading (H1 lines) Skeleton */}
+            <div className="mt-5 flex w-full flex-col items-center space-y-3 lg:items-start">
+              <Skeleton className="h-9 w-11/12 sm:h-11 sm:w-4/5 lg:h-12" />
+              <Skeleton className="h-9 w-3/4 sm:h-11 sm:w-3/5 lg:h-12" />
+            </div>
+
+            {/* Name & Age Skeleton */}
+            <Skeleton className="mt-4 h-6 w-52 sm:w-64" />
+
+            {/* Bio Paragraph Lines Skeleton */}
+            <div className="mt-3 flex w-full max-w-3xl flex-col items-center space-y-2 lg:items-start">
+              <Skeleton className="h-4.5 w-full" />
+              <Skeleton className="h-4.5 w-11/12" />
+              <Skeleton className="h-4.5 w-4/5" />
+            </div>
+
+            {/* Action Buttons Skeleton */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+              <Skeleton className="h-11 w-36 rounded-lg" />
+              <Skeleton className="h-11 w-32 rounded-lg" />
+            </div>
+          </div>
+
+          {/* Right Column: Avatar Portrait Skeleton */}
+          <div className="relative lg:col-span-4">
+            <div className="flex justify-center lg:sticky lg:top-24 lg:justify-end">
+              <div className="relative">
+                <div
+                  className="absolute -inset-2 rounded-full bg-gray-200/50 blur-xl"
+                  aria-hidden="true"
+                />
+                <Skeleton className="relative h-60 w-60 rounded-full border-4 border-white shadow-xl sm:h-72 sm:w-72 lg:h-80 lg:w-80" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
