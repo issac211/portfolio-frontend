@@ -6,7 +6,7 @@ import { Card, CardBody, CardHeader } from "../../components/ui/Card";
 import { TrashIcon, UserIcon } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
 import { ProfileFormSkeleton } from "../../components/ui/Skeleton";
-import { IMAGE_BASE_URL } from "../../config/constants";
+import { getImageUrl } from "../../utils/image";
 import { useToast } from "../../context/ToastContext";
 import {
   useDeleteProfileImageMutation,
@@ -249,7 +249,7 @@ export function ProfileFormPage() {
   const currentAvatarUrl = previewUrl
     ? previewUrl
     : profile?.image_url
-      ? `${IMAGE_BASE_URL}${profile.image_url}`
+      ? getImageUrl(profile.image_url)
       : null;
 
   return (

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { IMAGE_BASE_URL } from "../../config/constants";
+import { getImageUrl } from "../../utils/image";
 import type { PersonalInfoResponse } from "../../types/profile";
 import { handleSmoothScroll } from "../../utils/scroll";
 import { ArrowDownIcon, UserIcon } from "../ui/icons";
@@ -79,7 +79,7 @@ function splitHeroTitle(title: string | null | undefined): {
  * Top-of-page Hero section displaying developer introduction and portrait.
  *
  * Anchors the page with `id="home"`, serves as the sole semantic `<h1>` on the
- * public portfolio, resolves relative profile image paths using `IMAGE_BASE_URL`,
+ * public portfolio, resolves relative paths and absolute Cloudinary URLs using `getImageUrl`,
  * and adheres strictly to Single Source of Truth by conditionally rendering
  * profile data only when provided by the backend.
  */
@@ -115,9 +115,9 @@ function ProfileHeroContent({ profile }: { profile: PersonalInfoResponse | null 
 
   const heroHeading = splitHeroTitle(profile?.hero_title);
 
-  // Prepend IMAGE_BASE_URL to relative backend image path
+  // Resolve relative backend image path or absolute Cloudinary URL
   const avatarUrl = profile?.image_url
-    ? `${IMAGE_BASE_URL}${profile.image_url}`
+    ? getImageUrl(profile.image_url)
     : null;
 
   const initials = profile

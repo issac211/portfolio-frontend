@@ -1,4 +1,4 @@
-/** Project data returned by the API. `image_url` is a relative path — prepend `IMAGE_BASE_URL` to render. */
+/** Project data returned by the API. `image_url` is either a relative path or an absolute Cloudinary URL — resolve via `getImageUrl`. */
 export interface ProjectResponse {
   id: number;
   title: string;

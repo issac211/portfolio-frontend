@@ -17,7 +17,7 @@ import {
 } from "../../components/ui/icons";
 import { Input } from "../../components/ui/Input";
 import { ProjectFormSkeleton } from "../../components/ui/Skeleton";
-import { IMAGE_BASE_URL } from "../../config/constants";
+import { getImageUrl } from "../../utils/image";
 import { useToast } from "../../context/ToastContext";
 import {
   useCreateProjectMutation,
@@ -324,7 +324,7 @@ function ProjectFormContent() {
   const currentMediaUrl = previewUrl
     ? previewUrl
     : existingImageUrl
-      ? `${IMAGE_BASE_URL}${existingImageUrl}`
+      ? getImageUrl(existingImageUrl)
       : null;
 
   return (

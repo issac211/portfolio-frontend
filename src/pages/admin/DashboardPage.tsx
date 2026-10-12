@@ -5,7 +5,7 @@ import { useProjects, useDeleteProjectMutation } from "../../hooks/useProjects";
 import { useProfile } from "../../hooks/useProfile";
 import { useSEO } from "../../hooks/useSEO";
 import { useToast } from "../../context/ToastContext";
-import { IMAGE_BASE_URL } from "../../config/constants";
+import { getImageUrl } from "../../utils/image";
 import { Card, CardHeader, CardBody } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
@@ -241,7 +241,7 @@ export function DashboardPage() {
               <div className="flex items-center gap-4">
                 {profile.image_url ? (
                   <img
-                    src={`${IMAGE_BASE_URL}${profile.image_url}`}
+                    src={getImageUrl(profile.image_url)}
                     alt={fullName || "Admin avatar"}
                     className="h-14 w-14 rounded-full border border-gray-200 object-cover"
                   />
@@ -359,7 +359,7 @@ export function DashboardPage() {
               <tbody className="divide-y divide-gray-200">
                 {projects.map((project) => {
                   const imageUrl = project.image_url
-                    ? `${IMAGE_BASE_URL}${project.image_url}`
+                    ? getImageUrl(project.image_url)
                     : null;
                   const isDeleting = deletingId === project.id;
 

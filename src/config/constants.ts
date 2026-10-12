@@ -16,9 +16,9 @@ function getRequiredEnvVar(key: string): string {
 export const API_BASE_URL = getRequiredEnvVar("VITE_API_BASE_URL");
 
 /**
- * Base URL for rendering images returned by the API.
- * The API returns relative paths — components must build the full URL:
- * `${IMAGE_BASE_URL}${image_url}`
+ * Base URL for rendering local media assets returned by the API in development.
+ * In production, absolute CDN URLs (e.g. Cloudinary) are returned instead.
+ * Components must resolve all images via `getImageUrl(imagePath)` in `utils/image.ts`.
  */
 export const IMAGE_BASE_URL = getRequiredEnvVar("VITE_IMAGE_BASE_URL");
 

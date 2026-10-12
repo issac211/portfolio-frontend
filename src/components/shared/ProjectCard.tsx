@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Card, CardBody, CardFooter } from "../ui/Card";
 import { Badge } from "../ui/Badge";
 import { GithubIcon, ExternalLinkIcon, ArrowRightIcon } from "../ui/icons";
-import { IMAGE_BASE_URL } from "../../config/constants";
+import { getImageUrl } from "../../utils/image";
 import type { ProjectResponse } from "../../types/project";
 
 interface ProjectCardProps {
@@ -20,7 +20,7 @@ interface ProjectCardProps {
  */
 export function ProjectCard({ project }: ProjectCardProps) {
   const imageUrl = project.image_url
-    ? `${IMAGE_BASE_URL}${project.image_url}`
+    ? getImageUrl(project.image_url)
     : null;
 
   return (

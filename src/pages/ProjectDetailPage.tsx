@@ -9,7 +9,7 @@ import {
 } from "../components/ui/icons";
 import { ProjectDetailSkeleton } from "../components/ui/Skeleton";
 import { MarkdownContent } from "../components/ui/MarkdownContent";
-import { IMAGE_BASE_URL } from "../config/constants";
+import { getImageUrl } from "../utils/image";
 import { useProject } from "../hooks/useProjects";
 import { useSEO } from "../hooks/useSEO";
 
@@ -49,7 +49,7 @@ export function ProjectDetailPage() {
       project?.summary ||
       "Detailed project deep-dive showcasing tags, media preview, and architecture.",
     image: project?.image_url
-      ? `${IMAGE_BASE_URL}${project.image_url}`
+      ? getImageUrl(project.image_url)
       : undefined,
   });
 
@@ -90,7 +90,7 @@ export function ProjectDetailPage() {
   }
 
   const imageUrl = project.image_url
-    ? `${IMAGE_BASE_URL}${project.image_url}`
+    ? getImageUrl(project.image_url)
     : null;
 
   return (
