@@ -126,6 +126,9 @@ VITE_API_BASE_URL=http://localhost:8000/api/v1
 
 # Base URL for serving uploaded images and media assets
 VITE_IMAGE_BASE_URL=http://localhost:8000
+
+# Canonical public web app URL (without trailing slash) for Open Graph & social previews (WhatsApp, LinkedIn, X)
+VITE_APP_URL=https://your-portfolio-domain.com
 ```
 
 > **Note:** The application uses fail-fast validation at startup. If any required environment variable is missing, an explicit error is thrown immediately.
