@@ -1,23 +1,30 @@
+import { useMemo, useState } from "react";
 import { useProfile } from "../hooks/useProfile";
 import { useProjects } from "../hooks/useProjects";
 import { useScrollToHash } from "../hooks/useScrollToHash";
 import { useSEO } from "../hooks/useSEO";
 import { ProfileHero } from "../components/shared/ProfileHero";
 import { ProjectCard } from "../components/shared/ProjectCard";
+import { ProjectSearch } from "../components/shared/ProjectSearch";
 import { SectionTitle } from "../components/ui/SectionTitle";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ProjectsGridSkeleton } from "../components/ui/Skeleton";
 import { Button } from "../components/ui/Button";
-import { ExclamationCircleIcon, InboxIcon } from "../components/ui/icons";
+import {
+  ExclamationCircleIcon,
+  InboxIcon,
+  SearchIcon,
+} from "../components/ui/icons";
 
 /**
  * Public portfolio landing page.
  *
  * Integrates the ProfileHero section (`#home`) and Projects showcase grid (`#projects`),
  * coordinating parallel client-side data fetching, graceful loading/error/empty states,
- * and automatic smooth-scrolling to URL hash anchors.
+ * free-text project filtering, and automatic smooth-scrolling to URL hash anchors.
  */
 export function HomePage() {
+  const [searchQuery, setSearchQuery] = useState("");
   const { profile, isLoading: isProfileLoading } = useProfile();
   const {
     projects,
@@ -34,6 +41,24 @@ export function HomePage() {
 
   // Scroll to hash anchor once data resolves so the target section exists in the DOM
   useScrollToHash(isProjectsLoading || isProfileLoading);
+
+  // Filter projects by free-text keywords across title, summary, tags, and content
+  const filteredProjects = useMemo(() => {
+    const trimmed = searchQuery.trim().toLowerCase();
+    if (!trimmed) return projects;
+
+    const queryWords = trimmed.split(/\s+/).filter(Boolean);
+
+    return projects.filter((project) => {
+      const title = project.title.toLowerCase();
+      const summary = project.summary.toLowerCase();
+      const tags = (project.tags || []).map((t) => t.toLowerCase()).join(" ");
+      const content = (project.content || "").toLowerCase();
+      const searchableText = `${title} ${summary} ${tags} ${content}`;
+
+      return queryWords.every((word) => searchableText.includes(word));
+    });
+  }, [projects, searchQuery]);
 
   return (
     <div className="flex flex-col">
@@ -53,6 +78,16 @@ export function HomePage() {
             badge="Portfolio"
             align="left"
           />
+
+          {/* Search Bar — rendered when projects are available */}
+          {!isProjectsLoading && !projectsError && projects.length > 0 && (
+            <ProjectSearch
+              value={searchQuery}
+              onChange={setSearchQuery}
+              totalCount={projects.length}
+              filteredCount={filteredProjects.length}
+            />
+          )}
 
           {/* Loading State */}
           {isProjectsLoading && <ProjectsGridSkeleton />}
@@ -77,7 +112,7 @@ export function HomePage() {
             </div>
           )}
 
-          {/* Empty State */}
+          {/* Empty State (no projects added to portfolio yet) */}
           {!isProjectsLoading && !projectsError && projects.length === 0 && (
             <EmptyState
               icon={<InboxIcon className="h-8 w-8" />}
@@ -86,16 +121,40 @@ export function HomePage() {
             />
           )}
 
+          {/* Empty Search State (search yielded zero matching projects) */}
+          {!isProjectsLoading &&
+            !projectsError &&
+            projects.length > 0 &&
+            filteredProjects.length === 0 && (
+              <EmptyState
+                icon={<SearchIcon className="h-8 w-8" />}
+                title="No matching projects found"
+                description={`No projects match your search for "${searchQuery}". Try different keywords, technologies, or clear the search filter.`}
+                action={
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear search
+                  </Button>
+                }
+              />
+            )}
+
           {/* Projects Grid — 1 or 2 columns for optimal content balance */}
-          {!isProjectsLoading && !projectsError && projects.length > 0 && (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 animate-fade-in-up">
-              {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          )}
+          {!isProjectsLoading &&
+            !projectsError &&
+            filteredProjects.length > 0 && (
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 animate-fade-in-up">
+                {filteredProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            )}
         </div>
       </section>
     </div>
   );
 }
+
