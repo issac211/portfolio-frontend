@@ -1,4 +1,4 @@
-# Itzik's Developer Portfolio — Frontend (v1.2)
+# Itzik's Developer Portfolio — Frontend (v1.2.1)
 
 The client-side web application and Content Management System (CMS) for my personal software engineering portfolio. Built with **React 19**, **TypeScript**, **Tailwind CSS v4**, **Vite 8**, and **TanStack React Query v5**, consuming a custom **FastAPI** REST backend.
 

@@ -36,6 +36,7 @@ frontend/
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
+├── vercel.json
 ├── docs/
 │   ├── implementation_plan.md            # v1.0 archive — do not modify
 │   └── phase_5_2_toast_system.md
@@ -256,6 +257,7 @@ frontend/
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── vite.config.ts
+├── vercel.json                           ✅ Done — SPA rewrite rules for Vercel deployment
 ├── docs/
 │   ├── implementation_plan.md            # v1.0 archive — untouched
 │   ├── implementation_plan_v1.1.md       [NEW] — this file
