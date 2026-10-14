@@ -20,4 +20,5 @@ export { TrashIcon } from "./TrashIcon";
 export { UserIcon } from "./UserIcon";
 export { XIcon } from "./XIcon";
 export { SearchIcon } from "./SearchIcon";
+export { TriangleDownIcon } from "./TriangleDownIcon";
 

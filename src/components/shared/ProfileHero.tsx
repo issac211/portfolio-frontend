@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { getImageUrl } from "../../utils/image";
 import type { PersonalInfoResponse } from "../../types/profile";
+import { getImageUrl } from "../../utils/image";
 import { handleSmoothScroll } from "../../utils/scroll";
-import { ArrowDownIcon, UserIcon } from "../ui/icons";
+import { ArrowDownIcon, TriangleDownIcon, UserIcon } from "../ui/icons";
 import { ProfileHeroSkeleton } from "../ui/Skeleton";
 import { StatusBadge } from "../ui/StatusBadge";
 
@@ -91,8 +91,12 @@ export function ProfileHero({ profile, isLoading = false }: ProfileHeroProps) {
   return <ProfileHeroContent profile={profile} />;
 }
 
-function ProfileHeroContent({ profile }: { profile: PersonalInfoResponse | null }) {
-  const [isBioExpanded, setIsBioExpanded] = useState(true);
+function ProfileHeroContent({
+  profile,
+}: {
+  profile: PersonalInfoResponse | null;
+}) {
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
 
   const fullName = profile
     ? `${profile.first_name} ${profile.last_name}`.trim()
@@ -116,9 +120,7 @@ function ProfileHeroContent({ profile }: { profile: PersonalInfoResponse | null 
   const heroHeading = splitHeroTitle(profile?.hero_title);
 
   // Resolve relative backend image path or absolute Cloudinary URL
-  const avatarUrl = profile?.image_url
-    ? getImageUrl(profile.image_url)
-    : null;
+  const avatarUrl = profile?.image_url ? getImageUrl(profile.image_url) : null;
 
   const initials = profile
     ? `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`.toUpperCase()
@@ -171,24 +173,45 @@ function ProfileHeroContent({ profile }: { profile: PersonalInfoResponse | null 
               </p>
             )}
 
-            {/* Render collapsible extended bio with subtle border-l accent and narrative styling */}
+            {/* Render collapsible extended bio framed by top/bottom accent lines and anchored toggle buttons */}
             {extendedBio && (
-              <div className="mt-3 max-w-3xl w-full text-left">
+              <div className="mt-4 max-w-3xl w-full text-left">
+                {/* Top Toggle Button anchored at the top border of the extended bio */}
+                <div className="relative z-10">
+                  <button
+                    type="button"
+                    onClick={() => setIsBioExpanded((prev) => !prev)}
+                    className="inline-flex items-center gap-2 rounded-sm border border-blue-200/90 bg-blue-50/90 hover:border-blue-300 hover:bg-blue-100/90 px-4 h-[32px] sm:h-[34px] text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 shadow-2xs transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/40 active:scale-[0.99]"
+                    aria-expanded={isBioExpanded}
+                    aria-controls="hero-extended-bio"
+                  >
+                    <span>{isBioExpanded ? "Show less" : "Read full bio"}</span>
+                    <TriangleDownIcon
+                      className={`h-3.5 w-3.5 shrink-0 transition-transform duration-300 ${
+                        isBioExpanded ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Collapsible Extended Bio with background starting at midpoint of top button and ending at midpoint of bottom button */}
                 <div
-                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                  id="hero-extended-bio"
+                  className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-in-out ${
                     isBioExpanded
-                      ? "grid-rows-[1fr] opacity-100"
-                      : "grid-rows-[0fr] opacity-0"
+                      ? "grid-rows-[1fr] opacity-100 -mt-[16px] sm:-mt-[17px]"
+                      : "grid-rows-[0fr] opacity-0 mt-0"
                   }`}
                 >
-                  <div className="overflow-hidden">
-                    <div className="pl-2 py-1">
-                      <div className="relative border-l-2 border-blue-500/30 pl-4 sm:pl-5 py-0.5 space-y-3.5 sm:space-y-4">
+                  <div className="overflow-hidden pb-4 sm:pb-5">
+                    {/* Narrative timeline framed in subtle tinted card */}
+                    <div className="rounded-md border border-blue-100/80 bg-blue-50/40 px-4 pt-7 pb-6 sm:px-5 sm:pt-8 sm:pb-7 shadow-2xs">
+                      <div className="relative border-l-2 border-blue-500/30 pl-4 sm:pl-5 space-y-3.5 sm:space-y-4 py-0.5">
                         {bioParagraphs.map((paragraph, index) => (
                           <div key={index} className="relative group">
-                            {/* Subtle timeline node marker for each distinct paragraph */}
+                            {/* Subtle timeline node marker — fully visible with white ring buffer */}
                             <span
-                              className="absolute -left-5 sm:-left-6 top-2 sm:top-2.5 h-1.5 w-1.5 rounded-full bg-blue-500 ring-[3px] ring-white transition-all duration-200 group-hover:scale-125 group-hover:bg-blue-600"
+                              className="absolute -left-[21px] sm:-left-[25px] top-2 sm:top-2.5 h-2 w-2 rounded-full bg-blue-500 ring-[3px] ring-white transition-all duration-200 group-hover:scale-125 group-hover:bg-blue-600"
                               aria-hidden="true"
                             />
                             <p className="text-sm font-normal leading-relaxed text-gray-600 transition-colors duration-200 group-hover:text-gray-900 sm:text-base">
@@ -198,21 +221,22 @@ function ProfileHeroContent({ profile }: { profile: PersonalInfoResponse | null 
                         ))}
                       </div>
                     </div>
+
+                    {/* Bottom Toggle Button anchored at the bottom border of the extended bio */}
+                    <div className="-mt-[16px] sm:-mt-[17px] relative z-10">
+                      <button
+                        type="button"
+                        onClick={() => setIsBioExpanded(false)}
+                        className="inline-flex items-center gap-2 rounded-sm border border-blue-200/90 bg-blue-50/90 hover:border-blue-300 hover:bg-blue-100/90 px-4 h-[32px] sm:h-[34px] text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 shadow-2xs transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/40 active:scale-[0.99]"
+                        aria-expanded={true}
+                        aria-controls="hero-extended-bio"
+                      >
+                        <span>Show less</span>
+                        <TriangleDownIcon className="h-3.5 w-3.5 shrink-0 transition-transform duration-300 rotate-180" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsBioExpanded((prev) => !prev)}
-                  className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
-                  aria-expanded={isBioExpanded}
-                >
-                  <span>{isBioExpanded ? "Show less" : "Read full bio"}</span>
-                  <ArrowDownIcon
-                    className={`h-3 w-3 transition-transform duration-300 ${
-                      isBioExpanded ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
               </div>
             )}
 
@@ -225,7 +249,7 @@ function ProfileHeroContent({ profile }: { profile: PersonalInfoResponse | null 
             )}
 
             {/* Action Buttons */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+            <div className="mt-10 sm:mt-12 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
               <a
                 href="/#projects"
                 onClick={(e) => handleSmoothScroll(e, "/#projects")}
